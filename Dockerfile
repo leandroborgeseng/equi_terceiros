@@ -1,5 +1,5 @@
 FROM node:20-alpine AS base
-RUN apk add --no-cache libc6-compat openssl
+RUN apk add --no-cache libc6-compat openssl su-exec
 WORKDIR /app
 
 FROM base AS deps
@@ -19,7 +19,6 @@ FROM base AS runner
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Prisma CLI completo para migrate deploy no startup (evita .bin incompleto no standalone)
 RUN npm install -g prisma@5.22.0
 
 RUN addgroup --system --gid 1001 nodejs
@@ -38,9 +37,8 @@ COPY scripts/docker-entrypoint.sh /app/docker-entrypoint.sh
 COPY scripts/seed-production.mjs /app/scripts/seed-production.mjs
 RUN chmod +x /app/docker-entrypoint.sh
 
-USER nextjs
-EXPOSE 3000
-ENV PORT=3000
+# Entrypoint roda como root (migrate + permissões em /data), app como nextjs
+EXPOSE 8080
 ENV HOSTNAME="0.0.0.0"
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]

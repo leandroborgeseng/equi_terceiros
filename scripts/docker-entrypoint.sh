@@ -1,45 +1,57 @@
 #!/bin/sh
-set -e
 
-MISSING=""
+export PORT="${PORT:-8080}"
+export HOSTNAME="${HOSTNAME:-0.0.0.0}"
 
-if [ -z "$DATABASE_URL" ]; then
-  MISSING="${MISSING}\n  - DATABASE_URL (ex: file:/data/prod.db com volume em /data)"
-fi
-
-if [ -z "$NEXTAUTH_SECRET" ] && [ -z "$AUTH_SECRET" ]; then
-  MISSING="${MISSING}\n  - NEXTAUTH_SECRET e AUTH_SECRET (mesmo valor, 32+ caracteres)"
-fi
-
-if [ -z "$NEXTAUTH_URL" ]; then
-  MISSING="${MISSING}\n  - NEXTAUTH_URL (ex: https://equiterceiros-production.up.railway.app)"
-fi
-
-if [ -n "$MISSING" ]; then
-  echo "=========================================="
-  echo "ERRO: Variáveis obrigatórias ausentes no Railway:"
-  printf "%b\n" "$MISSING"
-  echo ""
-  echo "Configure em: Project → equi_terceiros → Variables"
-  echo "=========================================="
-  exit 1
-fi
-
-# NextAuth v5 usa AUTH_SECRET; garantir que exista
-if [ -z "$AUTH_SECRET" ]; then
+if [ -z "$AUTH_SECRET" ] && [ -n "$NEXTAUTH_SECRET" ]; then
   export AUTH_SECRET="$NEXTAUTH_SECRET"
 fi
 
-export NEXTAUTH_URL="${NEXTAUTH_URL%/}"
+if [ -n "$NEXTAUTH_URL" ]; then
+  export NEXTAUTH_URL="${NEXTAUTH_URL%/}"
+fi
 
-echo "==> DATABASE_URL configurada"
-echo "==> NEXTAUTH_URL=$NEXTAUTH_URL"
+CONFIG_OK=1
 
-echo "==> Aplicando migrations Prisma..."
-prisma migrate deploy
+if [ -z "$DATABASE_URL" ]; then
+  echo "AVISO: DATABASE_URL ausente — configure file:/data/prod.db"
+  CONFIG_OK=0
+fi
 
-echo "==> Garantindo usuários iniciais (seed)..."
-node /app/scripts/seed-production.mjs
+if [ -z "$NEXTAUTH_SECRET" ] && [ -z "$AUTH_SECRET" ]; then
+  echo "AVISO: NEXTAUTH_SECRET / AUTH_SECRET ausentes"
+  CONFIG_OK=0
+fi
 
-echo "==> Iniciando aplicação..."
-exec node server.js
+if [ -z "$NEXTAUTH_URL" ]; then
+  echo "AVISO: NEXTAUTH_URL ausente"
+  CONFIG_OK=0
+fi
+
+if [ "$CONFIG_OK" = "1" ]; then
+  echo "==> Configuração OK"
+  echo "==> NEXTAUTH_URL=$NEXTAUTH_URL"
+
+  mkdir -p /data
+  chown -R nextjs:nodejs /data 2>/dev/null || chmod 777 /data 2>/dev/null || true
+
+  echo "==> Aplicando migrations..."
+  if prisma migrate deploy; then
+    echo "==> Migrations OK"
+  else
+    echo "AVISO: migrate deploy falhou (verifique volume /data e DATABASE_URL)"
+  fi
+
+  echo "==> Seed usuários demo..."
+  if node /app/scripts/seed-production.mjs; then
+    echo "==> Seed OK"
+  else
+    echo "AVISO: seed falhou"
+  fi
+else
+  echo "==> App sobe mesmo assim — confira https://seu-dominio/api/health"
+fi
+
+echo "==> Iniciando Next.js na porta $PORT"
+cd /app
+exec su-exec nextjs:nodejs node server.js
