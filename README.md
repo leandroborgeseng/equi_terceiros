@@ -102,7 +102,10 @@ docker compose up --build
 |----------|---------------------------|
 | `DATABASE_URL` | `file:/data/prod.db` |
 | `NEXTAUTH_URL` | `https://seu-app.up.railway.app` |
-| `NEXTAUTH_SECRET` | string aleatória longa |
+| `NEXTAUTH_SECRET` | string aleatória longa (mín. 32 caracteres) |
+| `AUTH_SECRET` | mesmo valor de `NEXTAUTH_SECRET` |
+
+Após o deploy, o **seed roda automaticamente** e cria os usuários demo. Login: `medico@hospital.local` / `Hospital@2026`
 
 Monte o volume em `/data` para persistir o banco SQLite.
 

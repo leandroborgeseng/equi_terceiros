@@ -14,19 +14,37 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/";
+  const rawCallback = searchParams.get("callbackUrl");
+  const callbackUrl =
+    rawCallback && rawCallback !== "/" && !rawCallback.startsWith("/login")
+      ? rawCallback
+      : "/dashboard";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const res = await signIn("credentials", { email, password, redirect: false });
-    if (res?.error) {
-      setError("Credenciais inválidas");
+    try {
+      const res = await signIn("credentials", {
+        email: email.trim().toLowerCase(),
+        password,
+        redirect: false,
+      });
+      if (res?.error) {
+        setError("Credenciais inválidas. Verifique e-mail e senha (demo: Hospital@2026).");
+        setLoading(false);
+        return;
+      }
+      if (!res?.ok) {
+        setError("Não foi possível iniciar a sessão. Tente novamente.");
+        setLoading(false);
+        return;
+      }
+      window.location.href = callbackUrl;
+    } catch {
+      setError("Erro de conexão com o servidor. Verifique se o app está no ar.");
       setLoading(false);
-      return;
     }
-    window.location.href = callbackUrl;
   }
 
   return (

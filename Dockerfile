@@ -32,8 +32,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/node_modules/bcryptjs ./node_modules/bcryptjs
 
 COPY scripts/docker-entrypoint.sh /app/docker-entrypoint.sh
+COPY scripts/seed-production.mjs /app/scripts/seed-production.mjs
 RUN chmod +x /app/docker-entrypoint.sh
 
 USER nextjs

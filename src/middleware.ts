@@ -38,6 +38,10 @@ export default auth((req) => {
     return NextResponse.redirect(login);
   }
 
+  if (pathname === "/dashboard") {
+    return NextResponse.next();
+  }
+
   const role = req.auth.user?.role as UserRole;
   if (!canAccessRoute(role, pathname)) {
     return NextResponse.redirect(new URL("/unauthorized", req.url));

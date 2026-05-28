@@ -2,6 +2,8 @@ import type { NextAuthConfig } from "next-auth";
 import type { UserRole } from "@/lib/enums";
 
 export const authConfig: NextAuthConfig = {
+  trustHost: true,
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   providers: [],
   pages: {
     signIn: "/login",
