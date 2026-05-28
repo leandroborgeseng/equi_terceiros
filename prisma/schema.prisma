@@ -1,0 +1,346 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// SQLite: enums modelados como String (PostgreSQL pode usar enum nativo na migração)
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  passwordHash  String
+  role          String
+  crm           String?
+  phone         String?
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  supplierProfile     Supplier?
+  requestsAsDoctor    EquipmentRequest[] @relation("DoctorRequests")
+  inspections         TechnicalInspection[]
+  auditLogs           AuditLog[]
+  responsibilityTerms ResponsibilityTerm[]
+  adverseEvents       AdverseEvent[]
+}
+
+model Supplier {
+  id          String   @id @default(cuid())
+  name        String
+  cnpj        String?
+  email       String
+  phone       String?
+  address     String?
+  userId      String?  @unique
+  user        User?    @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  equipmentRequests EquipmentRequest[]
+}
+
+model Equipment {
+  id              String   @id @default(cuid())
+  name            String
+  brand           String
+  model           String
+  serialNumber    String
+  anvisaNumber    String?
+  ownerName       String?
+  ownerContact    String?
+  riskLevel       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  requests              EquipmentRequest[]
+  maintenanceRecords    MaintenanceRecord[]
+  calibrationRecords    CalibrationRecord[]
+  electricalSafetyTests ElectricalSafetyTest[]
+  images                EquipmentImage[]
+  storageRecords        StorageRecord[]
+  withdrawalRecords     WithdrawalRecord[]
+  alerts                Alert[]
+}
+
+model EquipmentRequest {
+  id                        String        @id @default(cuid())
+  protocol                  String        @unique
+  status                    String        @default("RASCUNHO")
+  requestDate               DateTime
+  usageSector               String
+  doctorId                  String
+  doctor                    User          @relation("DoctorRequests", fields: [doctorId], references: [id])
+  doctorCrm                 String
+  patientName               String
+  medicalRecord             String
+  plannedProcedure          String
+  plannedDate               DateTime
+  plannedTime               String
+  clinicalJustification     String
+  noInstitutionalAlternative Boolean
+  technicalBenefit          String
+  equipmentName             String
+  brand                     String
+  model                     String
+  serialNumber              String
+  supplierId                String?
+  supplier                  Supplier?     @relation(fields: [supplierId], references: [id])
+  supplierName              String
+  ownerName                 String
+  ownerContact              String
+  assistentialRisk          String
+  isUrgent                  Boolean       @default(false)
+  supplierToken             String?       @unique
+  equipmentId               String?
+  equipment                 Equipment?    @relation(fields: [equipmentId], references: [id])
+  wizardStep                Int           @default(1)
+  submittedAt               DateTime?
+  homologatedAt             DateTime?
+  releasedAt                DateTime?
+  validUntil                DateTime?
+  restrictionNotes          String?
+  blockReason               String?
+  createdAt                 DateTime      @default(now())
+  updatedAt                 DateTime      @updatedAt
+
+  attachments           Attachment[]
+  documentChecklist     DocumentChecklist?
+  technicalInspection   TechnicalInspection?
+  releaseStatus         ReleaseStatus?
+  responsibilityTerm    ResponsibilityTerm?
+  adverseEvents         AdverseEvent[]
+  alerts                Alert[]
+}
+
+model Attachment {
+  id          String       @id @default(cuid())
+  requestId   String
+  request     EquipmentRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  type        String
+  fileName    String
+  mimeType    String
+  sizeBytes   Int
+  storageKey  String
+  version     Int          @default(1)
+  uploadedBy  String?
+  checksum    String?
+  createdAt   DateTime     @default(now())
+
+  @@index([requestId, type])
+}
+
+model DocumentChecklist {
+  id                    String   @id @default(cuid())
+  requestId             String   @unique
+  request               EquipmentRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  formFilled            String @default("PENDENTE")
+  supplierIdentified    String @default("PENDENTE")
+  anvisa                String @default("PENDENTE")
+  preventiveMaintenance String @default("PENDENTE")
+  calibration           String @default("PENDENTE")
+  tse                   String @default("PENDENTE")
+  manual                String @default("PENDENTE")
+  signedTerm            String @default("PENDENTE")
+  accessories           String @default("PENDENTE")
+  sanitization          String @default("PENDENTE")
+  insurance             String @default("PENDENTE")
+  rejectionReason       String?
+  reviewedBy            String?
+  reviewedAt            DateTime?
+  updatedAt             DateTime @updatedAt
+}
+
+model TechnicalInspection {
+  id                      String           @id @default(cuid())
+  requestId               String           @unique
+  request                 EquipmentRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  inspectorId             String
+  inspector               User             @relation(fields: [inspectorId], references: [id])
+  status                  String @default("PENDENTE")
+  physicalIntegrity       Boolean?
+  cabinet                 Boolean?
+  cables                  Boolean?
+  abntPlug                Boolean?
+  cleaning                Boolean?
+  accessories             Boolean?
+  selfDiagnostic          Boolean?
+  alarms                  Boolean?
+  electricalCompatibility Boolean?
+  gasCompatibility        Boolean?
+  infrastructureCompat    Boolean?
+  metrologicalEval        Boolean?
+  needsCalibration        Boolean?
+  needsTse                Boolean?
+  notes                   String?
+  restrictionNotes        String?
+  blockReason             String?
+  inspectedAt             DateTime?
+  createdAt               DateTime         @default(now())
+  updatedAt               DateTime         @updatedAt
+}
+
+model ReleaseStatus {
+  id              String             @id @default(cuid())
+  requestId       String             @unique
+  request         EquipmentRequest   @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  labelStatus     String @default("PENDENTE_ANALISE")
+  labelPdfKey     String?
+  validUntil      DateTime?
+  sector          String?
+  restriction     String?
+  blockReason     String?
+  technicalLead   String?
+  generatedAt     DateTime?
+  updatedAt       DateTime           @updatedAt
+}
+
+model MaintenanceRecord {
+  id          String    @id @default(cuid())
+  equipmentId String
+  equipment   Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  performedAt DateTime
+  validUntil  DateTime
+  provider    String?
+  notes       String?
+  createdAt   DateTime  @default(now())
+}
+
+model CalibrationRecord {
+  id          String    @id @default(cuid())
+  equipmentId String
+  equipment   Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  performedAt DateTime
+  validUntil  DateTime
+  certificateKey String?
+  notes       String?
+  createdAt   DateTime  @default(now())
+}
+
+model ElectricalSafetyTest {
+  id          String    @id @default(cuid())
+  equipmentId String
+  equipment   Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  performedAt DateTime
+  validUntil  DateTime
+  result      String?
+  certificateKey String?
+  createdAt   DateTime  @default(now())
+}
+
+model ResponsibilityTerm {
+  id              String   @id @default(cuid())
+  requestId       String   @unique
+  request         EquipmentRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  pdfKey          String?
+  signedAt        DateTime?
+  signedByDoctor  Boolean  @default(false)
+  signedBySupplier Boolean @default(false)
+  signatureHash   String?
+  generatedById   String?
+  generatedBy     User?    @relation(fields: [generatedById], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model EquipmentImage {
+  id           String            @id @default(cuid())
+  equipmentId  String?
+  equipment    Equipment?        @relation(fields: [equipmentId], references: [id])
+  requestId    String?
+  photoType    String
+  storageKey   String
+  fileName     String
+  mimeType     String
+  sizeBytes    Int
+  qualityScore Float?
+  uploadedBy   String?
+  createdAt    DateTime          @default(now())
+
+  metadata EquipmentImageMetadata?
+
+  @@index([requestId])
+}
+
+model EquipmentImageMetadata {
+  id                 String             @id @default(cuid())
+  imageId            String             @unique
+  image              EquipmentImage     @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  imageType          String
+  extractedText      String?
+  serialDetected     String?
+  manufacturerDetected String?
+  modelDetected      String?
+  aiValidationStatus String @default("PENDING")
+  processedAt        DateTime?
+  createdAt          DateTime           @default(now())
+}
+
+model Alert {
+  id          String        @id @default(cuid())
+  type        String
+  severity    String
+  title       String
+  message     String
+  equipmentId String?
+  equipment   Equipment?    @relation(fields: [equipmentId], references: [id])
+  requestId   String?
+  request     EquipmentRequest? @relation(fields: [requestId], references: [id])
+  dueDate     DateTime?
+  resolved    Boolean       @default(false)
+  resolvedAt  DateTime?
+  createdAt   DateTime      @default(now())
+}
+
+model AdverseEvent {
+  id          String   @id @default(cuid())
+  requestId   String
+  request     EquipmentRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  reportedById String
+  reportedBy  User     @relation(fields: [reportedById], references: [id])
+  description String
+  severity    String
+  occurredAt  DateTime
+  createdAt   DateTime @default(now())
+}
+
+model StorageRecord {
+  id          String    @id @default(cuid())
+  equipmentId String
+  equipment   Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  location    String
+  storedAt    DateTime
+  notes       String?
+  createdAt   DateTime  @default(now())
+}
+
+model WithdrawalRecord {
+  id           String    @id @default(cuid())
+  equipmentId  String
+  equipment    Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  withdrawnAt  DateTime
+  withdrawnBy  String
+  reason       String?
+  completed    Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  action     String
+  entity     String
+  entityId   String?
+  metadata   String?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
