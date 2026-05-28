@@ -93,7 +93,18 @@ docker compose up --build
 2. Conecte o repositório
 3. Configure variáveis de `.env.example`
 4. Use volume persistente para SQLite ou PostgreSQL gerenciado
-5. Deploy automático via `Dockerfile` / `railway.json`
+5. **Gere um domínio público** (Settings → Networking) — senão o serviço fica "Unexposed"
+6. Deploy automático via `Dockerfile` / `railway.json`
+
+### Variáveis obrigatórias no Railway
+
+| Variável | Exemplo (SQLite + volume) |
+|----------|---------------------------|
+| `DATABASE_URL` | `file:/data/prod.db` |
+| `NEXTAUTH_URL` | `https://seu-app.up.railway.app` |
+| `NEXTAUTH_SECRET` | string aleatória longa |
+
+Monte o volume em `/data` para persistir o banco SQLite.
 
 ```bash
 chmod +x scripts/deploy-railway.sh
