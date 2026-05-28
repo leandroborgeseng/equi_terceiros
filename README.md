@@ -2,6 +2,8 @@
 
 Sistema web/PWA para gestão de equipamentos médico-hospitalares de terceiros — portal de homologação técnica e compliance documental para Engenharia Clínica hospitalar.
 
+**Repositório:** https://github.com/leandroborgeseng/equi_terceiros
+
 ## Stack
 
 - **Frontend:** Next.js 15, TypeScript, Tailwind CSS, shadcn/ui patterns, Framer Motion, TanStack Query, React Hook Form, Zod
