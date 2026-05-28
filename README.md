@@ -98,16 +98,23 @@ docker compose up --build
 
 ### Variáveis obrigatórias no Railway
 
-| Variável | Exemplo (SQLite + volume) |
-|----------|---------------------------|
+No painel **Variables** do serviço `equi_terceiros`, adicione (veja também `railway.env.example`):
+
+| Variável | Valor para seu deploy |
+|----------|------------------------|
 | `DATABASE_URL` | `file:/data/prod.db` |
-| `NEXTAUTH_URL` | `https://seu-app.up.railway.app` |
-| `NEXTAUTH_SECRET` | string aleatória longa (mín. 32 caracteres) |
-| `AUTH_SECRET` | mesmo valor de `NEXTAUTH_SECRET` |
+| `NEXTAUTH_URL` | `https://equiterceiros-production.up.railway.app` |
+| `NEXTAUTH_SECRET` | gere com `openssl rand -base64 32` |
+| `AUTH_SECRET` | **igual** ao `NEXTAUTH_SECRET` |
 
-Após o deploy, o **seed roda automaticamente** e cria os usuários demo. Login: `medico@hospital.local` / `Hospital@2026`
+**Volume:** Settings → Volumes → mount path `/data` (obrigatório para SQLite persistir).
 
-Monte o volume em `/data` para persistir o banco SQLite.
+Sem `DATABASE_URL` o seed não roda (banco sem usuários). Sem `NEXTAUTH_SECRET` o login falha com `MissingSecret`.
+
+Após configurar, faça **Redeploy**. Nos logs deve aparecer:
+`Seed produção OK` e `NEXTAUTH_URL=https://...`
+
+Login demo: `medico@hospital.local` / `Hospital@2026`
 
 ```bash
 chmod +x scripts/deploy-railway.sh
