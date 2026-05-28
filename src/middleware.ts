@@ -6,7 +6,15 @@ import type { UserRole } from "@/lib/enums";
 
 const { auth } = NextAuth(authConfig);
 
-const publicPaths = ["/login", "/fornecedor", "/api/auth", "/api/public", "/manifest.webmanifest", "/sw.js"];
+const publicPaths = [
+  "/login",
+  "/fornecedor",
+  "/api/auth",
+  "/api/public",
+  "/api/health",
+  "/manifest.webmanifest",
+  "/sw.js",
+];
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;
