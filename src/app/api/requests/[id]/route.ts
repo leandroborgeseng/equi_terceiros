@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { medicalRequestSchema } from "@/lib/validators/request";
+import { medicalRequestDraftSchema } from "@/lib/validators/request";
 import { createAuditLog } from "@/lib/audit";
 
 export async function GET(
@@ -53,7 +53,10 @@ export async function PATCH(
   }
 
   if (body.wizardStep !== undefined || body.status === "RASCUNHO") {
-    const parsed = medicalRequestSchema.partial().safeParse(body);
+    const parsed = medicalRequestDraftSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+    }
     const request = await prisma.equipmentRequest.update({
       where: { id },
       data: {

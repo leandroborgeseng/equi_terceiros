@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { medicalRequestSchema } from "@/lib/validators/request";
+import { medicalRequestDraftSchema, REQUEST_DRAFT_DEFAULTS } from "@/lib/validators/request";
 import { generateProtocol, generateSupplierToken } from "@/lib/utils";
 import { createAuditLog } from "@/lib/audit";
 import { canCreateRequest } from "@/lib/rbac";
@@ -54,6 +54,24 @@ export async function GET(req: Request) {
   return NextResponse.json(requests);
 }
 
+function mergeDraft(body: Record<string, unknown>) {
+  const parsed = medicalRequestDraftSchema.safeParse(body);
+  if (!parsed.success) {
+    return { error: parsed.error.flatten() } as const;
+  }
+
+  const merged = {
+    ...REQUEST_DRAFT_DEFAULTS,
+    ...parsed.data,
+    requestDate: parsed.data.requestDate ?? REQUEST_DRAFT_DEFAULTS.requestDate,
+    plannedDate: parsed.data.plannedDate ?? REQUEST_DRAFT_DEFAULTS.plannedDate,
+    patientName: "—",
+    medicalRecord: "—",
+  };
+
+  return { data: merged } as const;
+}
+
 export async function POST(req: Request) {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
@@ -62,23 +80,23 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const parsed = medicalRequestSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+  const merged = mergeDraft(body);
+  if ("error" in merged) {
+    return NextResponse.json({ error: merged.error }, { status: 400 });
   }
 
-  const data = parsed.data;
   const protocol = generateProtocol();
   const supplierToken = generateSupplierToken();
+  const isDraft = body.status === "RASCUNHO";
 
   const request = await prisma.equipmentRequest.create({
     data: {
-      ...data,
+      ...merged.data,
       protocol,
       supplierToken,
       doctorId: session.user.id,
-      status: "AGUARDANDO_DOCUMENTACAO",
-      wizardStep: 5,
+      status: isDraft ? "RASCUNHO" : "AGUARDANDO_DOCUMENTACAO",
+      wizardStep: typeof body.wizardStep === "number" ? body.wizardStep : 1,
       documentChecklist: { create: {} },
       releaseStatus: { create: {} },
     },
@@ -90,7 +108,7 @@ export async function POST(req: Request) {
     action: "REQUEST_CREATED",
     entity: "EquipmentRequest",
     entityId: request.id,
-    metadata: { protocol },
+    metadata: { protocol, draft: isDraft },
   });
 
   return NextResponse.json(request, { status: 201 });

@@ -5,7 +5,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { medicalRequestSchema } from "@/lib/validators/request";
+import {
+  medicalRequestSchema,
+  wizardStepSchemas,
+} from "@/lib/validators/request";
 import type { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea, Label } from "@/components/ui/input";
@@ -15,16 +18,27 @@ import { ChevronLeft, ChevronRight, Save } from "lucide-react";
 type FormData = z.input<typeof medicalRequestSchema>;
 
 const steps = [
-  { title: "Contexto clínico", fields: ["requestDate", "usageSector", "doctorCrm", "patientName", "medicalRecord"] as const },
-  { title: "Procedimento", fields: ["plannedProcedure", "plannedDate", "plannedTime", "clinicalJustification"] as const },
-  { title: "Justificativa", fields: ["noInstitutionalAlternative", "technicalBenefit", "assistentialRisk", "isUrgent"] as const },
-  { title: "Equipamento", fields: ["equipmentName", "brand", "model", "serialNumber"] as const },
-  { title: "Fornecedor", fields: ["supplierName", "ownerName", "ownerContact"] as const },
-];
+  { title: "Contexto clínico", index: 0 },
+  { title: "Procedimento", index: 1 },
+  { title: "Justificativa", index: 2 },
+  { title: "Equipamento", index: 3 },
+  { title: "Fornecedor", index: 4 },
+] as const;
+
+function flattenErrors(errors: Record<string, unknown>): string[] {
+  const messages: string[] = [];
+  for (const val of Object.values(errors)) {
+    if (val && typeof val === "object" && "message" in val && val.message) {
+      messages.push(String(val.message));
+    }
+  }
+  return messages;
+}
 
 export function MedicalRequestWizard() {
   const [step, setStep] = useState(0);
   const [requestId, setRequestId] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const form = useForm<FormData>({
@@ -36,35 +50,107 @@ export function MedicalRequestWizard() {
       isUrgent: false,
       plannedTime: "08:00",
     },
-    mode: "onChange",
+    mode: "onTouched",
   });
 
   const saveMutation = useMutation({
-    mutationFn: async (data: FormData) => {
-      const parsed = medicalRequestSchema.parse(data);
+    mutationFn: async (payload: { data: FormData; nextStep: number }) => {
+      const body = {
+        ...payload.data,
+        wizardStep: payload.nextStep,
+        status: "RASCUNHO",
+      };
+
       const url = requestId ? `/api/requests/${requestId}` : "/api/requests";
       const method = requestId ? "PATCH" : "POST";
+
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...parsed, wizardStep: step + 1, status: "RASCUNHO" }),
+        body: JSON.stringify(body),
       });
-      if (!res.ok) throw new Error("Erro ao salvar");
-      return res.json();
+
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const msg =
+          typeof json.error === "string"
+            ? json.error
+            : json.error?.fieldErrors
+              ? Object.values(json.error.fieldErrors).flat().join(", ")
+              : "Erro ao salvar rascunho";
+        throw new Error(msg);
+      }
+      return json;
     },
     onSuccess: (data) => {
-      if (!requestId) setRequestId(data.id);
+      if (!requestId && data?.id) setRequestId(data.id);
       queryClient.invalidateQueries({ queryKey: ["requests"] });
+      setSaveError(null);
     },
+    onError: (err: Error) => setSaveError(err.message),
   });
 
-  const nextStep = async () => {
-    const fields = steps[step].fields;
-    const valid = await form.trigger(fields as unknown as (keyof FormData)[]);
+  async function validateCurrentStep() {
+    const schema = wizardStepSchemas[step];
+    const values = form.getValues();
+    const result = schema.safeParse(values);
+
+    if (!result.success) {
+      for (const issue of result.error.issues) {
+        const field = issue.path[0] as keyof FormData;
+        form.setError(field, { message: issue.message });
+      }
+      return false;
+    }
+    return true;
+  }
+
+  async function nextStep() {
+    setSaveError(null);
+    const valid = await validateCurrentStep();
     if (!valid) return;
-    await saveMutation.mutateAsync(form.getValues());
-    setStep((s) => Math.min(s + 1, steps.length - 1));
-  };
+
+    try {
+      await saveMutation.mutateAsync({
+        data: form.getValues(),
+        nextStep: step + 2,
+      });
+      setStep((s) => Math.min(s + 1, steps.length - 1));
+    } catch {
+      /* erro em saveError */
+    }
+  }
+
+  async function finishWizard() {
+    setSaveError(null);
+    const valid = await validateCurrentStep();
+    if (!valid) return;
+
+    const full = medicalRequestSchema.safeParse(form.getValues());
+    if (!full.success) {
+      for (const issue of full.error.issues) {
+        const field = issue.path[0] as keyof FormData;
+        form.setError(field, { message: issue.message });
+      }
+      setSaveError("Revise os campos destacados antes de continuar.");
+      return;
+    }
+
+    try {
+      const saved = await saveMutation.mutateAsync({
+        data: form.getValues(),
+        nextStep: steps.length,
+      });
+      const id = requestId ?? saved?.id;
+      if (id) {
+        window.location.href = `/dashboard/medico/solicitacoes/${id}/documentos`;
+      }
+    } catch {
+      /* saveError */
+    }
+  }
+
+  const fieldErrors = flattenErrors(form.formState.errors);
 
   return (
     <Card>
@@ -85,7 +171,7 @@ export function MedicalRequestWizard() {
         </div>
       </CardHeader>
       <CardContent>
-        <form onSubmit={form.handleSubmit(() => {})}>
+        <form onSubmit={(e) => e.preventDefault()}>
           <AnimatePresence mode="wait">
             <motion.div
               key={step}
@@ -98,82 +184,172 @@ export function MedicalRequestWizard() {
 
               {step === 0 && (
                 <>
-                  <div><Label>Data da solicitação</Label><Input type="date" {...form.register("requestDate")} /></div>
-                  <div><Label>Setor de uso</Label><Input {...form.register("usageSector")} placeholder="Centro Cirúrgico — Sala 03" /></div>
-                  <div><Label>CRM</Label><Input {...form.register("doctorCrm")} placeholder="123456-SP" /></div>
-                  <div><Label>Paciente</Label><Input {...form.register("patientName")} /></div>
-                  <div><Label>Prontuário</Label><Input {...form.register("medicalRecord")} /></div>
+                  <div>
+                    <Label>Data da solicitação</Label>
+                    <Input type="date" {...form.register("requestDate")} />
+                  </div>
+                  <div>
+                    <Label>Setor de uso</Label>
+                    <Input
+                      {...form.register("usageSector")}
+                      placeholder="Centro Cirúrgico — Sala 03"
+                    />
+                  </div>
+                  <div>
+                    <Label>CRM</Label>
+                    <Input {...form.register("doctorCrm")} placeholder="123456-SP" />
+                  </div>
                 </>
               )}
               {step === 1 && (
                 <>
-                  <div><Label>Procedimento previsto</Label><Input {...form.register("plannedProcedure")} /></div>
-                  <div><Label>Data prevista</Label><Input type="date" {...form.register("plannedDate")} /></div>
-                  <div><Label>Horário previsto</Label><Input type="time" {...form.register("plannedTime")} /></div>
-                  <div><Label>Justificativa clínica</Label><Textarea {...form.register("clinicalJustification")} rows={4} /></div>
+                  <div>
+                    <Label>Procedimento previsto</Label>
+                    <Input {...form.register("plannedProcedure")} />
+                  </div>
+                  <div>
+                    <Label>Data prevista</Label>
+                    <Input type="date" {...form.register("plannedDate")} />
+                  </div>
+                  <div>
+                    <Label>Horário previsto</Label>
+                    <Input type="time" {...form.register("plannedTime")} />
+                  </div>
+                  <div>
+                    <Label>Justificativa clínica</Label>
+                    <Textarea {...form.register("clinicalJustification")} rows={4} />
+                  </div>
                 </>
               )}
               {step === 2 && (
                 <>
                   <label className="flex items-center gap-2 text-sm">
-                    <input type="checkbox" {...form.register("noInstitutionalAlternative")} className="rounded" />
+                    <input
+                      type="checkbox"
+                      checked={form.watch("noInstitutionalAlternative")}
+                      onChange={(e) =>
+                        form.setValue("noInstitutionalAlternative", e.target.checked)
+                      }
+                      className="rounded"
+                    />
                     Ausência de alternativa institucional
                   </label>
-                  <div><Label>Ganho técnico-assistencial</Label><Textarea {...form.register("technicalBenefit")} /></div>
-                  <div><Label>Risco assistencial</Label><Input {...form.register("assistentialRisk")} placeholder="Baixo / Médio / Alto" /></div>
+                  <div>
+                    <Label>Ganho técnico-assistencial</Label>
+                    <Textarea {...form.register("technicalBenefit")} />
+                  </div>
+                  <div>
+                    <Label>Risco assistencial</Label>
+                    <Input
+                      {...form.register("assistentialRisk")}
+                      placeholder="Baixo / Médio / Alto"
+                    />
+                  </div>
                   <label className="flex items-center gap-2 text-sm">
-                    <input type="checkbox" {...form.register("isUrgent")} className="rounded" />
+                    <input
+                      type="checkbox"
+                      checked={!!form.watch("isUrgent")}
+                      onChange={(e) => form.setValue("isUrgent", e.target.checked)}
+                      className="rounded"
+                    />
                     Urgência / Emergência
                   </label>
                 </>
               )}
               {step === 3 && (
                 <>
-                  <div><Label>Equipamento</Label><Input {...form.register("equipmentName")} /></div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div><Label>Marca</Label><Input {...form.register("brand")} /></div>
-                    <div><Label>Modelo</Label><Input {...form.register("model")} /></div>
+                  <div>
+                    <Label>Equipamento</Label>
+                    <Input {...form.register("equipmentName")} />
                   </div>
-                  <div><Label>Número de série</Label><Input {...form.register("serialNumber")} /></div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label>Marca</Label>
+                      <Input {...form.register("brand")} />
+                    </div>
+                    <div>
+                      <Label>Modelo</Label>
+                      <Input {...form.register("model")} />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Número de série</Label>
+                    <Input {...form.register("serialNumber")} />
+                  </div>
                 </>
               )}
               {step === 4 && (
                 <>
-                  <div><Label>Fornecedor</Label><Input {...form.register("supplierName")} /></div>
-                  <div><Label>Proprietário</Label><Input {...form.register("ownerName")} /></div>
-                  <div><Label>Contatos</Label><Input {...form.register("ownerContact")} /></div>
+                  <div>
+                    <Label>Fornecedor</Label>
+                    <Input {...form.register("supplierName")} />
+                  </div>
+                  <div>
+                    <Label>Proprietário</Label>
+                    <Input {...form.register("ownerName")} />
+                  </div>
+                  <div>
+                    <Label>Contatos</Label>
+                    <Input {...form.register("ownerContact")} />
+                  </div>
                 </>
               )}
             </motion.div>
           </AnimatePresence>
 
-          <div className="mt-8 flex gap-3">
-            <Button type="button" variant="outline" disabled={step === 0} onClick={() => setStep((s) => s - 1)}>
+          {(fieldErrors.length > 0 || saveError) && (
+            <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+              {saveError && <p>{saveError}</p>}
+              {fieldErrors.map((m) => (
+                <p key={m}>{m}</p>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={step === 0 || saveMutation.isPending}
+              onClick={() => setStep((s) => s - 1)}
+            >
               <ChevronLeft className="h-4 w-4" /> Voltar
             </Button>
             <Button
               type="button"
               variant="secondary"
-              onClick={() => saveMutation.mutate(form.getValues())}
               disabled={saveMutation.isPending}
+              onClick={async () => {
+                setSaveError(null);
+                try {
+                  await saveMutation.mutateAsync({
+                    data: form.getValues(),
+                    nextStep: step + 1,
+                  });
+                } catch {
+                  /* saveError */
+                }
+              }}
             >
-              <Save className="h-4 w-4" /> Salvar rascunho
+              <Save className="h-4 w-4" />
+              {saveMutation.isPending ? "Salvando..." : "Salvar rascunho"}
             </Button>
             {step < steps.length - 1 ? (
-              <Button type="button" className="ml-auto" onClick={nextStep}>
-                Próximo <ChevronRight className="h-4 w-4" />
+              <Button
+                type="button"
+                className="ml-auto"
+                disabled={saveMutation.isPending}
+                onClick={nextStep}
+              >
+                {saveMutation.isPending ? "Salvando..." : "Próximo"}
+                <ChevronRight className="h-4 w-4" />
               </Button>
             ) : (
               <Button
                 type="button"
                 className="ml-auto"
-                onClick={() => {
-                  saveMutation.mutate(form.getValues(), {
-                    onSuccess: () => {
-                      if (requestId) window.location.href = `/dashboard/medico/solicitacoes/${requestId}/documentos`;
-                    },
-                  });
-                }}
+                disabled={saveMutation.isPending}
+                onClick={finishWizard}
               >
                 Ir para documentação
               </Button>

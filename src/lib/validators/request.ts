@@ -1,27 +1,82 @@
 import { z } from "zod";
 
+const dateField = z.union([z.date(), z.string()]).transform((v) => new Date(v));
+
 export const medicalRequestSchema = z.object({
-  requestDate: z.union([z.date(), z.string()]).transform((v) => new Date(v)),
+  requestDate: dateField,
   usageSector: z.string().min(2, "Setor obrigatório"),
   doctorCrm: z.string().min(4, "CRM obrigatório"),
-  patientName: z.string().min(2, "Paciente obrigatório"),
-  medicalRecord: z.string().min(1, "Prontuário obrigatório"),
   plannedProcedure: z.string().min(3, "Procedimento obrigatório"),
-  plannedDate: z.union([z.date(), z.string()]).transform((v) => new Date(v)),
+  plannedDate: dateField,
   plannedTime: z.string().min(4, "Horário obrigatório"),
   clinicalJustification: z.string().min(20, "Justificativa mínima 20 caracteres"),
   noInstitutionalAlternative: z.boolean(),
   technicalBenefit: z.string().min(10, "Ganho técnico-assistencial obrigatório"),
-  equipmentName: z.string().min(2),
-  brand: z.string().min(1),
-  model: z.string().min(1),
-  serialNumber: z.string().min(1),
-  supplierName: z.string().min(2),
-  ownerName: z.string().min(2),
-  ownerContact: z.string().min(5),
-  assistentialRisk: z.string().min(1),
+  equipmentName: z.string().min(2, "Equipamento obrigatório"),
+  brand: z.string().min(1, "Marca obrigatória"),
+  model: z.string().min(1, "Modelo obrigatório"),
+  serialNumber: z.string().min(1, "Número de série obrigatório"),
+  supplierName: z.string().min(2, "Fornecedor obrigatório"),
+  ownerName: z.string().min(2, "Proprietário obrigatório"),
+  ownerContact: z.string().min(5, "Contato obrigatório"),
+  assistentialRisk: z.string().min(1, "Risco assistencial obrigatório"),
   isUrgent: z.boolean().optional(),
 });
+
+export const medicalRequestDraftSchema = medicalRequestSchema.partial();
+
+/** Validação por etapa do wizard (não exige campos das etapas futuras) */
+export const wizardStepSchemas = [
+  medicalRequestSchema.pick({
+    requestDate: true,
+    usageSector: true,
+    doctorCrm: true,
+  }),
+  medicalRequestSchema.pick({
+    plannedProcedure: true,
+    plannedDate: true,
+    plannedTime: true,
+    clinicalJustification: true,
+  }),
+  medicalRequestSchema.pick({
+    noInstitutionalAlternative: true,
+    technicalBenefit: true,
+    assistentialRisk: true,
+    isUrgent: true,
+  }),
+  medicalRequestSchema.pick({
+    equipmentName: true,
+    brand: true,
+    model: true,
+    serialNumber: true,
+  }),
+  medicalRequestSchema.pick({
+    supplierName: true,
+    ownerName: true,
+    ownerContact: true,
+  }),
+] as const;
+
+export const REQUEST_DRAFT_DEFAULTS = {
+  requestDate: new Date(),
+  usageSector: "",
+  doctorCrm: "",
+  plannedProcedure: "",
+  plannedDate: new Date(),
+  plannedTime: "08:00",
+  clinicalJustification: "",
+  noInstitutionalAlternative: true,
+  technicalBenefit: "",
+  equipmentName: "",
+  brand: "",
+  model: "",
+  serialNumber: "",
+  supplierName: "",
+  ownerName: "",
+  ownerContact: "",
+  assistentialRisk: "",
+  isUrgent: false,
+} as const;
 
 export const checklistUpdateSchema = z.object({
   formFilled: z.enum(["APROVADO", "PENDENTE", "REPROVADO"]).optional(),

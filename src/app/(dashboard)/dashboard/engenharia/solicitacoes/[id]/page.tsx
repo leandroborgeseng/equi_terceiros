@@ -45,7 +45,6 @@ export default function EngenhariaRequestDetailPage() {
           <CardContent className="space-y-2 text-sm text-slate-600">
             <p><strong>Médico:</strong> {request.doctor?.name} — CRM {request.doctorCrm}</p>
             <p><strong>Setor:</strong> {request.usageSector}</p>
-            <p><strong>Paciente:</strong> {request.patientName} ({request.medicalRecord})</p>
             <p><strong>Procedimento:</strong> {request.plannedProcedure}</p>
             <p><strong>Previsto:</strong> {formatDate(request.plannedDate)} {request.plannedTime}</p>
             <p><strong>Fornecedor:</strong> {request.supplierName}</p>
