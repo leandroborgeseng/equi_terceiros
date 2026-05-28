@@ -1,25 +1,28 @@
 import { NextResponse } from "next/server";
+import {
+  getAuthSecret,
+  getDatabaseUrl,
+  getNextAuthUrl,
+  isEnvFullyConfigured,
+  isUsingRailwayAutoConfig,
+} from "@/lib/env";
 
 export async function GET() {
-  const hasDb = !!process.env.DATABASE_URL;
-  const hasSecret = !!(process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET);
-  const hasUrl = !!process.env.NEXTAUTH_URL;
-  const ok = hasDb && hasSecret && hasUrl;
+  const manualConfig = isEnvFullyConfigured();
+  const autoConfig = isUsingRailwayAutoConfig();
 
-  return NextResponse.json(
-    {
-      ok,
-      status: ok ? "ready" : "misconfigured",
-      checks: {
-        DATABASE_URL: hasDb,
-        NEXTAUTH_SECRET_or_AUTH_SECRET: hasSecret,
-        NEXTAUTH_URL: hasUrl,
-      },
-      port: process.env.PORT ?? "8080",
-      hint: ok
-        ? "Login: medico@hospital.local / Hospital@2026"
-        : "Adicione Variables no Railway (railway.env.example)",
+  return NextResponse.json({
+    ok: true,
+    status: manualConfig ? "ready" : autoConfig ? "ready_auto_config" : "ready_defaults",
+    manualVariablesConfigured: manualConfig,
+    railwayAutoConfig: autoConfig,
+    resolved: {
+      databaseUrl: getDatabaseUrl().replace(/prod\.db.*/, "prod.db"),
+      nextAuthUrl: getNextAuthUrl(),
+      hasSecret: !!getAuthSecret(),
     },
-    { status: ok ? 200 : 503 }
-  );
+    hint: manualConfig
+      ? "Variáveis Railway OK. Login: medico@hospital.local / Hospital@2026"
+      : "Funcionando com defaults Railway. Recomendado: adicionar NEXTAUTH_SECRET em Variables.",
+  });
 }

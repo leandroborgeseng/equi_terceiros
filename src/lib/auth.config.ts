@@ -1,9 +1,10 @@
 import type { NextAuthConfig } from "next-auth";
 import type { UserRole } from "@/lib/enums";
+import { getAuthSecret } from "@/lib/env";
 
 export const authConfig: NextAuthConfig = {
   trustHost: true,
-  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+  secret: getAuthSecret(),
   providers: [],
   pages: {
     signIn: "/login",
