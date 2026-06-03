@@ -15,13 +15,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Homologação de Equipamentos",
-  description: "Portal de homologação técnica e compliance documental hospitalar",
+  title: "GestEq — Gestão de Equipamentos de Terceiros",
+  description: "Gestão, homologação e rastreabilidade de equipamentos de terceiros (Norma 445.000)",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Homologação EC",
+    title: "GestEq",
   },
 };
 

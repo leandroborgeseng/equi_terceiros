@@ -7,6 +7,9 @@ const variants: Record<string, string> = {
   danger: "bg-red-50 text-red-700 ring-1 ring-red-200",
   orange: "bg-orange-50 text-orange-700 ring-1 ring-orange-200",
   info: "bg-blue-50 text-blue-700 ring-1 ring-blue-200",
+  purple: "bg-purple-50 text-purple-700 ring-1 ring-purple-200",
+  successDark: "bg-emerald-600 text-white",
+  grayDark: "bg-slate-600 text-white",
 };
 
 export function Badge({

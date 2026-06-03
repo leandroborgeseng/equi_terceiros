@@ -2,19 +2,21 @@
 
 import { useParams } from "next/navigation";
 import { MobileUpload, OfflineSyncBanner } from "@/components/upload/mobile-upload";
-import { PHOTO_LABELS, REQUIRED_PHOTOS } from "@/lib/validators/request";
+import { PHOTO_LABELS, REQUIRED_PHOTOS, REQUIRED_DOCUMENT_TYPES } from "@/lib/validators/request";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
 
 const DOC_TYPES = [
-  { type: "ANVISA", label: "Registro ANVISA" },
-  { type: "MANUAL", label: "Manual do equipamento" },
-  { type: "MANUTENCAO_PREVENTIVA", label: "Manutenção preventiva" },
-  { type: "CALIBRACAO", label: "Calibração" },
-  { type: "TESTE_SEGURANCA_ELETRICA", label: "TSE" },
-  { type: "TERMO_RESPONSABILIDADE", label: "Termo de responsabilidade" },
-  { type: "APOLICE_SEGURO", label: "Apólice de seguro" },
-];
+  { type: "ANVISA", label: "Registro ANVISA", required: true },
+  { type: "MANUAL", label: "Manual do equipamento", required: true },
+  { type: "MANUTENCAO_PREVENTIVA", label: "Manutenção preventiva", required: true },
+  { type: "CALIBRACAO", label: "Calibração", required: true },
+  { type: "TESTE_SEGURANCA_ELETRICA", label: "TSE", required: true },
+  { type: "TERMO_RESPONSABILIDADE", label: "Termo de responsabilidade", required: false },
+  { type: "APOLICE_SEGURO", label: "Apólice de seguro", required: false },
+] as const;
+
+const requiredSet = new Set<string>(REQUIRED_DOCUMENT_TYPES);
 
 export default function DocumentosPage() {
   const { id } = useParams<{ id: string }>();
@@ -57,12 +59,12 @@ export default function DocumentosPage() {
       <section className="space-y-4">
         <h2 className="font-semibold text-slate-800">Documentos</h2>
         {DOC_TYPES.map((doc) => (
-          <MobileUpload
-            key={doc.type}
-            requestId={id}
-            type={doc.type}
-            label={doc.label}
-          />
+          <div key={doc.type}>
+            <MobileUpload requestId={id} type={doc.type} label={doc.label} />
+            {requiredSet.has(doc.type) && (
+              <p className="mt-1 text-xs text-red-600">Obrigatório para envio</p>
+            )}
+          </div>
         ))}
       </section>
 

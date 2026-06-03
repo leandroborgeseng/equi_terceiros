@@ -12,6 +12,8 @@ import {
   Menu,
   X,
   BarChart3,
+  PackageSearch,
+  AlertTriangle,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -20,12 +22,16 @@ import { ROLE_LABELS } from "@/lib/rbac";
 
 const navByRole: Record<UserRole, { href: string; label: string; icon: typeof LayoutDashboard }[]> = {
   ADMIN: [
-    { href: "/dashboard/engenharia", label: "Homologação", icon: Shield },
-    { href: "/dashboard/executivo", label: "Executivo", icon: BarChart3 },
+    { href: "/dashboard/engenharia", label: "Fila de Homologação", icon: Shield },
+    { href: "/equipamentos", label: "Equipamentos", icon: PackageSearch },
+    { href: "/pendencias", label: "Pendências", icon: AlertTriangle },
+    { href: "/dashboard/executivo", label: "Indicadores", icon: BarChart3 },
   ],
   ENGENHARIA_CLINICA: [
     { href: "/dashboard/engenharia", label: "Fila de Homologação", icon: Shield },
-    { href: "/dashboard/executivo", label: "Executivo", icon: BarChart3 },
+    { href: "/equipamentos", label: "Equipamentos", icon: PackageSearch },
+    { href: "/pendencias", label: "Pendências", icon: AlertTriangle },
+    { href: "/dashboard/executivo", label: "Indicadores", icon: BarChart3 },
   ],
   MEDICO: [{ href: "/dashboard/medico", label: "Minhas Solicitações", icon: ClipboardList }],
   FORNECEDOR: [{ href: "/dashboard/fornecedor", label: "Documentação", icon: ClipboardList }],
@@ -59,10 +65,10 @@ export function AppShell({
             </button>
             <Link href="/" className="flex items-center gap-2">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-sm font-bold text-white">
-                EC
+                GE
               </div>
               <div className="hidden sm:block">
-                <p className="text-sm font-semibold text-slate-900">Homologação</p>
+                <p className="text-sm font-semibold text-slate-900">GestEq</p>
                 <p className="text-xs text-slate-500">Equipamentos de Terceiros</p>
               </div>
             </Link>
@@ -122,6 +128,30 @@ export function AppShell({
           {children}
         </motion.main>
       </div>
+
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-slate-200 bg-white/95 backdrop-blur lg:hidden">
+        {[
+          { href: nav[0]?.href ?? "/", label: "Início", icon: LayoutDashboard },
+          { href: "/equipamentos", label: "Equipamentos", icon: PackageSearch },
+          { href: "/pendencias", label: "Pendências", icon: AlertTriangle },
+          { href: "/dashboard/executivo", label: "Indicadores", icon: BarChart3 },
+        ].map((item) => {
+          const active = pathname === item.href || pathname.startsWith(item.href + "/");
+          return (
+            <Link
+              key={item.label}
+              href={item.href}
+              className={cn(
+                "flex flex-col items-center gap-1 py-2 text-[11px] font-medium",
+                active ? "text-emerald-700" : "text-slate-500"
+              )}
+            >
+              <item.icon className="h-5 w-5" />
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 }

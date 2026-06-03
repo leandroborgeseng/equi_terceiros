@@ -24,7 +24,7 @@ export async function GET(
 
   const labelStatus = request.releaseStatus?.labelStatus ?? "PENDENTE_ANALISE";
   const pdf = generateLabelPdf({
-    protocol: request.protocol,
+    protocol: request.internalOs ?? request.protocol,
     status: labelStatus,
     date: formatDate(new Date()),
     validUntil: request.validUntil ? formatDate(request.validUntil) : undefined,

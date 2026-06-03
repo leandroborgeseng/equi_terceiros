@@ -34,3 +34,9 @@ export function generateProtocol() {
 export function generateSupplierToken() {
   return crypto.randomUUID().replace(/-/g, "");
 }
+
+export function generateInternalOs() {
+  const year = new Date().getFullYear();
+  const rand = Math.floor(1000 + Math.random() * 9000);
+  return `OS-${year}-${rand}`;
+}

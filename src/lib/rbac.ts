@@ -25,11 +25,11 @@ export function canAccessRoute(role: UserRole, path: string): boolean {
 
   const rolePrefixes: Record<UserRole, string[]> = {
     ADMIN: ["/dashboard", "/api"],
-    ENGENHARIA_CLINICA: ["/dashboard/engenharia", "/dashboard/executivo", "/api/requests", "/api/inspections", "/api/checklist", "/api/labels", "/api/gallery", "/api/alerts", "/api/dashboard"],
+    ENGENHARIA_CLINICA: ["/dashboard/engenharia", "/dashboard/executivo", "/equipamentos", "/pendencias", "/indicadores", "/api/requests", "/api/inspections", "/api/checklist", "/api/labels", "/api/gallery", "/api/alerts", "/api/dashboard"],
     MEDICO: ["/dashboard/medico", "/api/requests"],
     FORNECEDOR: ["/dashboard/fornecedor", "/fornecedor", "/api/requests", "/api/uploads"],
     CENTRO_CIRURGICO: ["/dashboard/centro-cirurgico", "/api/requests"],
-    CME_CCIH_NSP: ["/dashboard/cme", "/api/requests"],
+    CME_CCIH_NSP: ["/dashboard/cme", "/api/requests", "/api/adverse-events"],
   };
 
   return rolePrefixes[role]?.some((p) => path.startsWith(p)) ?? false;

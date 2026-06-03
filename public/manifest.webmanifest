@@ -1,7 +1,7 @@
 {
-  "name": "Homologação de Equipamentos",
-  "short_name": "Homologação EC",
-  "description": "Gestão de equipamentos médico-hospitalares de terceiros",
+  "name": "GestEq — Gestão de Equipamentos de Terceiros",
+  "short_name": "GestEq",
+  "description": "Gestão, homologação e rastreabilidade de equipamentos de terceiros (Norma 445.000)",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f8fafc",

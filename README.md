@@ -1,6 +1,6 @@
-# Homologação de Equipamentos de Terceiros
+# GestEq — Gestão de Equipamentos de Terceiros
 
-Sistema web/PWA para gestão de equipamentos médico-hospitalares de terceiros — portal de homologação técnica e compliance documental para Engenharia Clínica hospitalar.
+Sistema web/PWA, mobile-first, para gestão, homologação, inspeção e rastreabilidade de equipamentos médico-hospitalares de terceiros pela Engenharia Clínica, baseado na **Norma de Procedimento 445.000**.
 
 **Repositório:** https://github.com/leandroborgeseng/equi_terceiros
 
@@ -18,6 +18,8 @@ Sistema web/PWA para gestão de equipamentos médico-hospitalares de terceiros �
 | Engenharia Clínica | ec@hospital.local | Hospital@2026 |
 | Médico | medico@hospital.local | Hospital@2026 |
 | Fornecedor | fornecedor@hospital.local | Hospital@2026 |
+| Centro Cirúrgico | centro@hospital.local | Hospital@2026 |
+| CME / CCIH | cme@hospital.local | Hospital@2026 |
 
 ## Execução local
 
@@ -136,6 +138,19 @@ public/manifest.webmanifest
 - Instalável no celular (Add to Home Screen)
 - Service Worker com cache (Serwist)
 - Fila offline IndexedDB para fotos/documentos
+- Sincronização automática ao reconectar (`OfflineSyncBar`)
+
+## Alertas automáticos (cron)
+
+```bash
+curl "https://SEU_DOMINIO/api/cron/alerts?secret=SEU_CRON_SECRET"
+```
+
+Defina `CRON_SECRET` no Railway e agende no Cron do Railway ou externo.
+
+## Conformidade com a spec
+
+Veja [COMPLIANCE.md](./COMPLIANCE.md) para matriz detalhada spec × código.
 
 ## Segurança
 

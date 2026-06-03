@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { Camera, Upload, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Camera, Upload, CheckCircle2, AlertCircle, Loader2, ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { queueOfflineUpload } from "@/lib/offline-queue";
@@ -47,6 +47,7 @@ export function MobileUpload({
   const [status, setStatus] = useState<"idle" | "uploading" | "done" | "offline" | "error">("idle");
   const [quality, setQuality] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState(false);
 
   const processFile = useCallback(
     async (file: File) => {
@@ -128,7 +129,23 @@ export function MobileUpload({
   );
 
   return (
-    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-4">
+    <div
+      className={cn(
+        "rounded-2xl border border-dashed bg-slate-50/50 p-4 transition-colors",
+        dragOver ? "border-emerald-500 bg-emerald-50/50" : "border-slate-200"
+      )}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setDragOver(true);
+      }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setDragOver(false);
+        const files = Array.from(e.dataTransfer.files);
+        files.forEach((file) => processFile(file));
+      }}
+    >
       <div className="mb-3 flex items-center justify-between">
         <p className="text-sm font-medium text-slate-800">{label}</p>
         {quality && <span className="text-xs text-slate-500">Qualidade: {quality}</span>}
@@ -153,6 +170,11 @@ export function MobileUpload({
         }}
       />
 
+      {dragOver && (
+        <p className="mb-2 flex items-center gap-1 text-xs text-emerald-700">
+          <ImagePlus className="h-3 w-3" /> Solte os arquivos aqui
+        </p>
+      )}
       <div className="flex gap-2">
         <Button
           type="button"
@@ -208,21 +230,4 @@ export function MobileUpload({
   );
 }
 
-export function OfflineSyncBanner() {
-  const [count, setCount] = useState(0);
-
-  if (typeof window !== "undefined") {
-    import("@/lib/offline-queue").then(async ({ getPendingUploads }) => {
-      const pending = await getPendingUploads();
-      if (pending.length !== count) setCount(pending.length);
-    });
-  }
-
-  if (count === 0) return null;
-
-  return (
-    <div className={cn("mb-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800")}>
-      {count} arquivo(s) aguardando sincronização offline
-    </div>
-  );
-}
+export { OfflineSyncBar as OfflineSyncBanner } from "@/components/pwa/offline-sync-bar";

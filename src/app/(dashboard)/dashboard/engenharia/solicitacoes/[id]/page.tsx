@@ -41,13 +41,29 @@ export default function EngenhariaRequestDetailPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
-          <CardHeader><CardTitle>Dados clínicos</CardTitle></CardHeader>
+          <CardHeader>
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle>Dados clínicos e cadastro</CardTitle>
+              <a
+                href={`/equipamentos/${id}/cadastro`}
+                className="rounded-lg bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-200"
+              >
+                Cadastro EC
+              </a>
+            </div>
+          </CardHeader>
           <CardContent className="space-y-2 text-sm text-slate-600">
             <p><strong>Médico:</strong> {request.doctor?.name} — CRM {request.doctorCrm}</p>
+            <p><strong>Paciente:</strong> {request.patientName} · Prontuário {request.medicalRecord}</p>
             <p><strong>Setor:</strong> {request.usageSector}</p>
             <p><strong>Procedimento:</strong> {request.plannedProcedure}</p>
             <p><strong>Previsto:</strong> {formatDate(request.plannedDate)} {request.plannedTime}</p>
             <p><strong>Fornecedor:</strong> {request.supplierName}</p>
+            <p>
+              <strong>Classe:</strong> {request.equipmentClass ?? "—"} ·{" "}
+              <strong>Ingresso:</strong> {request.entryType} · <strong>OS:</strong>{" "}
+              {request.internalOs ?? "não cadastrada"}
+            </p>
             <p><strong>Enviado:</strong> {formatDateTime(request.submittedAt)}</p>
           </CardContent>
         </Card>

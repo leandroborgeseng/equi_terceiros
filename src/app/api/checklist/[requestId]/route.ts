@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { checklistUpdateSchema } from "@/lib/validators/request";
 import { canHomologate } from "@/lib/rbac";
 import { createAuditLog } from "@/lib/audit";
+import { notifyRequestRejection } from "@/lib/notifications";
 
 export async function PATCH(
   req: Request,
@@ -22,11 +23,12 @@ export async function PATCH(
   }
 
   const data = parsed.data;
-  const hasRejection = Object.values(data).includes("REPROVADO");
+  const isReproved = data.docStatus === "REPROVADO";
+  const isPending = data.docStatus === "PENDENTE";
 
-  if (hasRejection && !data.rejectionReason) {
+  if (isReproved && !data.rejectionReason) {
     return NextResponse.json(
-      { error: "Motivo obrigatório ao reprovar item" },
+      { error: "Motivo obrigatório ao reprovar a documentação" },
       { status: 400 }
     );
   }
@@ -46,21 +48,37 @@ export async function PATCH(
     },
   });
 
-  const requestStatus = hasRejection
-    ? "PENDENTE_COMPLEMENTO"
-    : "AGUARDANDO_INSPECAO";
+  // Aprovado → AGUARDANDO_INSPECAO; Pendente → PENDENTE_DOCUMENTOS; Reprovado → BLOQUEADO
+  const requestStatus = isReproved
+    ? "BLOQUEADO"
+    : isPending
+      ? "PENDENTE_DOCUMENTOS"
+      : data.docStatus === "APROVADO"
+        ? "AGUARDANDO_INSPECAO"
+        : undefined;
 
-  await prisma.equipmentRequest.update({
-    where: { id: requestId },
-    data: { status: requestStatus },
-  });
+  const request = requestStatus
+    ? await prisma.equipmentRequest.update({
+        where: { id: requestId },
+        data: { status: requestStatus },
+      })
+    : await prisma.equipmentRequest.findUniqueOrThrow({ where: { id: requestId } });
+
+  if ((isReproved || isPending) && data.rejectionReason) {
+    await notifyRequestRejection({
+      requestId,
+      protocol: request.protocol,
+      doctorId: request.doctorId,
+      reason: data.rejectionReason,
+    });
+  }
 
   await createAuditLog({
     userId: session.user.id,
-    action: hasRejection ? "CHECKLIST_REJECTED" : "CHECKLIST_APPROVED",
+    action: isReproved ? "CHECKLIST_REJECTED" : "CHECKLIST_REVIEWED",
     entity: "DocumentChecklist",
     entityId: checklist.id,
-    metadata: data,
+    metadata: { docStatus: data.docStatus },
   });
 
   return NextResponse.json(checklist);

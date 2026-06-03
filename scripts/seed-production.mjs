@@ -11,6 +11,8 @@ async function main() {
     { email: "ec@hospital.local", name: "Engenharia Clínica", role: "ENGENHARIA_CLINICA" },
     { email: "medico@hospital.local", name: "Dr. João Silva", role: "MEDICO", crm: "123456-SP" },
     { email: "fornecedor@hospital.local", name: "MedSupply Equipamentos", role: "FORNECEDOR" },
+    { email: "centro@hospital.local", name: "Coordenação Centro Cirúrgico", role: "CENTRO_CIRURGICO" },
+    { email: "cme@hospital.local", name: "CME / CCIH", role: "CME_CCIH_NSP" },
   ];
 
   for (const u of users) {

@@ -5,6 +5,8 @@ import { medicalRequestDraftSchema, REQUEST_DRAFT_DEFAULTS } from "@/lib/validat
 import { generateProtocol, generateSupplierToken } from "@/lib/utils";
 import { createAuditLog } from "@/lib/audit";
 import { canCreateRequest } from "@/lib/rbac";
+import { suggestEquipmentClass } from "@/lib/classification";
+import { randomUUID } from "crypto";
 
 export async function GET(req: Request) {
   const session = await auth();
@@ -25,17 +27,29 @@ export async function GET(req: Request) {
   if (queue === "engenharia") {
     where.status = {
       in: [
-        "DOCUMENTACAO_EM_ANALISE",
-        "PENDENTE_COMPLEMENTO",
+        "AGUARDANDO_CADASTRO",
+        "AGUARDANDO_DOCUMENTOS",
+        "PENDENTE_DOCUMENTOS",
         "AGUARDANDO_INSPECAO",
-        "AGUARDANDO_DOCUMENTACAO",
-        "URGENCIA",
-        "VENCIDO",
+        "FLUXO_URGENCIA",
         "BLOQUEADO",
         "LIBERADO",
         "LIBERADO_COM_RESTRICAO",
+        "EM_USO",
+        "AGUARDANDO_RETIRADA",
       ],
     };
+  }
+
+  if (queue === "liberados") {
+    where.status = { in: ["LIBERADO", "LIBERADO_COM_RESTRICAO", "EM_USO"] };
+  }
+
+  if (queue === "pendencias") {
+    where.OR = [
+      { status: { in: ["PENDENTE_DOCUMENTOS", "AGUARDANDO_RETIRADA", "FLUXO_URGENCIA"] } },
+      { regularizationDueAt: { not: null }, regularizedAt: null },
+    ];
   }
 
   const requests = await prisma.equipmentRequest.findMany({
@@ -65,8 +79,8 @@ function mergeDraft(body: Record<string, unknown>) {
     ...parsed.data,
     requestDate: parsed.data.requestDate ?? REQUEST_DRAFT_DEFAULTS.requestDate,
     plannedDate: parsed.data.plannedDate ?? REQUEST_DRAFT_DEFAULTS.plannedDate,
-    patientName: "—",
-    medicalRecord: "—",
+    patientName: parsed.data.patientName ?? "",
+    medicalRecord: parsed.data.medicalRecord ?? "",
   };
 
   return { data: merged } as const;
@@ -88,14 +102,35 @@ export async function POST(req: Request) {
   const protocol = generateProtocol();
   const supplierToken = generateSupplierToken();
   const isDraft = body.status === "RASCUNHO";
+  const isUrgent = !!merged.data.isUrgent;
+
+  const equipmentClass =
+    merged.data.equipmentClass ??
+    suggestEquipmentClass({
+      isUrgent,
+      plannedDate: merged.data.plannedDate,
+      expectedExitDate: merged.data.expectedExitDate,
+    });
+
+  const status = isDraft
+    ? "RASCUNHO"
+    : isUrgent
+      ? "FLUXO_URGENCIA"
+      : "AGUARDANDO_CADASTRO";
 
   const request = await prisma.equipmentRequest.create({
     data: {
       ...merged.data,
       protocol,
       supplierToken,
+      qrToken: randomUUID(),
       doctorId: session.user.id,
-      status: isDraft ? "RASCUNHO" : "AGUARDANDO_DOCUMENTACAO",
+      status,
+      flowType: isUrgent ? "URGENCIA" : "ELETIVO",
+      equipmentClass,
+      // Classe D (urgência): cria pendência de regularização para D+1
+      regularizationDueAt:
+        isUrgent && !isDraft ? new Date(Date.now() + 86400000) : undefined,
       wizardStep: typeof body.wizardStep === "number" ? body.wizardStep : 1,
       documentChecklist: { create: {} },
       releaseStatus: { create: {} },

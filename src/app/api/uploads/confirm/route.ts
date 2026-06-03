@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createAuditLog } from "@/lib/audit";
+import { validateUpload } from "@/lib/document-validation";
 import type { DocumentType, RequiredPhotoType } from "@/lib/enums";
 
 const photoTypes = new Set([
@@ -38,6 +39,16 @@ export async function POST(req: Request) {
   });
   if (!request) return NextResponse.json({ error: "Solicitação não encontrada" }, { status: 404 });
 
+  const validation = validateUpload({
+    requestSerialNumber: request.serialNumber,
+    requestBrand: request.brand,
+    requestModel: request.model,
+    documentType: type,
+    fileName,
+    mimeType: mimeType ?? "",
+    photoType,
+  });
+
   if (photoType && photoTypes.has(photoType)) {
     const image = await prisma.equipmentImage.create({
       data: {
@@ -52,7 +63,11 @@ export async function POST(req: Request) {
         metadata: {
           create: {
             imageType: photoType,
-            aiValidationStatus: "PENDING",
+            aiValidationStatus: validation.status,
+            extractedText: validation.extractedText,
+            serialDetected: validation.serialDetected,
+            manufacturerDetected: validation.manufacturerDetected,
+            modelDetected: validation.modelDetected,
           },
         },
       },
@@ -63,10 +78,10 @@ export async function POST(req: Request) {
       action: "PHOTO_UPLOADED",
       entity: "EquipmentImage",
       entityId: image.id,
-      metadata: { photoType },
+      metadata: { photoType, validation: validation.messages },
     });
 
-    return NextResponse.json(image);
+    return NextResponse.json({ ...image, validation });
   }
 
   const attachment = await prisma.attachment.create({
@@ -86,8 +101,8 @@ export async function POST(req: Request) {
     action: "ATTACHMENT_UPLOADED",
     entity: "Attachment",
     entityId: attachment.id,
-    metadata: { type },
+    metadata: { type, validation: validation.messages },
   });
 
-  return NextResponse.json(attachment);
+  return NextResponse.json({ ...attachment, validation });
 }

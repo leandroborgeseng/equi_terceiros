@@ -12,42 +12,47 @@ export async function GET() {
     pendentes,
     bloqueados,
     vencidos,
-    emAnalise,
     reprovados,
     porFornecedor,
     porMedico,
+    porClasse,
   ] = await Promise.all([
     prisma.equipmentRequest.count(),
     prisma.equipmentRequest.count({
-      where: { status: { in: ["LIBERADO", "LIBERADO_COM_RESTRICAO"] } },
+      where: { status: { in: ["LIBERADO", "LIBERADO_COM_RESTRICAO", "EM_USO"] } },
     }),
     prisma.equipmentRequest.count({
       where: {
         status: {
           in: [
-            "AGUARDANDO_DOCUMENTACAO",
-            "DOCUMENTACAO_EM_ANALISE",
-            "PENDENTE_COMPLEMENTO",
+            "AGUARDANDO_CADASTRO",
+            "AGUARDANDO_DOCUMENTOS",
+            "PENDENTE_DOCUMENTOS",
             "AGUARDANDO_INSPECAO",
           ],
         },
       },
     }),
     prisma.equipmentRequest.count({ where: { status: "BLOQUEADO" } }),
-    prisma.equipmentRequest.count({ where: { status: "VENCIDO" } }),
-    prisma.equipmentRequest.count({ where: { status: "DOCUMENTACAO_EM_ANALISE" } }),
-    prisma.equipmentRequest.count({ where: { status: "PENDENTE_COMPLEMENTO" } }),
+    prisma.equipmentRequest.count({
+      where: { validUntil: { lt: new Date() }, status: { in: ["LIBERADO", "LIBERADO_COM_RESTRICAO"] } },
+    }),
+    prisma.equipmentRequest.count({ where: { status: "PENDENTE_DOCUMENTOS" } }),
     prisma.equipmentRequest.groupBy({
       by: ["supplierName"],
       _count: true,
       where: {
-        status: { in: ["PENDENTE_COMPLEMENTO", "AGUARDANDO_DOCUMENTACAO"] },
+        status: { in: ["PENDENTE_DOCUMENTOS", "AGUARDANDO_DOCUMENTOS", "AGUARDANDO_CADASTRO"] },
       },
     }),
     prisma.equipmentRequest.groupBy({
       by: ["doctorId"],
       _count: true,
-      where: { status: { notIn: ["LIBERADO", "ARQUIVADO"] } },
+      where: { status: { notIn: ["LIBERADO", "RETIRADO"] } },
+    }),
+    prisma.equipmentRequest.groupBy({
+      by: ["equipmentClass"],
+      _count: true,
     }),
   ]);
 
@@ -68,18 +73,20 @@ export async function GET() {
   const taxaReprovacao = total > 0 ? Math.round((reprovados / total) * 100) : 0;
 
   const queue = {
-    aguardandoDocumentacao: await prisma.equipmentRequest.count({
-      where: { status: "AGUARDANDO_DOCUMENTACAO" },
+    aguardandoCadastro: await prisma.equipmentRequest.count({
+      where: { status: "AGUARDANDO_CADASTRO" },
     }),
-    documentacaoEmAnalise: emAnalise,
-    pendenteComplemento: reprovados,
+    aguardandoDocumentos: await prisma.equipmentRequest.count({
+      where: { status: "AGUARDANDO_DOCUMENTOS" },
+    }),
+    pendenteDocumentos: reprovados,
     aguardandoInspecao: await prisma.equipmentRequest.count({
       where: { status: "AGUARDANDO_INSPECAO" },
     }),
     liberado: liberados,
     bloqueado: bloqueados,
     urgencia: await prisma.equipmentRequest.count({
-      where: { OR: [{ status: "URGENCIA" }, { isUrgent: true }] },
+      where: { status: "FLUXO_URGENCIA" },
     }),
     vencido: vencidos,
   };
@@ -98,5 +105,9 @@ export async function GET() {
     queue,
     porFornecedor,
     porMedico,
+    porClasse: porClasse.map((c) => ({
+      classe: c.equipmentClass ?? "—",
+      _count: typeof c._count === "number" ? c._count : 0,
+    })),
   });
 }

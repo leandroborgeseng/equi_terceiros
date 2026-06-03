@@ -12,6 +12,8 @@ async function main() {
     { email: "ec@hospital.local", name: "Engenharia Clínica", role: "ENGENHARIA_CLINICA" as UserRole },
     { email: "medico@hospital.local", name: "Dr. João Silva", role: "MEDICO" as UserRole, crm: "123456-SP" },
     { email: "fornecedor@hospital.local", name: "MedSupply Equipamentos", role: "FORNECEDOR" as UserRole },
+    { email: "centro@hospital.local", name: "Coordenação Centro Cirúrgico", role: "CENTRO_CIRURGICO" as UserRole },
+    { email: "cme@hospital.local", name: "CME / CCIH", role: "CME_CCIH_NSP" as UserRole },
   ];
 
   for (const u of users) {
@@ -63,13 +65,13 @@ async function main() {
       await prisma.equipmentRequest.create({
         data: {
           protocol: "EQ-2026-DEMO01",
-          status: "DOCUMENTACAO_EM_ANALISE",
+          status: "AGUARDANDO_CADASTRO",
           requestDate: new Date(),
           usageSector: "Centro Cirúrgico — Sala 03",
           doctorId: medico.id,
           doctorCrm: "123456-SP",
-          patientName: "—",
-          medicalRecord: "—",
+          patientName: "Paciente Demonstração",
+          medicalRecord: "PRONT-0001",
           plannedProcedure: "Cirurgia minimamente invasiva",
           plannedDate: new Date(Date.now() + 7 * 86400000),
           plannedTime: "08:00",
@@ -81,12 +83,16 @@ async function main() {
           brand: "Philips",
           model: "MX450",
           serialNumber: "SN-DEMO-001",
+          entryType: "FORNECEDOR",
+          flowType: "ELETIVO",
+          equipmentClass: "C",
           supplierId: supplier?.id,
           supplierName: supplier?.name ?? "MedSupply",
           ownerName: "Hospital Demo",
           ownerContact: "contato@hospital.local",
           assistentialRisk: "Médio",
           supplierToken: "demotoken123456",
+          qrToken: "qr-demo-000001",
           wizardStep: 5,
           submittedAt: new Date(),
           documentChecklist: { create: {} },

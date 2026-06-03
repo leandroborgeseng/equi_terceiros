@@ -93,8 +93,27 @@ model EquipmentRequest {
   supplierName              String
   ownerName                 String
   ownerContact              String
+  ownerDocument             String?
   assistentialRisk          String
   isUrgent                  Boolean       @default(false)
+  // GestEq — Norma 445.000
+  entryType                 String        @default("MEDICO") // MEDICO|FORNECEDOR|COMODATO|ALUGUEL|DEMONSTRACAO|OUTRO
+  flowType                  String        @default("ELETIVO") // ELETIVO|URGENCIA
+  equipmentClass            String?       // A|B|C|D
+  // Cadastro Engenharia Clínica
+  internalOs                String?       @unique
+  originPatrimony           String?
+  destinationSector         String?
+  entryDate                 DateTime?
+  expectedExitDate          DateTime?
+  storageLocation           String?
+  boardAuthorization        String?       // autorização da diretoria (Classe A)
+  registeredById            String?
+  qrToken                   String?       @unique
+  // Urgência / regularização
+  urgencyAuthorizer         String?
+  regularizationDueAt       DateTime?
+  regularizedAt             DateTime?
   supplierToken             String?       @unique
   equipmentId               String?
   equipment                 Equipment?    @relation(fields: [equipmentId], references: [id])
@@ -103,6 +122,7 @@ model EquipmentRequest {
   homologatedAt             DateTime?
   releasedAt                DateTime?
   validUntil                DateTime?
+  withdrawnAt               DateTime?
   restrictionNotes          String?
   blockReason               String?
   createdAt                 DateTime      @default(now())
@@ -134,54 +154,68 @@ model Attachment {
   @@index([requestId, type])
 }
 
+// Anexo II — 8 itens, cada um: SIM | NAO | NA + observação + arquivo
 model DocumentChecklist {
-  id                    String   @id @default(cuid())
-  requestId             String   @unique
-  request               EquipmentRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
-  formFilled            String @default("PENDENTE")
-  supplierIdentified    String @default("PENDENTE")
-  anvisa                String @default("PENDENTE")
-  preventiveMaintenance String @default("PENDENTE")
-  calibration           String @default("PENDENTE")
-  tse                   String @default("PENDENTE")
-  manual                String @default("PENDENTE")
-  signedTerm            String @default("PENDENTE")
-  accessories           String @default("PENDENTE")
-  sanitization          String @default("PENDENTE")
-  insurance             String @default("PENDENTE")
-  rejectionReason       String?
-  reviewedBy            String?
-  reviewedAt            DateTime?
-  updatedAt             DateTime @updatedAt
+  id           String   @id @default(cuid())
+  requestId    String   @unique
+  request      EquipmentRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  item1Status  String  @default("NA") // Formulário/justificativa (Anexo I)
+  item1Obs     String?
+  item1FileKey String?
+  item2Status  String  @default("NA") // Identificação proprietário/fornecedor
+  item2Obs     String?
+  item2FileKey String?
+  item3Status  String  @default("NA") // ANVISA
+  item3Obs     String?
+  item3FileKey String?
+  item4Status  String  @default("NA") // Manutenção preventiva
+  item4Obs     String?
+  item4FileKey String?
+  item5Status  String  @default("NA") // Calibração
+  item5Obs     String?
+  item5FileKey String?
+  item6Status  String  @default("NA") // Teste de segurança elétrica
+  item6Obs     String?
+  item6FileKey String?
+  item7Status  String  @default("NA") // Manual em português
+  item7Obs     String?
+  item7FileKey String?
+  item8Status  String  @default("NA") // Termo de responsabilidade (Anexo IV)
+  item8Obs     String?
+  item8FileKey String?
+  docStatus       String   @default("PENDENTE") // APROVADO|PENDENTE|REPROVADO
+  rejectionReason String?
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  updatedAt       DateTime @updatedAt
 }
 
+// Anexo III — 7 itens, cada um: CONFORME | NAO_CONFORME | NA
 model TechnicalInspection {
-  id                      String           @id @default(cuid())
-  requestId               String           @unique
-  request                 EquipmentRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
-  inspectorId             String
-  inspector               User             @relation(fields: [inspectorId], references: [id])
-  status                  String @default("PENDENTE")
-  physicalIntegrity       Boolean?
-  cabinet                 Boolean?
-  cables                  Boolean?
-  abntPlug                Boolean?
-  cleaning                Boolean?
-  accessories             Boolean?
-  selfDiagnostic          Boolean?
-  alarms                  Boolean?
-  electricalCompatibility Boolean?
-  gasCompatibility        Boolean?
-  infrastructureCompat    Boolean?
-  metrologicalEval        Boolean?
-  needsCalibration        Boolean?
-  needsTse                Boolean?
-  notes                   String?
-  restrictionNotes        String?
-  blockReason             String?
-  inspectedAt             DateTime?
-  createdAt               DateTime         @default(now())
-  updatedAt               DateTime         @updatedAt
+  id          String           @id @default(cuid())
+  requestId   String           @unique
+  request     EquipmentRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  inspectorId String
+  inspector   User             @relation(fields: [inspectorId], references: [id])
+  item1Status String  @default("NA") // Integridade chassi/gabinete
+  item2Status String  @default("NA") // Cabo de alimentação e plugue ABNT
+  item3Status String  @default("NA") // Acessórios, cabos de paciente e periféricos
+  item4Status String  @default("NA") // Limpeza externa aparente
+  item5Status String  @default("NA") // Autodiagnóstico (POST)
+  item6Status String  @default("NA") // Alarmes visuais e sonoros
+  item7Status String  @default("NA") // Compatibilidade rede elétrica/gases
+  electricalSafetyTest   String  @default("NA") // SIM|NAO|NA
+  electricalSafetyResult String?
+  cmeRequired            Boolean @default(false)
+  generalNotes           String?
+  status                 String  @default("PENDENTE") // PENDENTE|LIBERADO|LIBERADO_COM_RESTRICAO|BLOQUEADO
+  restrictionNotes       String?
+  blockReason            String?
+  signatureData          String? // base64 da assinatura (canvas)
+  labelPrintedAt         DateTime?
+  inspectedAt            DateTime?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 }
 
 model ReleaseStatus {

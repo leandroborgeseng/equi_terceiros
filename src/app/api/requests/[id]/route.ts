@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { medicalRequestDraftSchema } from "@/lib/validators/request";
+import {
+  medicalRequestDraftSchema,
+  REQUIRED_DOCUMENT_TYPES,
+  REQUIRED_PHOTOS,
+} from "@/lib/validators/request";
 import { createAuditLog } from "@/lib/audit";
 
 export async function GET(
@@ -72,22 +76,23 @@ export async function PATCH(
     const images = await prisma.equipmentImage.findMany({
       where: { requestId: id },
     });
-    const required = [
-      "FRONTAL",
-      "TRASEIRA",
-      "ETIQUETA_FABRICANTE",
-      "NUMERO_SERIE",
-      "ACESSORIOS",
-      "CABOS",
-      "PLUGUE",
-      "MONTADO",
-    ];
-    const missing = required.filter(
+    const missingPhotos = REQUIRED_PHOTOS.filter(
       (t) => !images.some((i) => i.photoType === t)
     );
-    if (missing.length > 0) {
+    if (missingPhotos.length > 0) {
       return NextResponse.json(
-        { error: "Fotos obrigatórias incompletas", missing },
+        { error: "Fotos obrigatórias incompletas", missing: missingPhotos },
+        { status: 400 }
+      );
+    }
+
+    const attachments = await prisma.attachment.findMany({ where: { requestId: id } });
+    const missingDocs = REQUIRED_DOCUMENT_TYPES.filter(
+      (t) => !attachments.some((a) => a.type === t)
+    );
+    if (missingDocs.length > 0) {
+      return NextResponse.json(
+        { error: "Documentação obrigatória incompleta", missing: missingDocs },
         { status: 400 }
       );
     }
@@ -95,7 +100,7 @@ export async function PATCH(
     const request = await prisma.equipmentRequest.update({
       where: { id },
       data: {
-        status: "DOCUMENTACAO_EM_ANALISE",
+        status: "AGUARDANDO_CADASTRO",
         submittedAt: new Date(),
       },
     });

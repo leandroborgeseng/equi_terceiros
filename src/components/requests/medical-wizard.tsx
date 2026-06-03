@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -36,9 +37,11 @@ function flattenErrors(errors: Record<string, unknown>): string[] {
 }
 
 export function MedicalRequestWizard() {
+  const { data: session } = useSession();
   const [step, setStep] = useState(0);
   const [requestId, setRequestId] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [autoSaved, setAutoSaved] = useState(false);
   const queryClient = useQueryClient();
 
   const form = useForm<FormData>({
@@ -86,9 +89,39 @@ export function MedicalRequestWizard() {
       if (!requestId && data?.id) setRequestId(data.id);
       queryClient.invalidateQueries({ queryKey: ["requests"] });
       setSaveError(null);
+      setAutoSaved(true);
+      setTimeout(() => setAutoSaved(false), 2000);
     },
     onError: (err: Error) => setSaveError(err.message),
   });
+
+  const autoSave = useCallback(
+    (data: FormData) => {
+      if (!requestId && step === 0) return;
+      saveMutation.mutate({ data, nextStep: step + 1 });
+    },
+    [requestId, step, saveMutation]
+  );
+
+  useEffect(() => {
+    if (!requestId) return;
+    let timer: ReturnType<typeof setTimeout>;
+    const sub = form.watch(() => {
+      clearTimeout(timer);
+      timer = setTimeout(() => autoSave(form.getValues()), 1500);
+    });
+    return () => {
+      clearTimeout(timer);
+      sub.unsubscribe();
+    };
+  }, [form, requestId, autoSave]);
+
+  useEffect(() => {
+    if (session?.user?.email && !form.getValues("doctorCrm")) {
+      const u = session.user as { crm?: string };
+      if (u.crm) form.setValue("doctorCrm", u.crm);
+    }
+  }, [session, form]);
 
   async function validateCurrentStep() {
     const schema = wizardStepSchemas[step];
@@ -111,10 +144,11 @@ export function MedicalRequestWizard() {
     if (!valid) return;
 
     try {
-      await saveMutation.mutateAsync({
+      const saved = await saveMutation.mutateAsync({
         data: form.getValues(),
         nextStep: step + 2,
       });
+      if (!requestId && saved?.id) setRequestId(saved.id);
       setStep((s) => Math.min(s + 1, steps.length - 1));
     } catch {
       /* erro em saveError */
@@ -157,10 +191,16 @@ export function MedicalRequestWizard() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Nova solicitação médica</CardTitle>
-          <span className="text-sm text-slate-500">
-            Etapa {step + 1} de {steps.length}
-          </span>
+          <div className="text-right text-sm text-slate-500">
+            <p>Etapa {step + 1} de {steps.length}</p>
+            {autoSaved && <p className="text-emerald-600">Rascunho salvo</p>}
+          </div>
         </div>
+        {session?.user?.name && (
+          <p className="mt-2 text-sm text-slate-600">
+            Médico solicitante: <strong>{session.user.name}</strong>
+          </p>
+        )}
         <div className="mt-4 flex gap-1">
           {steps.map((_, i) => (
             <div
@@ -198,6 +238,14 @@ export function MedicalRequestWizard() {
                   <div>
                     <Label>CRM</Label>
                     <Input {...form.register("doctorCrm")} placeholder="123456-SP" />
+                  </div>
+                  <div>
+                    <Label>Paciente</Label>
+                    <Input {...form.register("patientName")} placeholder="Nome do paciente" />
+                  </div>
+                  <div>
+                    <Label>Prontuário</Label>
+                    <Input {...form.register("medicalRecord")} placeholder="Nº prontuário" />
                   </div>
                 </>
               )}
@@ -273,9 +321,31 @@ export function MedicalRequestWizard() {
                     </div>
                   </div>
                   <div>
-                    <Label>Número de série</Label>
+                    <Label>Número de série (se disponível)</Label>
                     <Input {...form.register("serialNumber")} />
                   </div>
+                  <div>
+                    <Label>Tipo de ingresso</Label>
+                    <select
+                      className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                      {...form.register("entryType")}
+                    >
+                      <option value="MEDICO">Médico</option>
+                      <option value="FORNECEDOR">Fornecedor</option>
+                      <option value="COMODATO">Comodato</option>
+                      <option value="ALUGUEL">Aluguel</option>
+                      <option value="DEMONSTRACAO">Demonstração</option>
+                      <option value="OUTRO">Outro</option>
+                    </select>
+                  </div>
+                  <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">
+                    Classe sugerida:{" "}
+                    <strong className="text-slate-700">
+                      {form.watch("isUrgent")
+                        ? "D — Urgência/Emergência"
+                        : "B — Temporário programado (ajustável pela Engenharia Clínica)"}
+                    </strong>
+                  </p>
                 </>
               )}
               {step === 4 && (
