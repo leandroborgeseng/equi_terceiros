@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { RequestStatusBadge } from "@/components/requests/status-badge";
 import { DELETABLE_STATUSES } from "@/lib/validators/request";
 import { Trash2 } from "lucide-react";
@@ -93,6 +94,15 @@ export default function EngenhariaRequestDetailPage() {
                     formalização — já no parque
                   </span>
                 )}
+              </p>
+            )}
+            {request.invoice && (
+              <p>
+                <strong>Nota fiscal:</strong>{" "}
+                <Link href="/notas-fiscais" className="text-emerald-700 hover:underline">
+                  NF {request.invoice.number}
+                </Link>
+                {request.invoice.fileName ? ` · ${request.invoice.fileName}` : ""}
               </p>
             )}
             <p><strong>Paciente:</strong> {request.patientName || "—"} · Prontuário {request.medicalRecord || "—"}</p>

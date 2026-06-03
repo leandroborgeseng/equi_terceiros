@@ -42,6 +42,7 @@ model Supplier {
   updatedAt   DateTime @updatedAt
 
   equipmentRequests EquipmentRequest[]
+  invoices          Invoice[]
 }
 
 model Equipment {
@@ -86,6 +87,9 @@ model EquipmentRequest {
   // Origem interna (Engenharia Clínica) e formalização de parque existente
   originatedByEc            Boolean       @default(false)
   alreadyInPark             Boolean       @default(false)
+  // Nota fiscal compartilhada por um grupo de equipamentos
+  invoiceId                 String?
+  invoice                   Invoice?      @relation(fields: [invoiceId], references: [id])
   patientName               String
   medicalRecord             String
   plannedProcedure          String
@@ -145,6 +149,27 @@ model EquipmentRequest {
   responsibilityTerm    ResponsibilityTerm?
   adverseEvents         AdverseEvent[]
   alerts                Alert[]
+}
+
+// Nota Fiscal — pode ser compartilhada por vários equipamentos (lote)
+model Invoice {
+  id           String   @id @default(cuid())
+  number       String   @unique
+  issueDate    DateTime?
+  supplierId   String?
+  supplier     Supplier? @relation(fields: [supplierId], references: [id])
+  supplierName String?
+  totalValue   Float?
+  notes        String?
+  fileKey      String?
+  fileName     String?
+  createdById  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  requests     EquipmentRequest[]
+
+  @@index([number])
 }
 
 // Chave de acesso gerada pela EC/Admin para solicitação sem login

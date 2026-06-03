@@ -38,11 +38,19 @@ export default function NovoEquipamentoPage() {
     boardAuthorization: "",
     observations: "",
     alreadyInPark: false,
+    invoiceId: "",
+    invoiceNumber: "",
+    invoiceDate: "",
   });
 
   const { data: suppliers } = useQuery<Supplier[]>({
     queryKey: ["suppliers"],
     queryFn: () => fetch("/api/suppliers").then((r) => r.json()),
+  });
+
+  const { data: invoices } = useQuery<{ id: string; number: string; issueDate?: string | null }[]>({
+    queryKey: ["invoices"],
+    queryFn: () => fetch("/api/invoices").then((r) => r.json()),
   });
 
   const set = (k: keyof typeof form, v: string | boolean) => setForm((f) => ({ ...f, [k]: v }));
@@ -224,6 +232,45 @@ export default function NovoEquipamentoPage() {
             <Label>CNPJ/CPF</Label>
             <Input value={form.ownerDocument} onChange={(e) => set("ownerDocument", e.target.value)} />
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Nota fiscal</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <Label>Vincular a uma NF já cadastrada</Label>
+            <select
+              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              value={form.invoiceId}
+              onChange={(e) => set("invoiceId", e.target.value)}
+            >
+              <option value="">— Nenhuma / criar nova abaixo —</option>
+              {(invoices ?? []).map((inv) => (
+                <option key={inv.id} value={inv.id}>
+                  NF {inv.number}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-slate-500">
+              Vários equipamentos podem compartilhar a mesma nota fiscal. Selecione uma existente ou
+              informe o número de uma nova.
+            </p>
+          </div>
+          {!form.invoiceId && (
+            <>
+              <div>
+                <Label>Número da NF (nova)</Label>
+                <Input value={form.invoiceNumber} onChange={(e) => set("invoiceNumber", e.target.value)} />
+              </div>
+              <div>
+                <Label>Data de emissão</Label>
+                <Input type="date" value={form.invoiceDate} onChange={(e) => set("invoiceDate", e.target.value)} />
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 

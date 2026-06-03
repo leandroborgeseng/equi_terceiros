@@ -77,6 +77,28 @@ export const supplierSchema = z.object({
 
 export type SupplierInput = z.input<typeof supplierSchema>;
 
+// Nota Fiscal (compartilhada por um grupo de equipamentos)
+export const invoiceSchema = z.object({
+  number: z.string().min(1, "Número da NF obrigatório"),
+  issueDate: dateField.optional(),
+  supplierId: z.string().optional(),
+  supplierName: z.string().optional(),
+  totalValue: z.coerce.number().optional(),
+  notes: z.string().optional(),
+});
+
+export const invoiceUpdateSchema = z.object({
+  issueDate: dateField.optional(),
+  supplierId: z.string().optional(),
+  supplierName: z.string().optional(),
+  totalValue: z.coerce.number().optional(),
+  notes: z.string().optional(),
+  fileKey: z.string().optional(),
+  fileName: z.string().optional(),
+});
+
+export type InvoiceInput = z.input<typeof invoiceSchema>;
+
 // Cadastro de equipamento originado pela Engenharia Clínica (entrada nova OU formalização de parque)
 export const ecEquipmentRequestSchema = z.object({
   equipmentName: z.string().min(2, "Equipamento obrigatório"),
@@ -101,6 +123,10 @@ export const ecEquipmentRequestSchema = z.object({
   boardAuthorization: z.string().optional(),
   observations: z.string().optional(),
   alreadyInPark: z.boolean().optional(),
+  // Nota fiscal: vincular existente OU criar por número
+  invoiceId: z.string().optional(),
+  invoiceNumber: z.string().optional(),
+  invoiceDate: dateField.optional(),
 });
 
 export type EcEquipmentRequestInput = z.input<typeof ecEquipmentRequestSchema>;

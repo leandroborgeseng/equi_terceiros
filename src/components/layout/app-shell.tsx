@@ -17,6 +17,7 @@ import {
   Settings,
   KeyRound,
   Building2,
+  Receipt,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -28,6 +29,7 @@ const navByRole: Record<UserRole, { href: string; label: string; icon: typeof La
     { href: "/dashboard/engenharia", label: "Fila de Homologação", icon: Shield },
     { href: "/equipamentos", label: "Equipamentos", icon: PackageSearch },
     { href: "/fornecedores", label: "Fornecedores", icon: Building2 },
+    { href: "/notas-fiscais", label: "Notas Fiscais", icon: Receipt },
     { href: "/pendencias", label: "Pendências", icon: AlertTriangle },
     { href: "/indicadores", label: "Indicadores", icon: BarChart3 },
     { href: "/convites", label: "Chaves de acesso", icon: KeyRound },
@@ -37,6 +39,7 @@ const navByRole: Record<UserRole, { href: string; label: string; icon: typeof La
     { href: "/dashboard/engenharia", label: "Fila de Homologação", icon: Shield },
     { href: "/equipamentos", label: "Equipamentos", icon: PackageSearch },
     { href: "/fornecedores", label: "Fornecedores", icon: Building2 },
+    { href: "/notas-fiscais", label: "Notas Fiscais", icon: Receipt },
     { href: "/pendencias", label: "Pendências", icon: AlertTriangle },
     { href: "/indicadores", label: "Indicadores", icon: BarChart3 },
     { href: "/convites", label: "Chaves de acesso", icon: KeyRound },

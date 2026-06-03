@@ -33,6 +33,23 @@ export async function POST(req: Request) {
 
   const alreadyInPark = !!data.alreadyInPark;
 
+  // Nota fiscal: usa a existente (invoiceId) ou cria/reaproveita pelo número
+  let invoiceId = data.invoiceId || undefined;
+  if (!invoiceId && data.invoiceNumber) {
+    const invoice = await prisma.invoice.upsert({
+      where: { number: data.invoiceNumber },
+      update: {},
+      create: {
+        number: data.invoiceNumber,
+        issueDate: data.invoiceDate,
+        supplierId: data.supplierId || undefined,
+        supplierName: data.supplierName,
+        createdById: session.user.id,
+      },
+    });
+    invoiceId = invoice.id;
+  }
+
   const request = await prisma.equipmentRequest.create({
     data: {
       protocol: generateProtocol(),
@@ -69,6 +86,7 @@ export async function POST(req: Request) {
       equipmentClass: data.equipmentClass,
       supplierId: data.supplierId || undefined,
       supplierName: data.supplierName,
+      invoiceId,
       ownerName: data.ownerName,
       ownerContact: data.ownerContact,
       ownerDocument: data.ownerDocument,

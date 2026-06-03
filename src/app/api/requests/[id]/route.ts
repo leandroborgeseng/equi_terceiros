@@ -29,6 +29,7 @@ export async function GET(
       releaseStatus: true,
       responsibilityTerm: true,
       accessInvite: { select: { key: true, requesterName: true } },
+      invoice: { select: { id: true, number: true, issueDate: true, fileName: true } },
       equipment: { include: { images: { include: { metadata: true } } } },
     },
   });
