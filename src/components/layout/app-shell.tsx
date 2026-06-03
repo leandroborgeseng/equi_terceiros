@@ -14,6 +14,7 @@ import {
   BarChart3,
   PackageSearch,
   AlertTriangle,
+  Settings,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -25,13 +26,14 @@ const navByRole: Record<UserRole, { href: string; label: string; icon: typeof La
     { href: "/dashboard/engenharia", label: "Fila de Homologação", icon: Shield },
     { href: "/equipamentos", label: "Equipamentos", icon: PackageSearch },
     { href: "/pendencias", label: "Pendências", icon: AlertTriangle },
-    { href: "/dashboard/executivo", label: "Indicadores", icon: BarChart3 },
+    { href: "/indicadores", label: "Indicadores", icon: BarChart3 },
+    { href: "/configuracoes", label: "Configurações", icon: Settings },
   ],
   ENGENHARIA_CLINICA: [
     { href: "/dashboard/engenharia", label: "Fila de Homologação", icon: Shield },
     { href: "/equipamentos", label: "Equipamentos", icon: PackageSearch },
     { href: "/pendencias", label: "Pendências", icon: AlertTriangle },
-    { href: "/dashboard/executivo", label: "Indicadores", icon: BarChart3 },
+    { href: "/indicadores", label: "Indicadores", icon: BarChart3 },
   ],
   MEDICO: [{ href: "/dashboard/medico", label: "Minhas Solicitações", icon: ClipboardList }],
   FORNECEDOR: [{ href: "/dashboard/fornecedor", label: "Documentação", icon: ClipboardList }],
@@ -134,7 +136,7 @@ export function AppShell({
           { href: nav[0]?.href ?? "/", label: "Início", icon: LayoutDashboard },
           { href: "/equipamentos", label: "Equipamentos", icon: PackageSearch },
           { href: "/pendencias", label: "Pendências", icon: AlertTriangle },
-          { href: "/dashboard/executivo", label: "Indicadores", icon: BarChart3 },
+          { href: "/indicadores", label: "Indicadores", icon: BarChart3 },
         ].map((item) => {
           const active = pathname === item.href || pathname.startsWith(item.href + "/");
           return (

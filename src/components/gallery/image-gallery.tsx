@@ -2,9 +2,17 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ZoomIn, Download, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ZoomIn, Download, ChevronLeft, ChevronRight, ScanText, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/utils";
+
+export type GalleryImageMetadata = {
+  serialDetected?: string | null;
+  manufacturerDetected?: string | null;
+  modelDetected?: string | null;
+  aiValidationStatus?: string | null;
+  processedAt?: string | null;
+};
 
 export type GalleryImage = {
   id: string;
@@ -12,13 +20,41 @@ export type GalleryImage = {
   photoType: string;
   fileName: string;
   createdAt: string;
+  metadata?: GalleryImageMetadata | null;
+};
+
+const AI_BADGE: Record<string, string> = {
+  VALIDATED: "bg-emerald-100 text-emerald-800",
+  MANUAL_REVIEW: "bg-amber-100 text-amber-800",
+  PROCESSING: "bg-blue-100 text-blue-800",
+  FAILED: "bg-red-100 text-red-800",
+  PENDING: "bg-slate-100 text-slate-600",
 };
 
 export function ImageGallery({ images }: { images: GalleryImage[] }) {
   const [index, setIndex] = useState<number | null>(null);
   const [compare, setCompare] = useState<number[]>([]);
+  const [ocrLoading, setOcrLoading] = useState<string | null>(null);
+  const [ocrResults, setOcrResults] = useState<Record<string, GalleryImageMetadata>>({});
 
   const current = index !== null ? images[index] : null;
+
+  async function runOcr(imageId: string) {
+    setOcrLoading(imageId);
+    try {
+      const res = await fetch(`/api/images/${imageId}/ocr`, { method: "POST" });
+      const data = await res.json();
+      if (res.ok && data.metadata) {
+        setOcrResults((prev) => ({ ...prev, [imageId]: data.metadata }));
+      }
+    } finally {
+      setOcrLoading(null);
+    }
+  }
+
+  function metaFor(img: GalleryImage): GalleryImageMetadata | null {
+    return ocrResults[img.id] ?? img.metadata ?? null;
+  }
 
   return (
     <div>
@@ -47,6 +83,15 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={img.url} alt={img.photoType} className="h-full w-full object-cover" />
+            {metaFor(img)?.aiValidationStatus && (
+              <span
+                className={`absolute left-1.5 top-1.5 rounded px-1.5 py-0.5 text-[10px] font-medium ${
+                  AI_BADGE[metaFor(img)!.aiValidationStatus as string] ?? AI_BADGE.PENDING
+                }`}
+              >
+                {metaFor(img)!.aiValidationStatus}
+              </span>
+            )}
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-left text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
               {img.photoType}
             </div>
@@ -96,6 +141,19 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
                   <p className="text-sm text-white/70">{formatDateTime(current.createdAt)}</p>
                 </div>
                 <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => runOcr(current.id)}
+                    disabled={ocrLoading === current.id}
+                    className="flex items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-sm"
+                  >
+                    {ocrLoading === current.id ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                      <ScanText className="h-5 w-5" />
+                    )}
+                    OCR / IA
+                  </button>
                   <a href={current.url} download className="rounded-lg bg-white/10 p-2">
                     <Download className="h-5 w-5" />
                   </a>
@@ -104,6 +162,17 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
                   </span>
                 </div>
               </div>
+              {metaFor(current) && (
+                <div className="mt-3 rounded-xl bg-white/10 p-3 text-sm text-white/90">
+                  <p className="mb-1 font-medium">Leitura automática (OCR/IA)</p>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-white/80">
+                    <span>Série: {metaFor(current)?.serialDetected ?? "—"}</span>
+                    <span>Fabricante: {metaFor(current)?.manufacturerDetected ?? "—"}</span>
+                    <span>Modelo: {metaFor(current)?.modelDetected ?? "—"}</span>
+                    <span>Status: {metaFor(current)?.aiValidationStatus ?? "—"}</span>
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

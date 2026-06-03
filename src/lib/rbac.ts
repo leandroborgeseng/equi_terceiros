@@ -25,7 +25,7 @@ export function canAccessRoute(role: UserRole, path: string): boolean {
 
   const rolePrefixes: Record<UserRole, string[]> = {
     ADMIN: ["/dashboard", "/api"],
-    ENGENHARIA_CLINICA: ["/dashboard/engenharia", "/dashboard/executivo", "/equipamentos", "/pendencias", "/indicadores", "/api/requests", "/api/inspections", "/api/checklist", "/api/labels", "/api/gallery", "/api/alerts", "/api/dashboard"],
+    ENGENHARIA_CLINICA: ["/dashboard/engenharia", "/dashboard/executivo", "/equipamentos", "/pendencias", "/indicadores", "/api/requests", "/api/inspections", "/api/checklist", "/api/labels", "/api/gallery", "/api/alerts", "/api/dashboard", "/api/indicators", "/api/images"],
     MEDICO: ["/dashboard/medico", "/api/requests"],
     FORNECEDOR: ["/dashboard/fornecedor", "/fornecedor", "/api/requests", "/api/uploads"],
     CENTRO_CIRURGICO: ["/dashboard/centro-cirurgico", "/api/requests"],
@@ -46,3 +46,16 @@ export function canHomologate(role: UserRole) {
 export function canCreateRequest(role: UserRole) {
   return role === "MEDICO" || role === "ADMIN";
 }
+
+export function canManageUsers(role: UserRole) {
+  return role === "ADMIN";
+}
+
+export const ALL_ROLES: UserRole[] = [
+  "ADMIN",
+  "ENGENHARIA_CLINICA",
+  "MEDICO",
+  "FORNECEDOR",
+  "CENTRO_CIRURGICO",
+  "CME_CCIH_NSP",
+];

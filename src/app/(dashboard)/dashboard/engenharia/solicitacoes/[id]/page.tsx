@@ -83,10 +83,19 @@ export default function EngenhariaRequestDetailPage() {
         <Card className="lg:col-span-2">
           <CardContent className="pt-6">
             <ImageGallery
-              images={gallery.map((g: { id: string; url: string; photoType: string; fileName: string; createdAt: string }) => ({
-                ...g,
-                createdAt: String(g.createdAt),
-              }))}
+              images={gallery.map(
+                (g: {
+                  id: string;
+                  url: string;
+                  photoType: string;
+                  fileName: string;
+                  createdAt: string;
+                  metadata?: Record<string, unknown> | null;
+                }) => ({
+                  ...g,
+                  createdAt: String(g.createdAt),
+                })
+              )}
             />
           </CardContent>
         </Card>

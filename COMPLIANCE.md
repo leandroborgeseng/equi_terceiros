@@ -29,8 +29,10 @@ Matriz spec × implementação. Legenda: ✅ implementado | 🟡 parcial | ⬜ p
 | 5.8 Fluxo de urgência (Classe D, task D+1) | ✅ status `FLUXO_URGENCIA` + alerta regularização |
 | 5.9 Etiqueta Bluetooth (ZPL) | ⬜ Fase 2 (hoje etiqueta PDF) |
 | 5.10 Notificações | 🟡 alertas in-app + reprovação |
-| 5.11 Indicadores (KPIs + por classe) | 🟡 dashboard executivo + `porClasse` na API |
+| 5.11 Indicadores (KPIs + pizza por classe + filtros + export CSV/PDF) | ✅ `/indicadores` |
 | 5.12 Histórico/auditoria (AuditLog imutável) | ✅ |
+| OCR/IA (estrutura + processamento + metadados na galeria) | ✅ `src/lib/ocr.ts` + `/api/images/[id]/ocr` |
+| Gestão de usuários (admin) + hub de configurações | ✅ `/configuracoes/usuarios` |
 
 ## Status do equipamento (seção 5.6)
 
@@ -49,10 +51,11 @@ Implementados exatamente conforme a norma:
 | Registros não excluídos (retenção) | ✅ apenas mudança de status (`RETIRADO`) |
 | Etiqueta registrada no log | 🟡 inspeção logada; impressão Bluetooth Fase 2 |
 
-## Próximas fases
+## Fases concluídas / pendentes
 
-- **Fase 2:** etiqueta Bluetooth (Web Bluetooth + ZPL) + fallback PDF, QR Code público de consulta, termo Anexo IV dedicado com assinatura remota, notificações push.
-- **Fase 3:** indicadores com gráfico de pizza + export CSV/PDF, OCR/IA (`EquipmentImageMetadata`), gestão de usuários/configurações.
+- **Fase 1:** ✅ status da norma, classe A/B/C/D, cadastro EC, checklist 8 itens, inspeção 7 itens, etiqueta PDF.
+- **Fase 3:** ✅ indicadores (pizza + filtros + export CSV/PDF), OCR/IA (estrutura + processamento + metadados na galeria), gestão de usuários e hub de configurações.
+- **Fase 2 (pendente):** etiqueta Bluetooth (Web Bluetooth + ZPL) + fallback PDF, QR Code público de consulta, termo Anexo IV dedicado com assinatura remota, notificações push, pareamento de impressoras e templates de etiqueta em `/configuracoes`.
 
 ## Usuários seed (senha `Hospital@2026`)
 
