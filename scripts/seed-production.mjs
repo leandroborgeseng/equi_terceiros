@@ -30,7 +30,9 @@ async function main() {
     });
   }
 
-  console.log("Seed produção OK — usuários demo disponíveis (senha: Hospital@2026)");
+  const total = await prisma.user.count();
+  const emails = (await prisma.user.findMany({ select: { email: true } })).map((u) => u.email);
+  console.log(`Seed produção OK — ${total} usuário(s): ${emails.join(", ")} (senha: Hospital@2026)`);
 }
 
 main()

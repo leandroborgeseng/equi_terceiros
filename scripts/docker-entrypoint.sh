@@ -41,12 +41,18 @@ echo "==> Aplicando migrations..."
 if prisma migrate deploy; then
   echo "==> Migrations OK"
 else
-  echo "AVISO: migrate deploy falhou"
+  echo "AVISO: migrate deploy falhou — aplicando schema via db push (fallback)"
+  # Garante o schema mesmo com histórico de migrations divergente (ex.: migration renomeada)
+  if prisma db push --accept-data-loss --skip-generate; then
+    echo "==> Schema sincronizado via db push"
+  else
+    echo "ERRO: não foi possível sincronizar o schema"
+  fi
 fi
 
 echo "==> Seed usuários demo..."
 if node /app/scripts/seed-production.mjs; then
-  echo "==> Seed OK — login: medico@hospital.local / Hospital@2026"
+  echo "==> Seed OK — login: admin@hospital.local / Hospital@2026"
 else
   echo "AVISO: seed falhou"
 fi

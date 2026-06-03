@@ -52,10 +52,10 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-600 text-xl font-bold text-white">
-            EC
+            GE
           </div>
           <CardTitle>Entrar na plataforma</CardTitle>
-          <CardDescription>Homologação de equipamentos de terceiros</CardDescription>
+          <CardDescription>GestEq — Gestão de Equipamentos de Terceiros</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
