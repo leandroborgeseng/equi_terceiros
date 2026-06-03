@@ -17,6 +17,10 @@
 /.next/
 /out/
 
+# cópias duplicadas geradas pelo build (ex.: "sw 2.js")
+public/*\ [0-9]*.js
+public/*\ [0-9]*.js.map
+
 # production
 /build
 
