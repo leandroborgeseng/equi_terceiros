@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { RequestStatusBadge } from "@/components/requests/status-badge";
 import type { RequestStatus } from "@/lib/enums";
 import { formatDate } from "@/lib/utils";
-import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search, Plus } from "lucide-react";
 
 type Row = {
   id: string;
@@ -64,9 +65,16 @@ export default function EquipamentosPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Equipamentos</h1>
-        <p className="text-slate-500">Rastreabilidade e fila da Engenharia Clínica</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Equipamentos</h1>
+          <p className="text-slate-500">Rastreabilidade e fila da Engenharia Clínica</p>
+        </div>
+        <Link href="/equipamentos/novo">
+          <Button>
+            <Plus className="h-4 w-4" /> Novo equipamento
+          </Button>
+        </Link>
       </div>
 
       <div className="space-y-3">

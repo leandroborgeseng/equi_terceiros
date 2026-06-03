@@ -83,6 +83,9 @@ model EquipmentRequest {
   submittedViaPublic        Boolean       @default(false)
   accessInviteId            String?
   accessInvite              AccessInvite? @relation(fields: [accessInviteId], references: [id])
+  // Origem interna (Engenharia Clínica) e formalização de parque existente
+  originatedByEc            Boolean       @default(false)
+  alreadyInPark             Boolean       @default(false)
   patientName               String
   medicalRecord             String
   plannedProcedure          String

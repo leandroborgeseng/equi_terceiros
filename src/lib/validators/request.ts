@@ -66,6 +66,45 @@ export const publicRequestSchema = z.object({
 
 export type PublicRequestInput = z.input<typeof publicRequestSchema>;
 
+// Cadastro de fornecedor (EC/Admin)
+export const supplierSchema = z.object({
+  name: z.string().min(2, "Nome do fornecedor obrigatório"),
+  cnpj: z.string().optional(),
+  email: z.string().email("E-mail inválido"),
+  phone: z.string().optional(),
+  address: z.string().optional(),
+});
+
+export type SupplierInput = z.input<typeof supplierSchema>;
+
+// Cadastro de equipamento originado pela Engenharia Clínica (entrada nova OU formalização de parque)
+export const ecEquipmentRequestSchema = z.object({
+  equipmentName: z.string().min(2, "Equipamento obrigatório"),
+  brand: z.string().min(1, "Marca obrigatória"),
+  model: z.string().min(1, "Modelo obrigatório"),
+  serialNumber: z.string().min(1, "Número de série obrigatório"),
+  equipmentClass: z.enum(["A", "B", "C", "D"]),
+  entryType: z
+    .enum(["MEDICO", "FORNECEDOR", "COMODATO", "ALUGUEL", "DEMONSTRACAO", "OUTRO"])
+    .default("FORNECEDOR"),
+  usageSector: z.string().min(2, "Setor obrigatório"),
+  supplierId: z.string().optional(),
+  supplierName: z.string().min(2, "Fornecedor obrigatório"),
+  ownerName: z.string().min(2, "Proprietário obrigatório"),
+  ownerContact: z.string().min(5, "Contato do proprietário obrigatório"),
+  ownerDocument: z.string().optional(),
+  originPatrimony: z.string().optional(),
+  clinicalJustification: z.string().optional(),
+  plannedProcedure: z.string().optional(),
+  expectedExitDate: dateField.optional(),
+  storageLocation: z.string().optional(),
+  boardAuthorization: z.string().optional(),
+  observations: z.string().optional(),
+  alreadyInPark: z.boolean().optional(),
+});
+
+export type EcEquipmentRequestInput = z.input<typeof ecEquipmentRequestSchema>;
+
 // Status considerados "não validados" — passíveis de exclusão pela EC/Admin
 export const DELETABLE_STATUSES = [
   "RASCUNHO",

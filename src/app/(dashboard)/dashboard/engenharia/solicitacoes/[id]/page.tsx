@@ -81,6 +81,20 @@ export default function EngenhariaRequestDetailPage() {
                 {request.accessInvite?.key ? ` · chave ${request.accessInvite.key}` : ""}
               </p>
             )}
+            {(request.originatedByEc || request.alreadyInPark) && (
+              <p className="flex flex-wrap gap-2">
+                {request.originatedByEc && (
+                  <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-xs text-emerald-700">
+                    cadastrado pela EC
+                  </span>
+                )}
+                {request.alreadyInPark && (
+                  <span className="rounded bg-amber-50 px-1.5 py-0.5 text-xs text-amber-700">
+                    formalização — já no parque
+                  </span>
+                )}
+              </p>
+            )}
             <p><strong>Paciente:</strong> {request.patientName || "—"} · Prontuário {request.medicalRecord || "—"}</p>
             <p><strong>Setor:</strong> {request.usageSector}</p>
             <p><strong>Procedimento:</strong> {request.plannedProcedure}</p>
