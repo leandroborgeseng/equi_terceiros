@@ -8,6 +8,7 @@ const { auth } = NextAuth(authConfig);
 
 const publicPaths = [
   "/login",
+  "/solicitar",
   "/fornecedor",
   "/api/auth",
   "/api/public",

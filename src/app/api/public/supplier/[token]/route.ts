@@ -25,6 +25,8 @@ export async function GET(
     model: request.model,
     serialNumber: request.serialNumber,
     doctor: request.doctor,
+    requesterName: request.requesterName,
+    doctorCrm: request.doctorCrm,
     plannedDate: request.plannedDate,
     plannedProcedure: request.plannedProcedure,
     attachmentsCount: request.attachments.length,

@@ -8,16 +8,21 @@ export default function HomePage() {
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-600 font-bold text-white">
-            EC
+            GE
           </div>
           <div>
-            <p className="font-semibold text-slate-900">Homologação de Equipamentos</p>
+            <p className="font-semibold text-slate-900">GestEq</p>
             <p className="text-sm text-slate-500">Gestão de equipamentos de terceiros</p>
           </div>
         </div>
-        <Link href="/login">
-          <Button>Entrar</Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/solicitar">
+            <Button variant="outline">Solicitar equipamento</Button>
+          </Link>
+          <Link href="/login">
+            <Button>Entrar</Button>
+          </Link>
+        </div>
       </header>
 
       <main className="mx-auto max-w-6xl px-6 pb-20 pt-8">
@@ -34,12 +39,20 @@ export default function HomePage() {
             Mobile-first, PWA instalável e rastreabilidade completa.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <Link href="/login">
+            <Link href="/solicitar">
               <Button size="lg">
-                Acessar plataforma <ArrowRight className="h-4 w-4" />
+                Solicitar cadastro de equipamento <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            <Link href="/login">
+              <Button size="lg" variant="outline">
+                Acessar plataforma (Engenharia Clínica)
               </Button>
             </Link>
           </div>
+          <p className="mt-3 text-sm text-slate-500">
+            Médicos e empresas podem solicitar sem login — basta preencher e anexar os documentos.
+          </p>
         </section>
 
         <section className="mt-20 grid gap-6 sm:grid-cols-3">

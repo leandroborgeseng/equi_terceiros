@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 export async function notifyRequestRejection(params: {
   requestId: string;
   protocol: string;
-  doctorId: string;
+  doctorId?: string | null;
   reason: string;
 }) {
   await prisma.alert.create({

@@ -22,6 +22,8 @@ type Row = {
   equipmentClass?: string | null;
   usageSector: string;
   doctor?: { name: string } | null;
+  requesterName?: string | null;
+  submittedViaPublic?: boolean;
   supplierName: string;
   plannedDate: string;
 };
@@ -53,7 +55,7 @@ export default function EquipamentosPage() {
       if (classe !== "TODAS" && r.equipmentClass !== classe) return false;
       if (search) {
         const q = search.toLowerCase();
-        const hay = `${r.serialNumber} ${r.equipmentName} ${r.protocol} ${r.internalOs ?? ""} ${r.doctor?.name ?? ""} ${r.usageSector}`.toLowerCase();
+        const hay = `${r.serialNumber} ${r.equipmentName} ${r.protocol} ${r.internalOs ?? ""} ${r.doctor?.name ?? ""} ${r.requesterName ?? ""} ${r.usageSector}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
@@ -128,7 +130,11 @@ export default function EquipamentosPage() {
                 )}
               </div>
               <p className="text-xs text-slate-500">
-                {r.usageSector} · {r.doctor?.name ?? "—"} · {formatDate(r.plannedDate)}
+                {r.usageSector} · {r.doctor?.name ?? r.requesterName ?? "—"}
+                {r.submittedViaPublic && (
+                  <span className="ml-1 rounded bg-blue-50 px-1 text-blue-700">público</span>
+                )}{" "}
+                · {formatDate(r.plannedDate)}
               </p>
               <div className="flex gap-3 pt-1 text-sm">
                 <Link

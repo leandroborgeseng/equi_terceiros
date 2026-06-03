@@ -1,8 +1,10 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useParams, useRouter } from "next/navigation";
 import { RequestStatusBadge } from "@/components/requests/status-badge";
+import { DELETABLE_STATUSES } from "@/lib/validators/request";
+import { Trash2 } from "lucide-react";
 import { ChecklistPanel } from "@/components/ec/checklist-panel";
 import { InspectionPanel } from "@/components/ec/inspection-panel";
 import { ImageGallery } from "@/components/gallery/image-gallery";
@@ -12,10 +14,21 @@ import type { RequestStatus } from "@/lib/enums";
 
 export default function EngenhariaRequestDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
 
   const { data: request } = useQuery({
     queryKey: ["request", id],
     queryFn: () => fetch(`/api/requests/${id}`).then((r) => r.json()),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`/api/requests/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Erro ao excluir");
+      return data;
+    },
+    onSuccess: () => router.push("/equipamentos"),
   });
 
   const { data: gallery = [] } = useQuery({
@@ -53,8 +66,21 @@ export default function EngenhariaRequestDetailPage() {
             </div>
           </CardHeader>
           <CardContent className="space-y-2 text-sm text-slate-600">
-            <p><strong>Médico:</strong> {request.doctor?.name} — CRM {request.doctorCrm}</p>
-            <p><strong>Paciente:</strong> {request.patientName} · Prontuário {request.medicalRecord}</p>
+            <p>
+              <strong>Solicitante:</strong> {request.doctor?.name ?? request.requesterName ?? "—"}
+              {request.doctorCrm ? ` — CRM ${request.doctorCrm}` : ""}
+              {request.submittedViaPublic && (
+                <span className="ml-2 rounded bg-blue-50 px-1.5 py-0.5 text-xs text-blue-700">
+                  público
+                </span>
+              )}
+            </p>
+            {request.submittedViaPublic && (
+              <p className="text-xs text-slate-500">
+                {request.requesterEmail} · {request.requesterPhone}
+              </p>
+            )}
+            <p><strong>Paciente:</strong> {request.patientName || "—"} · Prontuário {request.medicalRecord || "—"}</p>
             <p><strong>Setor:</strong> {request.usageSector}</p>
             <p><strong>Procedimento:</strong> {request.plannedProcedure}</p>
             <p><strong>Previsto:</strong> {formatDate(request.plannedDate)} {request.plannedTime}</p>
@@ -109,6 +135,27 @@ export default function EngenhariaRequestDetailPage() {
           Baixar etiqueta (PDF)
         </a>
       </div>
+
+      {DELETABLE_STATUSES.includes(request.status) && (
+        <div className="flex items-center justify-between rounded-xl border border-red-100 bg-red-50/50 px-4 py-3">
+          <p className="text-sm text-red-700">
+            Cadastro ainda não validado — pode ser excluído.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              if (confirm("Excluir esta solicitação não validada? Esta ação não pode ser desfeita.")) {
+                deleteMutation.mutate();
+              }
+            }}
+            disabled={deleteMutation.isPending}
+            className="flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
+          >
+            <Trash2 className="h-4 w-4" />
+            {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

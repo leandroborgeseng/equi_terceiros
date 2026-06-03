@@ -73,9 +73,14 @@ model EquipmentRequest {
   status                    String        @default("RASCUNHO")
   requestDate               DateTime
   usageSector               String
-  doctorId                  String
-  doctor                    User          @relation("DoctorRequests", fields: [doctorId], references: [id])
+  doctorId                  String?
+  doctor                    User?         @relation("DoctorRequests", fields: [doctorId], references: [id])
   doctorCrm                 String
+  // Solicitante público (sem login) — médico ou empresa
+  requesterName             String?
+  requesterEmail            String?
+  requesterPhone            String?
+  submittedViaPublic        Boolean       @default(false)
   patientName               String
   medicalRecord             String
   plannedProcedure          String

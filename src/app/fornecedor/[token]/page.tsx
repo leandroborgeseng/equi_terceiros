@@ -40,7 +40,10 @@ export default function FornecedorPublicPage() {
         <Card>
           <CardHeader><CardTitle>Dados da solicitação</CardTitle></CardHeader>
           <CardContent className="text-sm text-slate-600 space-y-1">
-            <p>Médico: {data.doctor?.name} — CRM {data.doctor?.crm}</p>
+            <p>
+              Solicitante: {data.doctor?.name ?? data.requesterName ?? "—"}
+              {(data.doctor?.crm ?? data.doctorCrm) ? ` — CRM ${data.doctor?.crm ?? data.doctorCrm}` : ""}
+            </p>
             <p>Procedimento: {data.plannedProcedure}</p>
             <p>Data: {formatDate(data.plannedDate)}</p>
             <p>Status: {data.status}</p>

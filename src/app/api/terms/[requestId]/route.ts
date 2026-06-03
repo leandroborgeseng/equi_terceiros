@@ -21,7 +21,7 @@ export async function GET(
 
   const pdf = generateTermPdf({
     protocol: request.protocol,
-    doctorName: request.doctor.name,
+    doctorName: request.doctor?.name ?? request.requesterName ?? "—",
     doctorCrm: request.doctorCrm,
     supplierName: request.supplierName,
     ownerName: request.ownerName,

@@ -5,8 +5,10 @@ import {
   medicalRequestDraftSchema,
   REQUIRED_DOCUMENT_TYPES,
   REQUIRED_PHOTOS,
+  DELETABLE_STATUSES,
 } from "@/lib/validators/request";
 import { createAuditLog } from "@/lib/audit";
+import { isClinicalEngineering } from "@/lib/rbac";
 
 export async function GET(
   _req: Request,
@@ -116,4 +118,43 @@ export async function PATCH(
   }
 
   return NextResponse.json({ error: "Ação inválida" }, { status: 400 });
+}
+
+export async function DELETE(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth();
+  if (!session?.user || !isClinicalEngineering(session.user.role)) {
+    return NextResponse.json({ error: "Sem permissão" }, { status: 403 });
+  }
+
+  const { id } = await params;
+  const existing = await prisma.equipmentRequest.findUnique({ where: { id } });
+  if (!existing) return NextResponse.json({ error: "Não encontrado" }, { status: 404 });
+
+  if (!DELETABLE_STATUSES.includes(existing.status as (typeof DELETABLE_STATUSES)[number])) {
+    return NextResponse.json(
+      {
+        error:
+          "Só é possível excluir cadastros não validados (antes da liberação/bloqueio). Equipamentos já avaliados são mantidos para auditoria.",
+      },
+      { status: 400 }
+    );
+  }
+
+  // Remove dependências sem cascade automático
+  await prisma.alert.deleteMany({ where: { requestId: id } });
+  await prisma.equipmentImage.deleteMany({ where: { requestId: id } });
+  await prisma.equipmentRequest.delete({ where: { id } });
+
+  await createAuditLog({
+    userId: session.user.id,
+    action: "REQUEST_DELETED",
+    entity: "EquipmentRequest",
+    entityId: id,
+    metadata: { protocol: existing.protocol, status: existing.status, public: existing.submittedViaPublic },
+  });
+
+  return NextResponse.json({ ok: true });
 }

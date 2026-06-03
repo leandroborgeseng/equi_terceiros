@@ -33,6 +33,48 @@ export const medicalRequestSchema = z.object({
 
 export const medicalRequestDraftSchema = medicalRequestSchema.partial();
 
+// Solicitação pública (sem login) — médico OU empresa preenchem o Anexo I.
+// Identificação completa do solicitante para rastreabilidade.
+export const publicRequestSchema = z.object({
+  requesterName: z.string().min(3, "Nome do solicitante obrigatório"),
+  requesterEmail: z.string().email("E-mail inválido"),
+  requesterPhone: z.string().min(8, "Telefone obrigatório"),
+  doctorCrm: z.string().optional(),
+  usageSector: z.string().min(2, "Setor obrigatório"),
+  patientName: z.string().optional(),
+  medicalRecord: z.string().optional(),
+  plannedProcedure: z.string().min(3, "Procedimento obrigatório"),
+  plannedDate: dateField,
+  plannedTime: z.string().min(4, "Horário obrigatório"),
+  clinicalJustification: z.string().min(20, "Justificativa mínima 20 caracteres"),
+  noInstitutionalAlternative: z.boolean().optional(),
+  technicalBenefit: z.string().optional(),
+  equipmentName: z.string().min(2, "Equipamento obrigatório"),
+  brand: z.string().min(1, "Marca obrigatória"),
+  model: z.string().min(1, "Modelo obrigatório"),
+  serialNumber: z.string().optional(),
+  entryType: z
+    .enum(["MEDICO", "FORNECEDOR", "COMODATO", "ALUGUEL", "DEMONSTRACAO", "OUTRO"])
+    .default("MEDICO"),
+  supplierName: z.string().min(2, "Fornecedor/empresa obrigatório"),
+  ownerName: z.string().min(2, "Proprietário obrigatório"),
+  ownerContact: z.string().min(5, "Contato do proprietário obrigatório"),
+  ownerDocument: z.string().optional(),
+  assistentialRisk: z.string().optional(),
+  isUrgent: z.boolean().optional(),
+});
+
+export type PublicRequestInput = z.input<typeof publicRequestSchema>;
+
+// Status considerados "não validados" — passíveis de exclusão pela EC/Admin
+export const DELETABLE_STATUSES = [
+  "RASCUNHO",
+  "AGUARDANDO_CADASTRO",
+  "AGUARDANDO_DOCUMENTOS",
+  "PENDENTE_DOCUMENTOS",
+  "AGUARDANDO_INSPECAO",
+] as const;
+
 export const wizardStepSchemas = [
   medicalRequestSchema.pick({
     requestDate: true,

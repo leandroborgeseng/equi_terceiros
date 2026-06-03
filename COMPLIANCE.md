@@ -19,7 +19,7 @@ Matriz spec × implementação. Legenda: ✅ implementado | 🟡 parcial | ⬜ p
 
 | Módulo | Status |
 |--------|--------|
-| 5.1 Solicitação (Anexo I) — wizard, paciente/prontuário, tipo de ingresso, fluxo | ✅ |
+| 5.1 Solicitação (Anexo I) — wizard logado **+ solicitação pública sem login** (`/solicitar`) | ✅ |
 | 5.2 Cadastro EC (série, patrimônio, OS interna, classe, armazenagem) | ✅ `/equipamentos/[id]/cadastro` |
 | 5.3 Checklist documental (Anexo II) — 8 itens Sim/Não/N/A + obs | ✅ |
 | 5.4 Inspeção técnica (Anexo III) — 7 itens Conforme/NC/N/A + TSE + CME + assinatura | ✅ |
@@ -48,7 +48,7 @@ Implementados exatamente conforme a norma:
 | Classe D → task de regularização D+1 | ✅ `regularizationDueAt` + alerta |
 | Reprovar checklist exige motivo + notifica | ✅ |
 | Bloqueio na inspeção exige motivo | ✅ |
-| Registros não excluídos (retenção) | ✅ apenas mudança de status (`RETIRADO`) |
+| Registros não excluídos (retenção) | ✅ validados mantidos; **não validados podem ser excluídos pela EC/Admin** (com log) |
 | Etiqueta registrada no log | 🟡 inspeção logada; impressão Bluetooth Fase 2 |
 
 ## Fases concluídas / pendentes

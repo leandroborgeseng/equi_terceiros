@@ -75,8 +75,13 @@ export default function LoginPage() {
           <p className="mt-6 text-center text-xs text-slate-500">
             Demo: medico@hospital.local / Hospital@2026
           </p>
+          <p className="mt-4 text-center text-sm">
+            <Link href="/solicitar" className="font-medium text-emerald-600 hover:underline">
+              Solicitar equipamento sem login
+            </Link>
+          </p>
           <p className="mt-2 text-center text-sm">
-            <Link href="/" className="text-emerald-600 hover:underline">Voltar</Link>
+            <Link href="/" className="text-slate-500 hover:underline">Voltar</Link>
           </p>
         </CardContent>
       </Card>
