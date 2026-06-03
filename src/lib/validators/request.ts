@@ -194,16 +194,16 @@ export const equipmentRegistrationSchema = z.object({
   observations: z.string().optional(),
 });
 
-// Anexo II — checklist documental (8 itens)
+// Anexo II — checklist documental (8 itens). docType = categoria do anexo comprobatório.
 export const DOC_CHECKLIST_ITEMS = [
-  { key: "item1", label: "Formulário de Solicitação/Justificativa de Uso (Anexo I)" },
-  { key: "item2", label: "Identificação do proprietário/fornecedor (CNPJ/CPF)" },
-  { key: "item3", label: "Comprovante de regularização na ANVISA" },
-  { key: "item4", label: "Certificado de Manutenção Preventiva vigente" },
-  { key: "item5", label: "Certificado de Calibração vigente (se aplicável)" },
-  { key: "item6", label: "Laudo de Teste de Segurança Elétrica (se aplicável)" },
-  { key: "item7", label: "Manual de Instruções em Português" },
-  { key: "item8", label: "Termo de Responsabilidade assinado (Anexo IV)" },
+  { key: "item1", label: "Formulário de Solicitação/Justificativa de Uso (Anexo I)", docType: "OUTROS" },
+  { key: "item2", label: "Identificação do proprietário/fornecedor (CNPJ/CPF)", docType: "OUTROS" },
+  { key: "item3", label: "Comprovante de regularização na ANVISA", docType: "ANVISA" },
+  { key: "item4", label: "Certificado de Manutenção Preventiva vigente", docType: "MANUTENCAO_PREVENTIVA" },
+  { key: "item5", label: "Certificado de Calibração vigente (se aplicável)", docType: "CALIBRACAO" },
+  { key: "item6", label: "Laudo de Teste de Segurança Elétrica (se aplicável)", docType: "TESTE_SEGURANCA_ELETRICA" },
+  { key: "item7", label: "Manual de Instruções em Português", docType: "MANUAL" },
+  { key: "item8", label: "Termo de Responsabilidade assinado (Anexo IV)", docType: "TERMO_RESPONSABILIDADE" },
 ] as const;
 
 const docItemStatus = z.enum(["SIM", "NAO", "NA"]).optional();

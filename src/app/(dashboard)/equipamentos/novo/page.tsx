@@ -8,7 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea, Label } from "@/components/ui/input";
 
-type Supplier = { id: string; name: string; email: string };
+type Supplier = {
+  id: string;
+  name: string;
+  email: string;
+  cnpj?: string | null;
+  phone?: string | null;
+  address?: string | null;
+};
 
 export default function NovoEquipamentoPage() {
   const router = useRouter();
@@ -42,7 +49,19 @@ export default function NovoEquipamentoPage() {
 
   const onSupplierSelect = (id: string) => {
     const s = suppliers?.find((x) => x.id === id);
-    setForm((f) => ({ ...f, supplierId: id, supplierName: s ? s.name : f.supplierName }));
+    if (!s) {
+      setForm((f) => ({ ...f, supplierId: "" }));
+      return;
+    }
+    // Fornecedor pré-cadastrado: preenche automaticamente os campos obrigatórios
+    setForm((f) => ({
+      ...f,
+      supplierId: id,
+      supplierName: s.name,
+      ownerName: f.ownerName || s.name,
+      ownerContact: f.ownerContact || s.phone || s.email || "",
+      ownerDocument: f.ownerDocument || s.cnpj || "",
+    }));
   };
 
   const mutation = useMutation({

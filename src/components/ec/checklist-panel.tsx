@@ -4,8 +4,11 @@ import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/input";
 import { useState } from "react";
-import { DOC_CHECKLIST_ITEMS } from "@/lib/validators/request";
+import { DOC_CHECKLIST_ITEMS, REQUIRED_PHOTOS, PHOTO_LABELS } from "@/lib/validators/request";
 import { ChecklistItem } from "./checklist-item";
+import { MobileUpload } from "@/components/upload/mobile-upload";
+import { uploadAttachment } from "@/lib/upload-client";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 type DocItem = "SIM" | "NAO" | "NA";
 type DocStatus = "APROVADO" | "PENDENTE" | "REPROVADO";
@@ -43,6 +46,35 @@ export function ChecklistPanel({
     (checklist?.rejectionReason as string) ?? ""
   );
   const [error, setError] = useState<string | null>(null);
+  const [fileNames, setFileNames] = useState<Record<string, string>>({});
+  const [fileKeys, setFileKeys] = useState<Record<string, string>>(
+    Object.fromEntries(
+      DOC_CHECKLIST_ITEMS.map((i) => [i.key, (checklist?.[`${i.key}FileKey`] as string) ?? ""])
+    )
+  );
+  const [uploadingKey, setUploadingKey] = useState<string | null>(null);
+  const [showPhotos, setShowPhotos] = useState(false);
+
+  async function handleItemFile(itemKey: string, docType: string, file: File) {
+    setError(null);
+    setUploadingKey(itemKey);
+    try {
+      const { storageKey } = await uploadAttachment({
+        requestId,
+        type: docType,
+        file,
+        fileName: file.name,
+      });
+      setFileNames((p) => ({ ...p, [itemKey]: file.name }));
+      setFileKeys((p) => ({ ...p, [itemKey]: storageKey }));
+      // anexar comprovante => marca o item como atendido
+      setStatuses((p) => ({ ...p, [itemKey]: "SIM" }));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erro ao anexar arquivo");
+    } finally {
+      setUploadingKey(null);
+    }
+  }
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -50,6 +82,7 @@ export function ChecklistPanel({
       for (const i of DOC_CHECKLIST_ITEMS) {
         payload[`${i.key}Status`] = statuses[i.key];
         payload[`${i.key}Obs`] = obs[i.key];
+        if (fileKeys[i.key]) payload[`${i.key}FileKey`] = fileKeys[i.key];
       }
       const res = await fetch(`/api/checklist/${requestId}`, {
         method: "PATCH",
@@ -67,18 +100,49 @@ export function ChecklistPanel({
   return (
     <div className="space-y-4">
       <h3 className="font-semibold text-slate-900">Checklist documental (Anexo II)</h3>
+      <p className="text-xs text-slate-500">
+        Marque cada item e, quando o documento existir, anexe o arquivo comprobatório (PDF/foto).
+      </p>
       {DOC_CHECKLIST_ITEMS.map((item, idx) => (
         <ChecklistItem
           key={item.key}
           index={idx + 1}
-          label={item.label}
+          label={
+            uploadingKey === item.key ? `${item.label} — enviando anexo...` : item.label
+          }
           value={statuses[item.key]}
           options={OPTIONS}
           onChange={(v) => setStatuses((p) => ({ ...p, [item.key]: v as DocItem }))}
           obs={obs[item.key]}
           onObsChange={(v) => setObs((p) => ({ ...p, [item.key]: v }))}
+          onFileUpload={(file) => handleItemFile(item.key, item.docType, file)}
+          fileName={fileNames[item.key] ?? (fileKeys[item.key] ? "arquivo anexado" : undefined)}
         />
       ))}
+
+      <div className="rounded-xl border border-slate-200">
+        <button
+          type="button"
+          onClick={() => setShowPhotos((s) => !s)}
+          className="flex w-full items-center justify-between px-3 py-2.5 text-left text-sm font-medium text-slate-700"
+        >
+          <span>Fotos do equipamento ({REQUIRED_PHOTOS.length})</span>
+          {showPhotos ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </button>
+        {showPhotos && (
+          <div className="grid gap-3 border-t border-slate-100 p-3 sm:grid-cols-2">
+            {REQUIRED_PHOTOS.map((photoType) => (
+              <MobileUpload
+                key={photoType}
+                requestId={requestId}
+                type="FOTO_EQUIPAMENTO"
+                photoType={photoType}
+                label={PHOTO_LABELS[photoType]}
+              />
+            ))}
+          </div>
+        )}
+      </div>
 
       <div className="rounded-xl bg-slate-50 p-3">
         <p className="mb-2 text-sm font-medium text-slate-700">Parecer final</p>
