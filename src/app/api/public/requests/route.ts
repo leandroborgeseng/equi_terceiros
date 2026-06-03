@@ -19,6 +19,17 @@ export async function POST(req: Request) {
   const data = parsed.data;
   const isUrgent = !!data.isUrgent;
 
+  // Chave de acesso (opcional) — valida e vincula a solicitação ao convite
+  let accessInviteId: string | undefined;
+  const inviteKey = typeof body.inviteKey === "string" ? body.inviteKey : undefined;
+  if (inviteKey) {
+    const invite = await prisma.accessInvite.findUnique({ where: { key: inviteKey } });
+    if (!invite || invite.revokedAt || (invite.expiresAt && new Date(invite.expiresAt) < new Date())) {
+      return NextResponse.json({ error: "Chave de acesso inválida ou expirada" }, { status: 400 });
+    }
+    accessInviteId = invite.id;
+  }
+
   const equipmentClass = suggestEquipmentClass({
     isUrgent,
     plannedDate: data.plannedDate,
@@ -36,6 +47,7 @@ export async function POST(req: Request) {
       flowType: isUrgent ? "URGENCIA" : "ELETIVO",
       equipmentClass,
       submittedViaPublic: true,
+      accessInviteId,
       submittedAt: new Date(),
       requestDate: new Date(),
       requesterName: data.requesterName,
@@ -73,7 +85,7 @@ export async function POST(req: Request) {
     action: "PUBLIC_REQUEST_CREATED",
     entity: "EquipmentRequest",
     entityId: request.id,
-    metadata: { protocol, requester: data.requesterName, public: true },
+    metadata: { protocol, requester: data.requesterName, public: true, inviteKey: inviteKey ?? null },
   });
 
   return NextResponse.json(

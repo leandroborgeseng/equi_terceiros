@@ -81,6 +81,8 @@ model EquipmentRequest {
   requesterEmail            String?
   requesterPhone            String?
   submittedViaPublic        Boolean       @default(false)
+  accessInviteId            String?
+  accessInvite              AccessInvite? @relation(fields: [accessInviteId], references: [id])
   patientName               String
   medicalRecord             String
   plannedProcedure          String
@@ -140,6 +142,26 @@ model EquipmentRequest {
   responsibilityTerm    ResponsibilityTerm?
   adverseEvents         AdverseEvent[]
   alerts                Alert[]
+}
+
+// Chave de acesso gerada pela EC/Admin para solicitação sem login
+model AccessInvite {
+  id             String   @id @default(cuid())
+  key            String   @unique
+  requesterName  String
+  requesterEmail String
+  requesterPhone String?
+  doctorCrm      String?
+  entryType      String   @default("MEDICO") // MEDICO|FORNECEDOR|COMODATO|ALUGUEL|DEMONSTRACAO|OUTRO
+  note           String?
+  createdById    String?
+  expiresAt      DateTime?
+  revokedAt      DateTime?
+  createdAt      DateTime @default(now())
+
+  requests       EquipmentRequest[]
+
+  @@index([key])
 }
 
 model Attachment {

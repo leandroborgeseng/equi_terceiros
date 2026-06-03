@@ -25,7 +25,7 @@ export function canAccessRoute(role: UserRole, path: string): boolean {
 
   const rolePrefixes: Record<UserRole, string[]> = {
     ADMIN: ["/dashboard", "/api"],
-    ENGENHARIA_CLINICA: ["/dashboard/engenharia", "/dashboard/executivo", "/equipamentos", "/pendencias", "/indicadores", "/api/requests", "/api/inspections", "/api/checklist", "/api/labels", "/api/gallery", "/api/alerts", "/api/dashboard", "/api/indicators", "/api/images"],
+    ENGENHARIA_CLINICA: ["/dashboard/engenharia", "/dashboard/executivo", "/equipamentos", "/pendencias", "/indicadores", "/convites", "/api/requests", "/api/inspections", "/api/checklist", "/api/labels", "/api/gallery", "/api/alerts", "/api/dashboard", "/api/indicators", "/api/images", "/api/invites"],
     MEDICO: ["/dashboard/medico", "/api/requests"],
     FORNECEDOR: ["/dashboard/fornecedor", "/fornecedor", "/api/requests", "/api/uploads"],
     CENTRO_CIRURGICO: ["/dashboard/centro-cirurgico", "/api/requests"],
@@ -49,6 +49,10 @@ export function canCreateRequest(role: UserRole) {
 
 export function canManageUsers(role: UserRole) {
   return role === "ADMIN";
+}
+
+export function canManageInvites(role: UserRole) {
+  return role === "ENGENHARIA_CLINICA" || role === "ADMIN";
 }
 
 export const ALL_ROLES: UserRole[] = [

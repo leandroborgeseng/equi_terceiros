@@ -15,6 +15,7 @@ import {
   PackageSearch,
   AlertTriangle,
   Settings,
+  KeyRound,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -27,6 +28,7 @@ const navByRole: Record<UserRole, { href: string; label: string; icon: typeof La
     { href: "/equipamentos", label: "Equipamentos", icon: PackageSearch },
     { href: "/pendencias", label: "Pendências", icon: AlertTriangle },
     { href: "/indicadores", label: "Indicadores", icon: BarChart3 },
+    { href: "/convites", label: "Chaves de acesso", icon: KeyRound },
     { href: "/configuracoes", label: "Configurações", icon: Settings },
   ],
   ENGENHARIA_CLINICA: [
@@ -34,6 +36,7 @@ const navByRole: Record<UserRole, { href: string; label: string; icon: typeof La
     { href: "/equipamentos", label: "Equipamentos", icon: PackageSearch },
     { href: "/pendencias", label: "Pendências", icon: AlertTriangle },
     { href: "/indicadores", label: "Indicadores", icon: BarChart3 },
+    { href: "/convites", label: "Chaves de acesso", icon: KeyRound },
   ],
   MEDICO: [{ href: "/dashboard/medico", label: "Minhas Solicitações", icon: ClipboardList }],
   FORNECEDOR: [{ href: "/dashboard/fornecedor", label: "Documentação", icon: ClipboardList }],

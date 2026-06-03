@@ -28,6 +28,7 @@ export async function GET(
       technicalInspection: { include: { inspector: { select: { name: true } } } },
       releaseStatus: true,
       responsibilityTerm: true,
+      accessInvite: { select: { key: true, requesterName: true } },
       equipment: { include: { images: { include: { metadata: true } } } },
     },
   });

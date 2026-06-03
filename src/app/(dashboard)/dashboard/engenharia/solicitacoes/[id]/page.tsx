@@ -78,6 +78,7 @@ export default function EngenhariaRequestDetailPage() {
             {request.submittedViaPublic && (
               <p className="text-xs text-slate-500">
                 {request.requesterEmail} · {request.requesterPhone}
+                {request.accessInvite?.key ? ` · chave ${request.accessInvite.key}` : ""}
               </p>
             )}
             <p><strong>Paciente:</strong> {request.patientName || "—"} · Prontuário {request.medicalRecord || "—"}</p>

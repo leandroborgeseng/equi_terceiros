@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Building2, Printer, Tags } from "lucide-react";
+import { Users, Building2, Printer, Tags, KeyRound } from "lucide-react";
 
 const sections = [
   {
@@ -8,6 +8,13 @@ const sections = [
     title: "Usuários",
     desc: "Criar, editar perfis e ativar/desativar acessos",
     icon: Users,
+    enabled: true,
+  },
+  {
+    href: "/convites",
+    title: "Chaves de acesso",
+    desc: "Gerar links para médico/empresa solicitar sem login",
+    icon: KeyRound,
     enabled: true,
   },
   {
