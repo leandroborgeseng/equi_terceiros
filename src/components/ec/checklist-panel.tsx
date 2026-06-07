@@ -8,11 +8,11 @@ import { DOC_CHECKLIST_ITEMS, REQUIRED_PHOTOS, PHOTO_LABELS } from "@/lib/valida
 import { ChecklistItem } from "./checklist-item";
 import { MobileUpload } from "@/components/upload/mobile-upload";
 import { uploadAttachment } from "@/lib/upload-client";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 function fileViewUrl(storageKey: string) {
   return `/api/files?key=${encodeURIComponent(storageKey)}`;
 }
-import { ChevronDown, ChevronUp } from "lucide-react";
 
 type DocItem = "SIM" | "NAO" | "NA";
 type DocStatus = "APROVADO" | "PENDENTE" | "REPROVADO";
@@ -102,20 +102,15 @@ export function ChecklistPanel({
   });
 
   return (
-    <div className="space-y-4">
-      <h3 className="font-semibold text-slate-900">Checklist documental (Anexo II)</h3>
-      <p className="text-xs text-slate-500">
-        Marque cada item e, quando o documento existir, anexe o arquivo comprobatório (PDF/foto).
-      </p>
+    <div className="space-y-3">
       {DOC_CHECKLIST_ITEMS.map((item, idx) => (
         <ChecklistItem
           key={item.key}
           index={idx + 1}
-          label={
-            uploadingKey === item.key ? `${item.label} — enviando anexo...` : item.label
-          }
+          label={item.label}
           value={statuses[item.key]}
           options={OPTIONS}
+          uploading={uploadingKey === item.key}
           onChange={(v) => setStatuses((p) => ({ ...p, [item.key]: v as DocItem }))}
           obs={obs[item.key]}
           onObsChange={(v) => setObs((p) => ({ ...p, [item.key]: v }))}

@@ -31,6 +31,8 @@ import { ImageGallery } from "@/components/gallery/image-gallery";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate, formatDateTime } from "@/lib/utils";
 import { ENTRY_TYPE_LABELS, EQUIPMENT_CLASS_LABELS, type RequestStatus, type EquipmentClass, type EntryType } from "@/lib/enums";
+import { DOC_CHECKLIST_ITEMS } from "@/lib/validators/request";
+import { FilePreviewGrid, type PreviewFile, isImageFile, fileUrlFromKey } from "@/components/ec/file-preview";
 
 type TabId = "resumo" | "documentos" | "termo" | "inspecao" | "ciclo" | "fotos";
 
@@ -117,6 +119,64 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
     },
     onSuccess: () => router.push("/equipamentos"),
   });
+
+  const previewFiles = useMemo(() => {
+    if (!request) return [] as PreviewFile[];
+    const seen = new Set<string>();
+    const files: PreviewFile[] = [];
+
+    const add = (file: PreviewFile, storageKey?: string) => {
+      const dedupe = storageKey ?? file.url;
+      if (seen.has(dedupe)) return;
+      seen.add(dedupe);
+      files.push(file);
+    };
+
+    for (const g of gallery as { id: string; photoType: string; fileName: string; url: string }[]) {
+      add(
+        {
+          id: `gallery-${g.id}`,
+          label: g.photoType.replace(/_/g, " "),
+          fileName: g.fileName,
+          url: g.url,
+          isImage: true,
+        },
+        g.url
+      );
+    }
+
+    const checklist = request.documentChecklist as Record<string, string | null> | null;
+    if (checklist) {
+      for (const item of DOC_CHECKLIST_ITEMS) {
+        const key = checklist[`${item.key}FileKey`];
+        if (key) {
+          const shortLabel = item.label.length > 40 ? `${item.label.slice(0, 40)}…` : item.label;
+          add({
+            id: `checklist-${item.key}`,
+            label: shortLabel,
+            fileName: key.split("/").pop()?.replace(/^\d+-/, "") ?? "documento",
+            url: fileUrlFromKey(key),
+            isImage: isImageFile(key),
+          }, key);
+        }
+      }
+    }
+
+    for (const att of request.attachments ?? []) {
+      add(
+        {
+          id: `att-${att.id}`,
+          label: String(att.type).replace(/_/g, " "),
+          fileName: att.fileName,
+          url: fileUrlFromKey(att.storageKey),
+          isImage: isImageFile(att.fileName, att.mimeType),
+        },
+        att.storageKey
+      );
+    }
+
+    return files;
+  }, [request, gallery]);
 
   const workflow = useMemo(() => {
     if (!request) return null;
@@ -305,6 +365,18 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
       <div className="mt-4">
         {tab === "resumo" && (
           <div className="grid gap-4 lg:grid-cols-2">
+            <Card className="lg:col-span-2">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Anexos e fotos ({previewFiles.length})</CardTitle>
+                <p className="text-sm text-slate-500">
+                  Clique na miniatura para pré-visualizar PDF ou imagem.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <FilePreviewGrid files={previewFiles} />
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">Equipamento</CardTitle>
@@ -416,17 +488,29 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
         )}
 
         {tab === "documentos" && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Checklist documental (Anexo II)</CardTitle>
-              <p className="text-sm text-slate-500">
-                Valide cada item e anexe o comprovante quando disponível.
-              </p>
-            </CardHeader>
-            <CardContent>
-              <ChecklistPanel requestId={requestId} checklist={request.documentChecklist} />
-            </CardContent>
-          </Card>
+          <div className="space-y-4">
+            {previewFiles.length > 0 && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Pré-visualização dos anexos</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <FilePreviewGrid files={previewFiles} />
+                </CardContent>
+              </Card>
+            )}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Checklist documental (Anexo II)</CardTitle>
+                <p className="text-sm text-slate-500">
+                  Marque Sim/Não/N/A, use o ícone para observação e anexe o comprovante.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <ChecklistPanel requestId={requestId} checklist={request.documentChecklist} />
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         {tab === "termo" && (
