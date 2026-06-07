@@ -125,7 +125,7 @@ export function PrintLabelButton({
         onClick={openPdf}
         className="flex items-center gap-1 text-sm text-emerald-600 hover:underline"
       >
-        <Printer className="h-4 w-4" /> Baixar etiqueta (PDF)
+        <Printer className="h-4 w-4" /> Baixar etiqueta (PDF 90×50)
       </button>
       {msg && <span className="text-xs text-slate-500">{msg}</span>}
     </div>

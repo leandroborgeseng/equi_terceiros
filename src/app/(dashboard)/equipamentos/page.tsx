@@ -9,7 +9,8 @@ import { RequestStatusBadge } from "@/components/requests/status-badge";
 import type { RequestStatus } from "@/lib/enums";
 import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Copy } from "lucide-react";
+import { Search, Plus, Copy, Printer, Loader2 } from "lucide-react";
+import { labelsPerA4Page } from "@/lib/label-layout";
 
 type Row = {
   id: string;
@@ -40,10 +41,15 @@ const STATUS_FILTERS = [
   "FLUXO_URGENCIA",
 ] as const;
 
+const PER_PAGE = labelsPerA4Page();
+
 export default function EquipamentosPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string>("TODOS");
   const [classe, setClasse] = useState<string>("TODAS");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [printing, setPrinting] = useState(false);
+  const [printError, setPrintError] = useState<string | null>(null);
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["equipamentos"],
@@ -62,6 +68,62 @@ export default function EquipamentosPage() {
       return true;
     });
   }, [rows, status, classe, search]);
+
+  const filteredIds = useMemo(() => new Set(filtered.map((r) => r.id)), [filtered]);
+  const selectedInView = [...selected].filter((id) => filteredIds.has(id));
+
+  function toggleOne(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleAllVisible() {
+    if (selectedInView.length === filtered.length && filtered.length > 0) {
+      setSelected((prev) => {
+        const next = new Set(prev);
+        filtered.forEach((r) => next.delete(r.id));
+        return next;
+      });
+    } else {
+      setSelected((prev) => {
+        const next = new Set(prev);
+        filtered.forEach((r) => next.add(r.id));
+        return next;
+      });
+    }
+  }
+
+  async function downloadLabelsA4() {
+    if (selectedInView.length === 0) return;
+    setPrinting(true);
+    setPrintError(null);
+    try {
+      const res = await fetch("/api/labels/batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requestIds: selectedInView }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? "Falha ao gerar PDF");
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `etiquetas-a4-${selectedInView.length}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setPrintError(e instanceof Error ? e.message : "Erro ao gerar etiquetas");
+    } finally {
+      setPrinting(false);
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -115,6 +177,36 @@ export default function EquipamentosPage() {
         </div>
       </div>
 
+      {filtered.length > 0 && (
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              checked={selectedInView.length === filtered.length && filtered.length > 0}
+              onChange={toggleAllVisible}
+              className="rounded"
+            />
+            Selecionar visíveis ({filtered.length})
+          </label>
+          <Button
+            size="sm"
+            onClick={downloadLabelsA4}
+            disabled={printing || selectedInView.length === 0}
+          >
+            {printing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Printer className="h-4 w-4" />
+            )}
+            Etiquetas A4 ({selectedInView.length})
+          </Button>
+          <span className="text-xs text-slate-500">
+            Até {PER_PAGE} etiquetas por folha A4 (90×50 mm). Imprima e recorte nas linhas cinza.
+          </span>
+          {printError && <span className="text-xs text-red-600">{printError}</span>}
+        </div>
+      )}
+
       {isLoading && <p className="text-sm text-slate-500">Carregando...</p>}
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -122,12 +214,21 @@ export default function EquipamentosPage() {
           <Card key={r.id}>
             <CardContent className="space-y-2 p-4">
               <div className="flex items-start justify-between gap-2">
+                <label className="mt-1 flex cursor-pointer items-start gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selected.has(r.id)}
+                    onChange={() => toggleOne(r.id)}
+                    className="mt-1 rounded"
+                    aria-label={`Selecionar ${r.equipmentName}`}
+                  />
                 <div>
                   <p className="font-medium text-slate-900">{r.equipmentName}</p>
                   <p className="text-xs text-slate-500">
                     {r.brand} {r.model} · S/N {r.serialNumber || "—"}
                   </p>
                 </div>
+                </label>
                 <RequestStatusBadge status={r.status as RequestStatus} />
               </div>
               <div className="flex flex-wrap gap-2 text-xs text-slate-500">

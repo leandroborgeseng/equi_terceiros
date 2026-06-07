@@ -40,6 +40,9 @@ yarn-error.log*
 .env.*.local
 !.env.example
 
+# uploads locais (sem S3)
+/uploads
+
 # database
 prisma/*.db
 prisma/*.db-journal

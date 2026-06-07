@@ -60,6 +60,23 @@ export async function getDownloadPresignedUrl(key: string, expiresIn = 3600) {
   return getSignedUrl(client, command, { expiresIn });
 }
 
+export async function getObjectBuffer(key: string) {
+  const client = getS3Client();
+  if (!client) return null;
+
+  try {
+    const response = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+    const bytes = await response.Body?.transformToByteArray();
+    if (!bytes) return null;
+    return {
+      buffer: Buffer.from(bytes),
+      contentType: response.ContentType ?? undefined,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function deleteObject(key: string) {
   const client = getS3Client();
   if (!client) return;

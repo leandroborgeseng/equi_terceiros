@@ -5,6 +5,7 @@ import { Camera, Upload, CheckCircle2, AlertCircle, Loader2, ImagePlus } from "l
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { queueOfflineUpload } from "@/lib/offline-queue";
+import { uploadBlobToStorage } from "@/lib/upload-client";
 
 const ACCEPT = "image/jpeg,image/jpg,image/png,image/webp,application/pdf";
 
@@ -87,13 +88,13 @@ export function MobileUpload({
         if (!presignRes.ok) throw new Error("Falha ao preparar upload");
         const { uploadUrl, storageKey, useLocal } = await presignRes.json();
 
-        if (uploadUrl && !useLocal) {
-          await fetch(uploadUrl, {
-            method: "PUT",
-            body: blob,
-            headers: { "Content-Type": blob.type || file.type },
-          });
-        }
+        await uploadBlobToStorage({
+          uploadUrl,
+          useLocal: !!useLocal,
+          storageKey,
+          mimeType: blob.type || file.type,
+          body: blob,
+        });
 
         const confirmRes = await fetch("/api/uploads/confirm", {
           method: "POST",

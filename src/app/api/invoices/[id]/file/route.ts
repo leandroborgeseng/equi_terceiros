@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { isClinicalEngineering } from "@/lib/rbac";
-import { getDownloadPresignedUrl } from "@/lib/s3";
+import { buildFileUrl } from "@/lib/file-storage";
 
 export async function GET(
   _req: Request,
@@ -19,11 +19,8 @@ export async function GET(
     return NextResponse.json({ error: "Nota fiscal sem anexo" }, { status: 404 });
   }
 
-  const signed = await getDownloadPresignedUrl(invoice.fileKey);
-  const url = signed ?? `/api/files/local?key=${encodeURIComponent(invoice.fileKey)}`;
-
   return NextResponse.json({
-    url,
+    url: buildFileUrl(invoice.fileKey),
     fileName: invoice.fileName,
     fileKey: invoice.fileKey,
   });

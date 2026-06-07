@@ -18,6 +18,7 @@ RUN npm run build
 FROM base AS runner
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV UPLOAD_DIR="/data/uploads"
 
 RUN npm install -g prisma@5.22.0
 

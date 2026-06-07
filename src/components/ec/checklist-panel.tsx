@@ -8,6 +8,10 @@ import { DOC_CHECKLIST_ITEMS, REQUIRED_PHOTOS, PHOTO_LABELS } from "@/lib/valida
 import { ChecklistItem } from "./checklist-item";
 import { MobileUpload } from "@/components/upload/mobile-upload";
 import { uploadAttachment } from "@/lib/upload-client";
+
+function fileViewUrl(storageKey: string) {
+  return `/api/files?key=${encodeURIComponent(storageKey)}`;
+}
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 type DocItem = "SIM" | "NAO" | "NA";
@@ -117,6 +121,7 @@ export function ChecklistPanel({
           onObsChange={(v) => setObs((p) => ({ ...p, [item.key]: v }))}
           onFileUpload={(file) => handleItemFile(item.key, item.docType, file)}
           fileName={fileNames[item.key] ?? (fileKeys[item.key] ? "arquivo anexado" : undefined)}
+          fileUrl={fileKeys[item.key] ? fileViewUrl(fileKeys[item.key]) : undefined}
         />
       ))}
 

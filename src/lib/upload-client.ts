@@ -23,15 +23,42 @@ export async function presignAndUpload(params: {
   if (!presignRes.ok) throw new Error("Falha ao preparar upload");
   const { uploadUrl, storageKey, useLocal } = await presignRes.json();
 
-  if (uploadUrl && !useLocal) {
-    await fetch(uploadUrl, {
-      method: "PUT",
-      body: file,
-      headers: { "Content-Type": mimeType },
-    });
-  }
+  await uploadBlobToStorage({ uploadUrl, useLocal: !!useLocal, storageKey, mimeType, body: file });
 
   return { storageKey, mimeType, sizeBytes };
+}
+
+/** Envia bytes para storage local (disco) ou S3 conforme presign. */
+export async function uploadBlobToStorage(params: {
+  uploadUrl: string | null;
+  useLocal: boolean;
+  storageKey: string;
+  mimeType: string;
+  body: Blob;
+}) {
+  const { uploadUrl, useLocal, storageKey, mimeType, body } = params;
+
+  if (useLocal) {
+    const res = await fetch("/api/uploads/local", {
+      method: "PUT",
+      headers: {
+        "Content-Type": mimeType,
+        "X-Storage-Key": storageKey,
+      },
+      body,
+    });
+    if (!res.ok) throw new Error("Falha ao salvar arquivo localmente");
+    return;
+  }
+
+  if (uploadUrl) {
+    const res = await fetch(uploadUrl, {
+      method: "PUT",
+      body,
+      headers: { "Content-Type": mimeType },
+    });
+    if (!res.ok) throw new Error("Falha no upload para o storage remoto");
+  }
 }
 
 /**

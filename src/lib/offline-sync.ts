@@ -5,6 +5,7 @@ import {
   updateUploadStatus,
   removeOfflineUpload,
 } from "@/lib/offline-queue";
+import { uploadBlobToStorage } from "@/lib/upload-client";
 
 export async function syncPendingUploads(): Promise<{
   synced: number;
@@ -32,13 +33,13 @@ export async function syncPendingUploads(): Promise<{
       if (!presignRes.ok) throw new Error("presign failed");
       const { uploadUrl, storageKey, useLocal } = await presignRes.json();
 
-      if (uploadUrl && !useLocal) {
-        await fetch(uploadUrl, {
-          method: "PUT",
-          body: item.blob,
-          headers: { "Content-Type": item.mimeType },
-        });
-      }
+      await uploadBlobToStorage({
+        uploadUrl,
+        useLocal: !!useLocal,
+        storageKey,
+        mimeType: item.mimeType,
+        body: item.blob,
+      });
 
       const confirmRes = await fetch("/api/uploads/confirm", {
         method: "POST",

@@ -35,7 +35,10 @@ echo "==> DATABASE_URL=$DATABASE_URL"
 echo "==> NEXTAUTH_URL=${NEXTAUTH_URL:-não definida}"
 
 mkdir -p /data
-chown -R nextjs:nodejs /data 2>/dev/null || chmod 777 /data 2>/dev/null || true
+export UPLOAD_DIR="${UPLOAD_DIR:-/data/uploads}"
+mkdir -p "$UPLOAD_DIR"
+chown -R nextjs:nodejs /data 2>/dev/null || chmod -R 777 /data 2>/dev/null || true
+echo "==> UPLOAD_DIR=$UPLOAD_DIR"
 
 echo "==> Aplicando migrations..."
 if prisma migrate deploy; then

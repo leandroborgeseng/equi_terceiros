@@ -2,7 +2,15 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ZoomIn, Download, ChevronLeft, ChevronRight, ScanText, Loader2 } from "lucide-react";
+import {
+  X,
+  Download,
+  ChevronLeft,
+  ChevronRight,
+  ScanText,
+  Loader2,
+  ImageOff,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/utils";
 
@@ -31,11 +39,66 @@ const AI_BADGE: Record<string, string> = {
   PENDING: "bg-slate-100 text-slate-600",
 };
 
+function GalleryThumb({
+  img,
+  onOpen,
+  onCompare,
+  meta,
+}: {
+  img: GalleryImage;
+  onOpen: () => void;
+  onCompare: () => void;
+  meta: GalleryImageMetadata | null;
+}) {
+  const [failed, setFailed] = useState(false);
+
+  return (
+    <button
+      type="button"
+      className="group relative aspect-square overflow-hidden rounded-xl bg-slate-100"
+      onClick={onOpen}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        onCompare();
+      }}
+    >
+      {failed ? (
+        <div className="flex h-full flex-col items-center justify-center gap-1 p-2 text-center text-xs text-slate-500">
+          <ImageOff className="h-6 w-6 text-slate-400" />
+          <span>Imagem indisponível</span>
+        </div>
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={img.url}
+          alt={img.photoType}
+          loading="lazy"
+          className="h-full w-full object-cover"
+          onError={() => setFailed(true)}
+        />
+      )}
+      {meta?.aiValidationStatus && (
+        <span
+          className={`absolute left-1.5 top-1.5 rounded px-1.5 py-0.5 text-[10px] font-medium ${
+            AI_BADGE[meta.aiValidationStatus as string] ?? AI_BADGE.PENDING
+          }`}
+        >
+          {meta.aiValidationStatus}
+        </span>
+      )}
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-left text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
+        {img.photoType}
+      </div>
+    </button>
+  );
+}
+
 export function ImageGallery({ images }: { images: GalleryImage[] }) {
   const [index, setIndex] = useState<number | null>(null);
   const [compare, setCompare] = useState<number[]>([]);
   const [ocrLoading, setOcrLoading] = useState<string | null>(null);
   const [ocrResults, setOcrResults] = useState<Record<string, GalleryImageMetadata>>({});
+  const [lightboxFailed, setLightboxFailed] = useState(false);
 
   const current = index !== null ? images[index] : null;
 
@@ -56,12 +119,25 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
     return ocrResults[img.id] ?? img.metadata ?? null;
   }
 
+  function openAt(i: number) {
+    setLightboxFailed(false);
+    setIndex(i);
+  }
+
+  if (images.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed border-slate-200 py-10 text-center text-sm text-slate-500">
+        Nenhuma foto enviada ainda. Use o checklist ou a seção de fotos obrigatórias.
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
         <h3 className="font-semibold text-slate-900">Galeria ({images.length})</h3>
         {compare.length === 2 && (
-          <Button size="sm" variant="outline" onClick={() => setIndex(compare[0])}>
+          <Button size="sm" variant="outline" onClick={() => openAt(compare[0])}>
             Comparar selecionadas
           </Button>
         )}
@@ -69,33 +145,17 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {images.map((img, i) => (
-          <button
+          <GalleryThumb
             key={img.id}
-            type="button"
-            className="group relative aspect-square overflow-hidden rounded-xl bg-slate-100"
-            onClick={() => setIndex(i)}
-            onContextMenu={(e) => {
-              e.preventDefault();
+            img={img}
+            meta={metaFor(img)}
+            onOpen={() => openAt(i)}
+            onCompare={() =>
               setCompare((prev) =>
                 prev.includes(i) ? prev.filter((x) => x !== i) : [...prev.slice(-1), i]
-              );
-            }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={img.url} alt={img.photoType} className="h-full w-full object-cover" />
-            {metaFor(img)?.aiValidationStatus && (
-              <span
-                className={`absolute left-1.5 top-1.5 rounded px-1.5 py-0.5 text-[10px] font-medium ${
-                  AI_BADGE[metaFor(img)!.aiValidationStatus as string] ?? AI_BADGE.PENDING
-                }`}
-              >
-                {metaFor(img)!.aiValidationStatus}
-              </span>
-            )}
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-left text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
-              {img.photoType}
-            </div>
-          </button>
+              )
+            }
+          />
         ))}
       </div>
 
@@ -106,46 +166,72 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+            onClick={() => setIndex(null)}
           >
             <button
               type="button"
-              className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white"
+              className="absolute right-4 top-4 z-10 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
               onClick={() => setIndex(null)}
             >
               <X className="h-6 w-6" />
             </button>
-            <button
-              type="button"
-              className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white"
-              onClick={() => setIndex((index - 1 + images.length) % images.length)}
+            {images.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  className="absolute left-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openAt((index - 1 + images.length) % images.length);
+                  }}
+                >
+                  <ChevronLeft />
+                </button>
+                <button
+                  type="button"
+                  className="absolute right-4 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openAt((index + 1) % images.length);
+                  }}
+                >
+                  <ChevronRight />
+                </button>
+              </>
+            )}
+            <div
+              className="max-h-[90vh] w-full max-w-5xl"
+              onClick={(e) => e.stopPropagation()}
             >
-              <ChevronLeft />
-            </button>
-            <button
-              type="button"
-              className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-2 text-white"
-              onClick={() => setIndex((index + 1) % images.length)}
-            >
-              <ChevronRight />
-            </button>
-            <div className="max-h-[85vh] max-w-5xl">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={current.url}
-                alt={current.fileName}
-                className="max-h-[75vh] w-full object-contain"
-              />
-              <div className="mt-4 flex items-center justify-between text-white">
+              {lightboxFailed ? (
+                <div className="flex min-h-[40vh] flex-col items-center justify-center gap-2 text-white/80">
+                  <ImageOff className="h-12 w-12" />
+                  <p>Não foi possível carregar esta imagem.</p>
+                  <p className="text-sm text-white/50">{current.fileName}</p>
+                </div>
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={current.url}
+                  alt={current.fileName}
+                  className="mx-auto max-h-[75vh] w-auto max-w-full object-contain"
+                  onError={() => setLightboxFailed(true)}
+                />
+              )}
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-white">
                 <div>
                   <p className="font-medium">{current.photoType}</p>
                   <p className="text-sm text-white/70">{formatDateTime(current.createdAt)}</p>
+                  <p className="text-xs text-white/50">
+                    {index + 1} de {images.length}
+                  </p>
                 </div>
                 <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={() => runOcr(current.id)}
                     disabled={ocrLoading === current.id}
-                    className="flex items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-sm"
+                    className="flex items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-sm hover:bg-white/20"
                   >
                     {ocrLoading === current.id ? (
                       <Loader2 className="h-5 w-5 animate-spin" />
@@ -154,12 +240,14 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
                     )}
                     OCR / IA
                   </button>
-                  <a href={current.url} download className="rounded-lg bg-white/10 p-2">
-                    <Download className="h-5 w-5" />
+                  <a
+                    href={current.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-sm hover:bg-white/20"
+                  >
+                    <Download className="h-5 w-5" /> Abrir
                   </a>
-                  <span className="rounded-lg bg-white/10 p-2">
-                    <ZoomIn className="h-5 w-5" />
-                  </span>
                 </div>
               </div>
               {metaFor(current) && (

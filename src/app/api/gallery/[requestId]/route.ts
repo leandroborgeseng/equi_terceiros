@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getDownloadPresignedUrl } from "@/lib/s3";
+import { buildFileUrl } from "@/lib/file-storage";
 
 export async function GET(
   _req: Request,
@@ -18,20 +18,15 @@ export async function GET(
     orderBy: { createdAt: "asc" },
   });
 
-  const gallery = await Promise.all(
-    images.map(async (img) => {
-      const signed = await getDownloadPresignedUrl(img.storageKey);
-      return {
-        id: img.id,
-        photoType: img.photoType,
-        fileName: img.fileName,
-        createdAt: img.createdAt,
-        qualityScore: img.qualityScore,
-        metadata: img.metadata,
-        url: signed ?? `/api/files/local?key=${encodeURIComponent(img.storageKey)}`,
-      };
-    })
-  );
+  const gallery = images.map((img) => ({
+    id: img.id,
+    photoType: img.photoType,
+    fileName: img.fileName,
+    createdAt: img.createdAt,
+    qualityScore: img.qualityScore,
+    metadata: img.metadata,
+    url: buildFileUrl(img.storageKey),
+  }));
 
   return NextResponse.json(gallery);
 }

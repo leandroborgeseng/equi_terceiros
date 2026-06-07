@@ -18,6 +18,7 @@ export function ChecklistItem({
   onObsChange,
   onFileUpload,
   fileName,
+  fileUrl,
 }: {
   index: number;
   label: string;
@@ -28,6 +29,7 @@ export function ChecklistItem({
   onObsChange?: (value: string) => void;
   onFileUpload?: (file: File) => void;
   fileName?: string | null;
+  fileUrl?: string | null;
 }) {
   return (
     <div className="rounded-xl border border-slate-200 p-3">
@@ -78,7 +80,18 @@ export function ChecklistItem({
               }}
             />
           </label>
-          {fileName && <span className="truncate text-emerald-700">{fileName}</span>}
+          {fileName && fileUrl ? (
+            <a
+              href={fileUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="truncate text-emerald-700 hover:underline"
+            >
+              {fileName}
+            </a>
+          ) : fileName ? (
+            <span className="truncate text-emerald-700">{fileName}</span>
+          ) : null}
         </div>
       )}
     </div>
