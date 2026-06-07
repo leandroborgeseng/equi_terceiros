@@ -8,6 +8,7 @@ import { DELETABLE_STATUSES } from "@/lib/validators/request";
 import { Trash2 } from "lucide-react";
 import { ChecklistPanel } from "@/components/ec/checklist-panel";
 import { InspectionPanel } from "@/components/ec/inspection-panel";
+import { LifecyclePanel } from "@/components/ec/lifecycle-panel";
 import { ImageGallery } from "@/components/gallery/image-gallery";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate, formatDateTime } from "@/lib/utils";
@@ -128,6 +129,17 @@ export default function EngenhariaRequestDetailPage() {
         <Card className="lg:col-span-2">
           <CardContent className="pt-6">
             <InspectionPanel requestId={id} />
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-2">
+          <CardContent className="pt-6">
+            <LifecyclePanel
+              requestId={id}
+              status={request.status}
+              storageRecords={request.storageRecords}
+              withdrawalRecords={request.withdrawalRecords}
+            />
           </CardContent>
         </Card>
 

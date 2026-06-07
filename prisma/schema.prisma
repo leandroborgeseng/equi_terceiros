@@ -136,6 +136,7 @@ model EquipmentRequest {
   homologatedAt             DateTime?
   releasedAt                DateTime?
   validUntil                DateTime?
+  inUseAt                   DateTime?
   withdrawnAt               DateTime?
   restrictionNotes          String?
   blockReason               String?
@@ -149,6 +150,8 @@ model EquipmentRequest {
   responsibilityTerm    ResponsibilityTerm?
   adverseEvents         AdverseEvent[]
   alerts                Alert[]
+  storageRecords        StorageRecord[]
+  withdrawalRecords     WithdrawalRecord[]
 }
 
 // Nota Fiscal — pode ser compartilhada por vários equipamentos (lote)
@@ -398,24 +401,33 @@ model AdverseEvent {
 }
 
 model StorageRecord {
-  id          String    @id @default(cuid())
-  equipmentId String
-  equipment   Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  id          String     @id @default(cuid())
+  equipmentId String?
+  equipment   Equipment? @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  requestId   String?
+  request     EquipmentRequest? @relation(fields: [requestId], references: [id], onDelete: Cascade)
   location    String
   storedAt    DateTime
+  storedBy    String?
   notes       String?
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime   @default(now())
+
+  @@index([requestId])
 }
 
 model WithdrawalRecord {
-  id           String    @id @default(cuid())
-  equipmentId  String
-  equipment    Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  id           String     @id @default(cuid())
+  equipmentId  String?
+  equipment    Equipment? @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  requestId    String?
+  request      EquipmentRequest? @relation(fields: [requestId], references: [id], onDelete: Cascade)
   withdrawnAt  DateTime
   withdrawnBy  String
   reason       String?
-  completed    Boolean   @default(false)
-  createdAt    DateTime  @default(now())
+  completed    Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+
+  @@index([requestId])
 }
 
 model AuditLog {

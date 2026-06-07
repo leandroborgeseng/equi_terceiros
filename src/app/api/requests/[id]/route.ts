@@ -30,6 +30,8 @@ export async function GET(
       responsibilityTerm: true,
       accessInvite: { select: { key: true, requesterName: true } },
       invoice: { select: { id: true, number: true, issueDate: true, fileName: true } },
+      storageRecords: { orderBy: { storedAt: "desc" } },
+      withdrawalRecords: { orderBy: { withdrawnAt: "desc" } },
       equipment: { include: { images: { include: { metadata: true } } } },
     },
   });
