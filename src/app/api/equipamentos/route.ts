@@ -33,21 +33,28 @@ export async function POST(req: Request) {
 
   const alreadyInPark = !!data.alreadyInPark;
 
-  // Nota fiscal: usa a existente (invoiceId) ou cria/reaproveita pelo número
+  // Nota fiscal: vincula apenas NF já cadastrada com anexo
   let invoiceId = data.invoiceId || undefined;
+  if (invoiceId) {
+    const invoice = await prisma.invoice.findUnique({ where: { id: invoiceId } });
+    if (!invoice) {
+      return NextResponse.json({ error: "Nota fiscal não encontrada" }, { status: 400 });
+    }
+    if (!invoice.fileKey) {
+      return NextResponse.json(
+        { error: "A nota fiscal selecionada precisa ter o arquivo anexado" },
+        { status: 400 }
+      );
+    }
+  }
   if (!invoiceId && data.invoiceNumber) {
-    const invoice = await prisma.invoice.upsert({
-      where: { number: data.invoiceNumber },
-      update: {},
-      create: {
-        number: data.invoiceNumber,
-        issueDate: data.invoiceDate,
-        supplierId: data.supplierId || undefined,
-        supplierName: data.supplierName,
-        createdById: session.user.id,
+    return NextResponse.json(
+      {
+        error:
+          "Cadastre a nota fiscal em Notas Fiscais (com anexo) e selecione-a na lista, ou vincule depois na tela da NF",
       },
-    });
-    invoiceId = invoice.id;
+      { status: 400 }
+    );
   }
 
   const request = await prisma.equipmentRequest.create({

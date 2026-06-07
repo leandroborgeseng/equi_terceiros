@@ -2,7 +2,26 @@ import { z } from "zod";
 
 const dateField = z.union([z.date(), z.string()]).transform((v) => new Date(v));
 
-export const medicalRequestSchema = z.object({
+export const normalizeCnpjDigits = (v: string) => v.replace(/\D/g, "");
+
+export const cnpjField = z
+  .string()
+  .min(1, "CNPJ obrigatório")
+  .refine((v) => normalizeCnpjDigits(v).length === 14, "CNPJ deve ter 14 dígitos");
+
+/** Fornecedor sempre como pessoa jurídica: razão social gravada também em ownerName. */
+export function applySupplierPj<T extends { supplierName: string; ownerName?: string }>(data: T) {
+  return { ...data, ownerName: data.ownerName?.trim() || data.supplierName };
+}
+
+const supplierPjFields = {
+  supplierName: z.string().min(2, "Razão social obrigatória"),
+  ownerContact: z.string().min(5, "Contato obrigatório"),
+  ownerDocument: cnpjField,
+  ownerName: z.string().optional(),
+};
+
+const medicalRequestBaseSchema = z.object({
   requestDate: dateField,
   usageSector: z.string().min(2, "Setor obrigatório"),
   doctorCrm: z.string().min(4, "CRM obrigatório"),
@@ -21,17 +40,16 @@ export const medicalRequestSchema = z.object({
   entryType: z
     .enum(["MEDICO", "FORNECEDOR", "COMODATO", "ALUGUEL", "DEMONSTRACAO", "OUTRO"])
     .default("MEDICO"),
-  supplierName: z.string().min(2, "Fornecedor obrigatório"),
-  ownerName: z.string().min(2, "Proprietário obrigatório"),
-  ownerContact: z.string().min(5, "Contato obrigatório"),
-  ownerDocument: z.string().optional(),
+  ...supplierPjFields,
   assistentialRisk: z.string().min(1, "Risco assistencial obrigatório"),
   isUrgent: z.boolean().optional(),
   equipmentClass: z.enum(["A", "B", "C", "D"]).optional(),
   expectedExitDate: dateField.optional(),
 });
 
-export const medicalRequestDraftSchema = medicalRequestSchema.partial();
+export const medicalRequestSchema = medicalRequestBaseSchema.transform(applySupplierPj);
+
+export const medicalRequestDraftSchema = medicalRequestBaseSchema.partial();
 
 // Solicitação pública (sem login) — médico OU empresa preenchem o Anexo I.
 // Identificação completa do solicitante para rastreabilidade.
@@ -56,20 +74,17 @@ export const publicRequestSchema = z.object({
   entryType: z
     .enum(["MEDICO", "FORNECEDOR", "COMODATO", "ALUGUEL", "DEMONSTRACAO", "OUTRO"])
     .default("MEDICO"),
-  supplierName: z.string().min(2, "Fornecedor/empresa obrigatório"),
-  ownerName: z.string().min(2, "Proprietário obrigatório"),
-  ownerContact: z.string().min(5, "Contato do proprietário obrigatório"),
-  ownerDocument: z.string().optional(),
+  ...supplierPjFields,
   assistentialRisk: z.string().optional(),
   isUrgent: z.boolean().optional(),
-});
+}).transform(applySupplierPj);
 
 export type PublicRequestInput = z.input<typeof publicRequestSchema>;
 
-// Cadastro de fornecedor (EC/Admin)
+// Cadastro de fornecedor (EC/Admin) — sempre pessoa jurídica
 export const supplierSchema = z.object({
-  name: z.string().min(2, "Nome do fornecedor obrigatório"),
-  cnpj: z.string().optional(),
+  name: z.string().min(2, "Razão social obrigatória"),
+  cnpj: cnpjField,
   email: z.string().email("E-mail inválido"),
   phone: z.string().optional(),
   address: z.string().optional(),
@@ -93,8 +108,10 @@ export const invoiceUpdateSchema = z.object({
   supplierName: z.string().optional(),
   totalValue: z.coerce.number().optional(),
   notes: z.string().optional(),
-  fileKey: z.string().optional(),
-  fileName: z.string().optional(),
+  fileKey: z.string().min(1).optional(),
+  fileName: z.string().min(1).optional(),
+  linkRequestIds: z.array(z.string().min(1)).optional(),
+  unlinkRequestIds: z.array(z.string().min(1)).optional(),
 });
 
 export type InvoiceInput = z.input<typeof invoiceSchema>;
@@ -111,10 +128,7 @@ export const ecEquipmentRequestSchema = z.object({
     .default("FORNECEDOR"),
   usageSector: z.string().min(2, "Setor obrigatório"),
   supplierId: z.string().optional(),
-  supplierName: z.string().min(2, "Fornecedor obrigatório"),
-  ownerName: z.string().min(2, "Proprietário obrigatório"),
-  ownerContact: z.string().min(5, "Contato do proprietário obrigatório"),
-  ownerDocument: z.string().optional(),
+  ...supplierPjFields,
   originPatrimony: z.string().optional(),
   clinicalJustification: z.string().optional(),
   plannedProcedure: z.string().optional(),
@@ -127,7 +141,7 @@ export const ecEquipmentRequestSchema = z.object({
   invoiceId: z.string().optional(),
   invoiceNumber: z.string().optional(),
   invoiceDate: dateField.optional(),
-});
+}).transform(applySupplierPj);
 
 export type EcEquipmentRequestInput = z.input<typeof ecEquipmentRequestSchema>;
 
@@ -141,36 +155,36 @@ export const DELETABLE_STATUSES = [
 ] as const;
 
 export const wizardStepSchemas = [
-  medicalRequestSchema.pick({
+  medicalRequestBaseSchema.pick({
     requestDate: true,
     usageSector: true,
     doctorCrm: true,
     patientName: true,
     medicalRecord: true,
   }),
-  medicalRequestSchema.pick({
+  medicalRequestBaseSchema.pick({
     plannedProcedure: true,
     plannedDate: true,
     plannedTime: true,
     clinicalJustification: true,
   }),
-  medicalRequestSchema.pick({
+  medicalRequestBaseSchema.pick({
     noInstitutionalAlternative: true,
     technicalBenefit: true,
     assistentialRisk: true,
     isUrgent: true,
   }),
-  medicalRequestSchema.pick({
+  medicalRequestBaseSchema.pick({
     equipmentName: true,
     brand: true,
     model: true,
     serialNumber: true,
     entryType: true,
   }),
-  medicalRequestSchema.pick({
+  medicalRequestBaseSchema.pick({
     supplierName: true,
-    ownerName: true,
     ownerContact: true,
+    ownerDocument: true,
   }),
 ] as const;
 
@@ -192,8 +206,8 @@ export const REQUEST_DRAFT_DEFAULTS = {
   serialNumber: "",
   entryType: "MEDICO",
   supplierName: "",
-  ownerName: "",
   ownerContact: "",
+  ownerDocument: "",
   assistentialRisk: "",
   isUrgent: false,
 } as const;
@@ -223,7 +237,7 @@ export const equipmentRegistrationSchema = z.object({
 // Anexo II — checklist documental (8 itens). docType = categoria do anexo comprobatório.
 export const DOC_CHECKLIST_ITEMS = [
   { key: "item1", label: "Formulário de Solicitação/Justificativa de Uso (Anexo I)", docType: "OUTROS" },
-  { key: "item2", label: "Identificação do proprietário/fornecedor (CNPJ/CPF)", docType: "OUTROS" },
+  { key: "item2", label: "Identificação da empresa (CNPJ)", docType: "OUTROS" },
   { key: "item3", label: "Comprovante de regularização na ANVISA", docType: "ANVISA" },
   { key: "item4", label: "Certificado de Manutenção Preventiva vigente", docType: "MANUTENCAO_PREVENTIVA" },
   { key: "item5", label: "Certificado de Calibração vigente (se aplicável)", docType: "CALIBRACAO" },

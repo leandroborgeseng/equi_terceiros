@@ -113,7 +113,10 @@ export default function EngenhariaRequestDetailPage() {
             <p><strong>Setor:</strong> {request.usageSector}</p>
             <p><strong>Procedimento:</strong> {request.plannedProcedure}</p>
             <p><strong>Previsto:</strong> {formatDate(request.plannedDate)} {request.plannedTime}</p>
-            <p><strong>Fornecedor:</strong> {request.supplierName}</p>
+            <p>
+              <strong>Empresa (PJ):</strong> {request.supplierName}
+              {request.ownerDocument ? ` · CNPJ ${request.ownerDocument}` : ""}
+            </p>
             <p>
               <strong>Classe:</strong> {request.equipmentClass ?? "—"} ·{" "}
               <strong>Ingresso:</strong> {request.entryType} · <strong>OS:</strong>{" "}

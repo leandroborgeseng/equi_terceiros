@@ -214,24 +214,20 @@ export function PublicRequestForm({
 
       <Card>
         <CardHeader>
-          <CardTitle>Fornecedor / proprietário</CardTitle>
+          <CardTitle>Empresa (pessoa jurídica)</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div>
-            <Label>Fornecedor / empresa *</Label>
+            <Label>Razão social *</Label>
             <Input {...form.register("supplierName")} />
           </div>
           <div>
-            <Label>Proprietário *</Label>
-            <Input {...form.register("ownerName")} />
-          </div>
-          <div>
-            <Label>Contato do proprietário *</Label>
-            <Input {...form.register("ownerContact")} />
-          </div>
-          <div>
-            <Label>CNPJ/CPF (opcional)</Label>
+            <Label>CNPJ *</Label>
             <Input {...form.register("ownerDocument")} />
+          </div>
+          <div className="sm:col-span-2">
+            <Label>Contato (telefone ou e-mail) *</Label>
+            <Input {...form.register("ownerContact")} />
           </div>
         </CardContent>
       </Card>

@@ -87,8 +87,8 @@ export function TermPanel({
         <div className="flex items-start gap-2 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
           <p>
-            Pré-requisito para liberação. Registre o aceite eletrônico do responsável (proprietário /
-            médico / fornecedor) antes de liberar o equipamento.
+            Pré-requisito para liberação. Registre o aceite eletrônico do responsável (empresa PJ,
+            médico ou representante) antes de liberar o equipamento.
           </p>
         </div>
       )}

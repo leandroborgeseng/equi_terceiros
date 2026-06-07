@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { medicalRequestDraftSchema, REQUEST_DRAFT_DEFAULTS } from "@/lib/validators/request";
+import {
+  applySupplierPj,
+  medicalRequestDraftSchema,
+  REQUEST_DRAFT_DEFAULTS,
+} from "@/lib/validators/request";
 import { generateProtocol, generateSupplierToken } from "@/lib/utils";
 import { createAuditLog } from "@/lib/audit";
 import { canCreateRequest } from "@/lib/rbac";
@@ -74,14 +78,15 @@ function mergeDraft(body: Record<string, unknown>) {
     return { error: parsed.error.flatten() } as const;
   }
 
-  const merged = {
+  const merged = applySupplierPj({
     ...REQUEST_DRAFT_DEFAULTS,
     ...parsed.data,
     requestDate: parsed.data.requestDate ?? REQUEST_DRAFT_DEFAULTS.requestDate,
     plannedDate: parsed.data.plannedDate ?? REQUEST_DRAFT_DEFAULTS.plannedDate,
     patientName: parsed.data.patientName ?? "",
     medicalRecord: parsed.data.medicalRecord ?? "",
-  };
+    supplierName: parsed.data.supplierName ?? REQUEST_DRAFT_DEFAULTS.supplierName,
+  });
 
   return { data: merged } as const;
 }

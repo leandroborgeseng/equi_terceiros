@@ -52,7 +52,7 @@ export default function FornecedoresPage() {
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Fornecedores</h1>
         <p className="text-sm text-slate-500">
-          Cadastro de empresas/proprietários de equipamentos de terceiros.
+          Cadastro de empresas (pessoa jurídica) proprietárias de equipamentos de terceiros.
         </p>
       </div>
 
@@ -64,11 +64,11 @@ export default function FornecedoresPage() {
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div>
-            <Label>Nome / Razão social *</Label>
+            <Label>Razão social *</Label>
             <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
           </div>
           <div>
-            <Label>CNPJ</Label>
+            <Label>CNPJ *</Label>
             <Input value={form.cnpj} onChange={(e) => setForm((f) => ({ ...f, cnpj: e.target.value }))} />
           </div>
           <div>

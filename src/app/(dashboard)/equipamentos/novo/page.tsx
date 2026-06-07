@@ -30,7 +30,6 @@ export default function NovoEquipamentoPage() {
     usageSector: "",
     supplierId: "",
     supplierName: "",
-    ownerName: "",
     ownerContact: "",
     ownerDocument: "",
     originPatrimony: "",
@@ -39,8 +38,6 @@ export default function NovoEquipamentoPage() {
     observations: "",
     alreadyInPark: false,
     invoiceId: "",
-    invoiceNumber: "",
-    invoiceDate: "",
   });
 
   const { data: suppliers } = useQuery<Supplier[]>({
@@ -48,10 +45,14 @@ export default function NovoEquipamentoPage() {
     queryFn: () => fetch("/api/suppliers").then((r) => r.json()),
   });
 
-  const { data: invoices } = useQuery<{ id: string; number: string; issueDate?: string | null }[]>({
+  const { data: invoices } = useQuery<
+    { id: string; number: string; issueDate?: string | null; fileKey?: string | null; fileName?: string | null }[]
+  >({
     queryKey: ["invoices"],
     queryFn: () => fetch("/api/invoices").then((r) => r.json()),
   });
+
+  const invoicesWithAttachment = (invoices ?? []).filter((inv) => inv.fileKey);
 
   const { data: sectors } = useQuery<{ id: string; name: string }[]>({
     queryKey: ["sectors"],
@@ -71,7 +72,6 @@ export default function NovoEquipamentoPage() {
       ...f,
       supplierId: id,
       supplierName: s.name,
-      ownerName: f.ownerName || s.name,
       ownerContact: f.ownerContact || s.phone || s.email || "",
       ownerDocument: f.ownerDocument || s.cnpj || "",
     }));
@@ -201,11 +201,11 @@ export default function NovoEquipamentoPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Fornecedor / proprietário</CardTitle>
+          <CardTitle>Empresa (pessoa jurídica)</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <Label>Fornecedor cadastrado</Label>
+            <Label>Empresa cadastrada</Label>
             <select
               className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
               value={form.supplierId}
@@ -227,24 +227,20 @@ export default function NovoEquipamentoPage() {
             </p>
           </div>
           <div>
-            <Label>Fornecedor / empresa *</Label>
+            <Label>Razão social *</Label>
             <Input
               value={form.supplierName}
               onChange={(e) => set("supplierName", e.target.value)}
-              placeholder="Nome do fornecedor"
+              placeholder="Nome da empresa"
             />
           </div>
           <div>
-            <Label>Proprietário *</Label>
-            <Input value={form.ownerName} onChange={(e) => set("ownerName", e.target.value)} />
-          </div>
-          <div>
-            <Label>Contato do proprietário *</Label>
-            <Input value={form.ownerContact} onChange={(e) => set("ownerContact", e.target.value)} />
-          </div>
-          <div>
-            <Label>CNPJ/CPF</Label>
+            <Label>CNPJ *</Label>
             <Input value={form.ownerDocument} onChange={(e) => set("ownerDocument", e.target.value)} />
+          </div>
+          <div className="sm:col-span-2">
+            <Label>Contato (telefone ou e-mail) *</Label>
+            <Input value={form.ownerContact} onChange={(e) => set("ownerContact", e.target.value)} />
           </div>
         </CardContent>
       </Card>
@@ -255,36 +251,33 @@ export default function NovoEquipamentoPage() {
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <Label>Vincular a uma NF já cadastrada</Label>
+            <Label>Vincular a uma NF cadastrada (opcional)</Label>
             <select
               className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
               value={form.invoiceId}
               onChange={(e) => set("invoiceId", e.target.value)}
             >
-              <option value="">— Nenhuma / criar nova abaixo —</option>
-              {(invoices ?? []).map((inv) => (
+              <option value="">— Nenhuma por enquanto —</option>
+              {invoicesWithAttachment.map((inv) => (
                 <option key={inv.id} value={inv.id}>
                   NF {inv.number}
+                  {inv.fileName ? ` · ${inv.fileName}` : ""}
                 </option>
               ))}
             </select>
             <p className="mt-1 text-xs text-slate-500">
-              Vários equipamentos podem compartilhar a mesma nota fiscal. Selecione uma existente ou
-              informe o número de uma nova.
+              Uma NF com anexo pode ser compartilhada por vários equipamentos.{" "}
+              <Link href="/notas-fiscais" className="text-emerald-600 hover:underline">
+                Cadastre a nota fiscal
+              </Link>{" "}
+              (com anexo obrigatório) e vincule aqui ou depois na tela de Notas Fiscais.
             </p>
+            {invoicesWithAttachment.length === 0 && (
+              <p className="mt-1 text-xs text-amber-700">
+                Nenhuma NF com anexo disponível. Cadastre em Notas Fiscais antes de vincular.
+              </p>
+            )}
           </div>
-          {!form.invoiceId && (
-            <>
-              <div>
-                <Label>Número da NF (nova)</Label>
-                <Input value={form.invoiceNumber} onChange={(e) => set("invoiceNumber", e.target.value)} />
-              </div>
-              <div>
-                <Label>Data de emissão</Label>
-                <Input type="date" value={form.invoiceDate} onChange={(e) => set("invoiceDate", e.target.value)} />
-              </div>
-            </>
-          )}
         </CardContent>
       </Card>
 

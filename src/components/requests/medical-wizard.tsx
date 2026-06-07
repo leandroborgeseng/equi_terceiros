@@ -350,16 +350,17 @@ export function MedicalRequestWizard() {
               )}
               {step === 4 && (
                 <>
+                  <p className="text-sm text-slate-500">Empresa proprietária do equipamento (pessoa jurídica).</p>
                   <div>
-                    <Label>Fornecedor</Label>
+                    <Label>Razão social *</Label>
                     <Input {...form.register("supplierName")} />
                   </div>
                   <div>
-                    <Label>Proprietário</Label>
-                    <Input {...form.register("ownerName")} />
+                    <Label>CNPJ *</Label>
+                    <Input {...form.register("ownerDocument")} />
                   </div>
                   <div>
-                    <Label>Contatos</Label>
+                    <Label>Contato (telefone ou e-mail) *</Label>
                     <Input {...form.register("ownerContact")} />
                   </div>
                 </>
