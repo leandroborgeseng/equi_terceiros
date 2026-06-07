@@ -9,7 +9,7 @@ import { RequestStatusBadge } from "@/components/requests/status-badge";
 import type { RequestStatus } from "@/lib/enums";
 import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, Copy } from "lucide-react";
 
 type Row = {
   id: string;
@@ -144,7 +144,13 @@ export default function EquipamentosPage() {
                 )}{" "}
                 · {formatDate(r.plannedDate)}
               </p>
-              <div className="flex gap-3 pt-1 text-sm">
+              <div className="flex flex-wrap gap-3 pt-1 text-sm">
+                <Link
+                  href={`/equipamentos/novo?from=${r.id}`}
+                  className="inline-flex items-center gap-1 text-blue-700 hover:underline"
+                >
+                  <Copy className="h-3.5 w-3.5" /> Duplicar
+                </Link>
                 <Link
                   href={`/equipamentos/${r.id}/cadastro`}
                   className="text-slate-600 hover:underline"

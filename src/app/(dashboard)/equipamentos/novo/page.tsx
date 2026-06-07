@@ -1,12 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input, Textarea, Label } from "@/components/ui/input";
+import { Input, Label } from "@/components/ui/input";
+import { Copy } from "lucide-react";
+import {
+  NOVO_EQUIPAMENTO_DEFAULTS,
+  buildDuplicateForm,
+  type DuplicateSourceRequest,
+  type NovoEquipamentoForm,
+} from "@/lib/duplicate-equipment";
 
 type Supplier = {
   id: string;
@@ -19,26 +26,36 @@ type Supplier = {
 
 export default function NovoEquipamentoPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const fromId = searchParams.get("from");
+  const prefilled = useRef(false);
+
   const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState({
-    equipmentName: "",
-    brand: "",
-    model: "",
-    serialNumber: "",
-    equipmentClass: "B",
-    entryType: "FORNECEDOR",
-    usageSector: "",
-    supplierId: "",
-    supplierName: "",
-    ownerContact: "",
-    ownerDocument: "",
-    originPatrimony: "",
-    storageLocation: "",
-    boardAuthorization: "",
-    observations: "",
-    alreadyInPark: false,
-    invoiceId: "",
+  const [duplicateSource, setDuplicateSource] = useState<string | null>(null);
+  const [form, setForm] = useState<NovoEquipamentoForm>(NOVO_EQUIPAMENTO_DEFAULTS);
+
+  const {
+    data: sourceRequest,
+    isLoading: loadingSource,
+    isError: sourceError,
+  } = useQuery<DuplicateSourceRequest>({
+    queryKey: ["duplicate-source", fromId],
+    queryFn: async () => {
+      const res = await fetch(`/api/requests/${fromId}`);
+      if (!res.ok) throw new Error("Equipamento de origem não encontrado");
+      return res.json();
+    },
+    enabled: !!fromId,
+    retry: false,
   });
+
+  useEffect(() => {
+    if (!sourceRequest || prefilled.current) return;
+    prefilled.current = true;
+    const { form: next, sourceLabel } = buildDuplicateForm(sourceRequest);
+    setForm(next);
+    setDuplicateSource(sourceLabel);
+  }, [sourceRequest]);
 
   const { data: suppliers } = useQuery<Supplier[]>({
     queryKey: ["suppliers"],
@@ -59,7 +76,7 @@ export default function NovoEquipamentoPage() {
     queryFn: () => fetch("/api/sectors").then((r) => r.json()),
   });
 
-  const set = (k: keyof typeof form, v: string | boolean) => setForm((f) => ({ ...f, [k]: v }));
+  const set = (k: keyof NovoEquipamentoForm, v: string | boolean) => setForm((f) => ({ ...f, [k]: v }));
 
   const onSupplierSelect = (id: string) => {
     const s = suppliers?.find((x) => x.id === id);
@@ -67,7 +84,6 @@ export default function NovoEquipamentoPage() {
       setForm((f) => ({ ...f, supplierId: "" }));
       return;
     }
-    // Fornecedor pré-cadastrado: preenche automaticamente os campos obrigatórios
     setForm((f) => ({
       ...f,
       supplierId: id,
@@ -92,15 +108,53 @@ export default function NovoEquipamentoPage() {
     onError: (e: Error) => setError(e.message),
   });
 
+  const isDuplicate = !!fromId;
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Novo equipamento</h1>
+        <h1 className="text-2xl font-bold text-slate-900">
+          {isDuplicate ? "Duplicar equipamento" : "Novo equipamento"}
+        </h1>
         <p className="text-sm text-slate-500">
-          Cadastro originado pela Engenharia Clínica. Entra direto em homologação (checklist +
-          inspeção).
+          {isDuplicate
+            ? "Dados copiados do cadastro anterior. Ajuste série, patrimônio e demais campos pertinentes."
+            : "Cadastro originado pela Engenharia Clínica. Entra direto em homologação (checklist + inspeção)."}
         </p>
       </div>
+
+      {loadingSource && isDuplicate && (
+        <p className="text-sm text-slate-500">Carregando dados para duplicar...</p>
+      )}
+
+      {sourceError && isDuplicate && (
+        <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+          Não foi possível carregar o equipamento de origem.{" "}
+          <Link href="/equipamentos/novo" className="font-medium underline">
+            Cadastrar em branco
+          </Link>
+        </div>
+      )}
+
+      {duplicateSource && (
+        <Card className="border-blue-200 bg-blue-50/50">
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
+            <div className="flex items-start gap-2 text-sm text-blue-900">
+              <Copy className="mt-0.5 h-4 w-4 shrink-0" />
+              <div>
+                <p className="font-medium">Duplicando de {duplicateSource}</p>
+                <p className="text-xs text-blue-700">
+                  Número de série, patrimônio e autorização da diretoria foram limpos — preencha com os
+                  dados do novo item.
+                </p>
+              </div>
+            </div>
+            <Link href="/equipamentos/novo" className="text-xs text-blue-700 hover:underline">
+              Começar em branco
+            </Link>
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="border-amber-200 bg-amber-50/40">
         <CardContent className="py-4">
@@ -139,7 +193,12 @@ export default function NovoEquipamentoPage() {
           </div>
           <div>
             <Label>Número de série *</Label>
-            <Input value={form.serialNumber} onChange={(e) => set("serialNumber", e.target.value)} />
+            <Input
+              value={form.serialNumber}
+              onChange={(e) => set("serialNumber", e.target.value)}
+              placeholder={isDuplicate ? "Informe a série do novo equipamento" : undefined}
+              autoFocus={isDuplicate}
+            />
           </div>
           <div>
             <Label>Patrimônio de origem</Label>
@@ -286,7 +345,11 @@ export default function NovoEquipamentoPage() {
       )}
 
       <div className="flex items-center gap-3">
-        <Button size="lg" onClick={() => mutation.mutate()} disabled={mutation.isPending}>
+        <Button
+          size="lg"
+          onClick={() => mutation.mutate()}
+          disabled={mutation.isPending || (isDuplicate && loadingSource)}
+        >
           {mutation.isPending
             ? "Salvando..."
             : form.alreadyInPark

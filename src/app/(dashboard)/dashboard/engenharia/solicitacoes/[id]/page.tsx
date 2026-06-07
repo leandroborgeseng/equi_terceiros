@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { RequestStatusBadge } from "@/components/requests/status-badge";
 import { DELETABLE_STATUSES } from "@/lib/validators/request";
-import { Trash2 } from "lucide-react";
+import { Trash2, Copy } from "lucide-react";
 import { ChecklistPanel } from "@/components/ec/checklist-panel";
 import { InspectionPanel } from "@/components/ec/inspection-panel";
 import { LifecyclePanel } from "@/components/ec/lifecycle-panel";
@@ -54,7 +54,15 @@ export default function EngenhariaRequestDetailPage() {
           </h1>
           <p className="text-slate-500">S/N {request.serialNumber}</p>
         </div>
-        <RequestStatusBadge status={request.status as RequestStatus} />
+        <div className="flex flex-col items-end gap-2">
+          <RequestStatusBadge status={request.status as RequestStatus} />
+          <Link
+            href={`/equipamentos/novo?from=${id}`}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-800 hover:bg-blue-100"
+          >
+            <Copy className="h-3.5 w-3.5" /> Duplicar equipamento
+          </Link>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
