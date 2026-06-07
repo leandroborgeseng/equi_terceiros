@@ -13,6 +13,7 @@ export function generateLabelPdf(data: {
   brand: string;
   model: string;
   serialNumber: string;
+  qrDataUrl?: string;
 }) {
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: [90, 50] });
   const statusColors: Record<string, [number, number, number]> = {
@@ -27,16 +28,32 @@ export function generateLabelPdf(data: {
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(10);
   doc.text(data.status.replace(/_/g, " "), 5, 8);
+
+  // QR Code (canto inferior direito) — leva à consulta pública do equipamento
+  const hasQr = !!data.qrDataUrl;
+  const qrSize = 24;
+  const qrX = 90 - qrSize - 3;
+  const qrY = 15;
+  if (hasQr) {
+    doc.addImage(data.qrDataUrl!, "PNG", qrX, qrY, qrSize, qrSize);
+    doc.setTextColor(120, 120, 120);
+    doc.setFontSize(5);
+    doc.text("Aponte a câmera", qrX + qrSize / 2, qrY + qrSize + 2.5, { align: "center" });
+  }
+
+  // Largura do texto à esquerda (evita sobrepor o QR)
+  const textWidth = hasQr ? qrX - 7 : 80;
   doc.setTextColor(0, 0, 0);
   doc.setFontSize(8);
   doc.text(`OS: ${data.protocol}`, 5, 18);
-  doc.text(`${data.equipmentName} — ${data.brand} ${data.model}`, 5, 24);
-  doc.text(`S/N: ${data.serialNumber}`, 5, 30);
-  doc.text(`Setor: ${data.sector ?? "—"} | ${data.date}`, 5, 36);
-  if (data.validUntil) doc.text(`Validade: ${data.validUntil}`, 5, 42);
-  if (data.restriction) doc.text(`Restrição: ${data.restriction}`, 5, 46);
-  if (data.blockReason) doc.text(`Bloqueio: ${data.blockReason}`, 5, 46);
-  if (data.technicalLead) doc.text(`RT: ${data.technicalLead}`, 60, 42);
+  doc.text(`${data.equipmentName} — ${data.brand} ${data.model}`, 5, 24, { maxWidth: textWidth });
+  doc.text(`S/N: ${data.serialNumber}`, 5, 32);
+  doc.text(`Setor: ${data.sector ?? "—"}`, 5, 38, { maxWidth: textWidth });
+  doc.text(`${data.date}`, 5, 44);
+  if (data.validUntil) doc.text(`Validade: ${data.validUntil}`, 28, 44);
+  if (data.restriction) doc.text(`Restrição: ${data.restriction}`, 5, 48, { maxWidth: textWidth });
+  if (data.blockReason) doc.text(`Bloqueio: ${data.blockReason}`, 5, 48, { maxWidth: textWidth });
+  if (data.technicalLead && !hasQr) doc.text(`RT: ${data.technicalLead}`, 60, 44);
   return doc.output("arraybuffer");
 }
 

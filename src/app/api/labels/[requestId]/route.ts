@@ -4,9 +4,11 @@ import { prisma } from "@/lib/prisma";
 import { generateLabelPdf } from "@/lib/pdf";
 import { formatDate } from "@/lib/utils";
 import { canHomologate } from "@/lib/rbac";
+import { randomUUID } from "crypto";
+import QRCode from "qrcode";
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ requestId: string }> }
 ) {
   const session = await auth();
@@ -15,12 +17,31 @@ export async function GET(
   }
 
   const { requestId } = await params;
-  const request = await prisma.equipmentRequest.findUnique({
+  let request = await prisma.equipmentRequest.findUnique({
     where: { id: requestId },
     include: { releaseStatus: true },
   });
 
   if (!request) return NextResponse.json({ error: "Não encontrado" }, { status: 404 });
+
+  // Garante um token de QR (cadastros antigos podem não ter)
+  if (!request.qrToken) {
+    request = await prisma.equipmentRequest.update({
+      where: { id: requestId },
+      data: { qrToken: randomUUID() },
+      include: { releaseStatus: true },
+    });
+  }
+
+  // URL pública de consulta do equipamento (apontada pelo QR Code)
+  const baseUrl =
+    process.env.NEXTAUTH_URL?.replace(/\/$/, "") ?? new URL(req.url).origin;
+  const consultUrl = `${baseUrl}/equipamento/${request.qrToken}`;
+  const qrDataUrl = await QRCode.toDataURL(consultUrl, {
+    margin: 0,
+    width: 240,
+    errorCorrectionLevel: "M",
+  });
 
   const labelStatus = request.releaseStatus?.labelStatus ?? "PENDENTE_ANALISE";
   const pdf = generateLabelPdf({
@@ -36,6 +57,7 @@ export async function GET(
     brand: request.brand,
     model: request.model,
     serialNumber: request.serialNumber,
+    qrDataUrl,
   });
 
   return new NextResponse(pdf, {

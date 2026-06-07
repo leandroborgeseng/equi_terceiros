@@ -10,6 +10,7 @@ const publicPaths = [
   "/login",
   "/solicitar",
   "/fornecedor",
+  "/equipamento/",
   "/api/auth",
   "/api/public",
   "/api/health",
