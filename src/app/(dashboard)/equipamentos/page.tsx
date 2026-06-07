@@ -9,8 +9,30 @@ import { RequestStatusBadge } from "@/components/requests/status-badge";
 import type { RequestStatus } from "@/lib/enums";
 import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Copy, Printer, Loader2 } from "lucide-react";
+import {
+  Search,
+  Plus,
+  Copy,
+  Printer,
+  Loader2,
+  ClipboardList,
+  ChevronRight,
+  Stethoscope,
+  Building2,
+  X,
+} from "lucide-react";
 import { labelsPerA4Page } from "@/lib/label-layout";
+import {
+  buildDoctorOptions,
+  buildSupplierOptions,
+  labelFromFilterKey,
+  matchesDoctorFilter,
+  matchesSupplierFilter,
+} from "@/lib/equipment-filters";
+import {
+  EquipmentThumbnails,
+  type EquipmentThumbnail,
+} from "@/components/equipamentos/equipment-thumbnails";
 
 type Row = {
   id: string;
@@ -23,11 +45,13 @@ type Row = {
   status: string;
   equipmentClass?: string | null;
   usageSector: string;
-  doctor?: { name: string } | null;
+  doctor?: { id: string; name: string } | null;
   requesterName?: string | null;
   submittedViaPublic?: boolean;
+  supplier?: { id: string; name: string } | null;
   supplierName: string;
   plannedDate: string;
+  thumbnails?: EquipmentThumbnail[];
 };
 
 const STATUS_FILTERS = [
@@ -47,27 +71,37 @@ export default function EquipamentosPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string>("TODOS");
   const [classe, setClasse] = useState<string>("TODAS");
+  const [doctorFilter, setDoctorFilter] = useState("");
+  const [supplierFilter, setSupplierFilter] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [printing, setPrinting] = useState(false);
   const [printError, setPrintError] = useState<string | null>(null);
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["equipamentos"],
-    queryFn: () => fetch("/api/requests?queue=engenharia").then((r) => r.json()) as Promise<Row[]>,
+    queryFn: () =>
+      fetch("/api/requests?queue=engenharia&thumbnails=1").then((r) => r.json()) as Promise<Row[]>,
   });
+
+  const doctorOptions = useMemo(() => buildDoctorOptions(rows), [rows]);
+  const supplierOptions = useMemo(() => buildSupplierOptions(rows), [rows]);
 
   const filtered = useMemo(() => {
     return rows.filter((r) => {
       if (status !== "TODOS" && r.status !== status) return false;
       if (classe !== "TODAS" && r.equipmentClass !== classe) return false;
+      if (doctorFilter && !matchesDoctorFilter(r, doctorFilter)) return false;
+      if (supplierFilter && !matchesSupplierFilter(r, supplierFilter)) return false;
       if (search) {
         const q = search.toLowerCase();
-        const hay = `${r.serialNumber} ${r.equipmentName} ${r.protocol} ${r.internalOs ?? ""} ${r.doctor?.name ?? ""} ${r.requesterName ?? ""} ${r.usageSector}`.toLowerCase();
+        const hay = `${r.serialNumber} ${r.equipmentName} ${r.protocol} ${r.internalOs ?? ""} ${r.doctor?.name ?? ""} ${r.requesterName ?? ""} ${r.supplierName} ${r.supplier?.name ?? ""} ${r.usageSector}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
     });
-  }, [rows, status, classe, search]);
+  }, [rows, status, classe, search, doctorFilter, supplierFilter]);
+
+  const hasEntityFilter = !!(doctorFilter || supplierFilter);
 
   const filteredIds = useMemo(() => new Set(filtered.map((r) => r.id)), [filtered]);
   const selectedInView = [...selected].filter((id) => filteredIds.has(id));
@@ -175,6 +209,72 @@ export default function EquipamentosPage() {
             </button>
           ))}
         </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label className="mb-1 flex items-center gap-1.5 text-xs font-medium text-slate-600">
+              <Stethoscope className="h-3.5 w-3.5" />
+              Médico / solicitante
+            </label>
+            <select
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              value={doctorFilter}
+              onChange={(e) => setDoctorFilter(e.target.value)}
+            >
+              <option value="">Todos</option>
+              {doctorOptions.map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 flex items-center gap-1.5 text-xs font-medium text-slate-600">
+              <Building2 className="h-3.5 w-3.5" />
+              Fornecedor (PJ)
+            </label>
+            <select
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              value={supplierFilter}
+              onChange={(e) => setSupplierFilter(e.target.value)}
+            >
+              <option value="">Todos</option>
+              {supplierOptions.map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        {hasEntityFilter && (
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/60 px-3 py-2 text-sm text-emerald-900">
+            <span className="font-medium">
+              {filtered.length} equipamento(s)
+            </span>
+            {doctorFilter && (
+              <span className="rounded-full bg-white px-2.5 py-0.5 text-xs ring-1 ring-emerald-200">
+                {labelFromFilterKey(doctorFilter, doctorOptions)}
+              </span>
+            )}
+            {supplierFilter && (
+              <span className="rounded-full bg-white px-2.5 py-0.5 text-xs ring-1 ring-emerald-200">
+                {labelFromFilterKey(supplierFilter, supplierOptions)}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setDoctorFilter("");
+                setSupplierFilter("");
+              }}
+              className="ml-auto inline-flex items-center gap-1 text-xs text-emerald-700 hover:underline"
+            >
+              <X className="h-3.5 w-3.5" />
+              Limpar filtros
+            </button>
+          </div>
+        )}
       </div>
 
       {filtered.length > 0 && (
@@ -209,9 +309,9 @@ export default function EquipamentosPage() {
 
       {isLoading && <p className="text-sm text-slate-500">Carregando...</p>}
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className={`grid gap-3 ${hasEntityFilter ? "lg:grid-cols-2 xl:grid-cols-3" : "sm:grid-cols-2"}`}>
         {filtered.map((r) => (
-          <Card key={r.id}>
+          <Card key={r.id} className={hasEntityFilter ? "overflow-hidden" : undefined}>
             <CardContent className="space-y-2 p-4">
               <div className="flex items-start justify-between gap-2">
                 <label className="mt-1 flex cursor-pointer items-start gap-2">
@@ -242,27 +342,41 @@ export default function EquipamentosPage() {
                 {r.usageSector} · {r.doctor?.name ?? r.requesterName ?? "—"}
                 {r.submittedViaPublic && (
                   <span className="ml-1 rounded bg-blue-50 px-1 text-blue-700">público</span>
+                )}
+                {hasEntityFilter && (
+                  <>
+                    {" "}
+                    · {r.supplier?.name ?? r.supplierName ?? "—"}
+                  </>
                 )}{" "}
                 · {formatDate(r.plannedDate)}
               </p>
-              <div className="flex flex-wrap gap-3 pt-1 text-sm">
+              <EquipmentThumbnails
+                requestId={r.id}
+                thumbnails={r.thumbnails ?? []}
+                max={hasEntityFilter ? 6 : 4}
+              />
+              <div className="flex flex-wrap gap-2 pt-2">
                 <Link
-                  href={`/equipamentos/novo?from=${r.id}`}
-                  className="inline-flex items-center gap-1 text-blue-700 hover:underline"
+                  href={`/dashboard/engenharia/solicitacoes/${r.id}`}
+                  className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-medium text-white shadow-sm hover:bg-emerald-500"
                 >
-                  <Copy className="h-3.5 w-3.5" /> Duplicar
+                  Avaliar / detalhe
+                  <ChevronRight className="h-3.5 w-3.5" />
                 </Link>
                 <Link
                   href={`/equipamentos/${r.id}/cadastro`}
-                  className="text-slate-600 hover:underline"
+                  className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-200"
                 >
+                  <ClipboardList className="h-3.5 w-3.5" />
                   Cadastro EC
                 </Link>
                 <Link
-                  href={`/dashboard/engenharia/solicitacoes/${r.id}`}
-                  className="text-emerald-700 hover:underline"
+                  href={`/equipamentos/novo?from=${r.id}`}
+                  className="inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-medium text-blue-800 hover:bg-blue-100"
                 >
-                  Avaliar / detalhe
+                  <Copy className="h-3.5 w-3.5" />
+                  Duplicar
                 </Link>
               </div>
             </CardContent>

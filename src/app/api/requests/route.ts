@@ -10,6 +10,7 @@ import { generateProtocol, generateSupplierToken } from "@/lib/utils";
 import { createAuditLog } from "@/lib/audit";
 import { canCreateRequest } from "@/lib/rbac";
 import { suggestEquipmentClass } from "@/lib/classification";
+import { buildFileUrl } from "@/lib/file-storage";
 import { randomUUID } from "crypto";
 
 export async function GET(req: Request) {
@@ -19,6 +20,11 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const status = searchParams.get("status");
   const queue = searchParams.get("queue");
+  const doctorId = searchParams.get("doctorId");
+  const requesterName = searchParams.get("requesterName");
+  const supplierId = searchParams.get("supplierId");
+  const supplierName = searchParams.get("supplierName");
+  const withThumbnails = searchParams.get("thumbnails") === "1";
 
   const where: Record<string, unknown> = {};
 
@@ -56,6 +62,19 @@ export async function GET(req: Request) {
     ];
   }
 
+  if (doctorId) {
+    where.doctorId = doctorId;
+  } else if (requesterName) {
+    where.requesterName = requesterName;
+    where.doctorId = null;
+  }
+
+  if (supplierId) {
+    where.supplierId = supplierId;
+  } else if (supplierName) {
+    where.supplierName = supplierName;
+  }
+
   const requests = await prisma.equipmentRequest.findMany({
     where,
     include: {
@@ -69,7 +88,36 @@ export async function GET(req: Request) {
     orderBy: [{ isUrgent: "desc" }, { plannedDate: "asc" }, { createdAt: "desc" }],
   });
 
-  return NextResponse.json(requests);
+  if (!withThumbnails || requests.length === 0) {
+    return NextResponse.json(requests);
+  }
+
+  const requestIds = requests.map((r) => r.id);
+  const images = await prisma.equipmentImage.findMany({
+    where: { requestId: { in: requestIds } },
+    orderBy: { createdAt: "asc" },
+    select: { id: true, requestId: true, photoType: true, storageKey: true, fileName: true },
+  });
+
+  const thumbsByRequest = new Map<string, { id: string; photoType: string; url: string; fileName: string }[]>();
+  for (const img of images) {
+    if (!img.requestId) continue;
+    const list = thumbsByRequest.get(img.requestId) ?? [];
+    list.push({
+      id: img.id,
+      photoType: img.photoType,
+      url: buildFileUrl(img.storageKey),
+      fileName: img.fileName,
+    });
+    thumbsByRequest.set(img.requestId, list);
+  }
+
+  return NextResponse.json(
+    requests.map((r) => ({
+      ...r,
+      thumbnails: thumbsByRequest.get(r.id) ?? [],
+    }))
+  );
 }
 
 function mergeDraft(body: Record<string, unknown>) {

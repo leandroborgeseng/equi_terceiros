@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -95,10 +95,18 @@ function LoadingSkeleton() {
   );
 }
 
+const VALID_TABS: TabId[] = ["resumo", "documentos", "termo", "inspecao", "ciclo", "fotos"];
+
+function initialTabFromUrl(param: string | null): TabId {
+  if (param && VALID_TABS.includes(param as TabId)) return param as TabId;
+  return "documentos";
+}
+
 export function RequestDetailView({ requestId }: { requestId: string }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
-  const [tab, setTab] = useState<TabId>("documentos");
+  const [tab, setTab] = useState<TabId>(() => initialTabFromUrl(searchParams.get("tab")));
 
   const { data: request, isLoading } = useQuery({
     queryKey: ["request", requestId],

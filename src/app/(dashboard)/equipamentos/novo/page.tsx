@@ -14,21 +14,14 @@ import {
   type DuplicateSourceRequest,
   type NovoEquipamentoForm,
 } from "@/lib/duplicate-equipment";
-
-type Supplier = {
-  id: string;
-  name: string;
-  email: string;
-  cnpj?: string | null;
-  phone?: string | null;
-  address?: string | null;
-};
+import { supplierFieldsFromOption, type SupplierOption } from "@/lib/supplier-form";
 
 export default function NovoEquipamentoPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const fromId = searchParams.get("from");
   const prefilled = useRef(false);
+  const appliedSupplierId = useRef<string | null>(null);
 
   const [error, setError] = useState<string | null>(null);
   const [duplicateSource, setDuplicateSource] = useState<string | null>(null);
@@ -57,10 +50,19 @@ export default function NovoEquipamentoPage() {
     setDuplicateSource(sourceLabel);
   }, [sourceRequest]);
 
-  const { data: suppliers } = useQuery<Supplier[]>({
+  const { data: suppliers } = useQuery<SupplierOption[]>({
     queryKey: ["suppliers"],
     queryFn: () => fetch("/api/suppliers").then((r) => r.json()),
   });
+
+  useEffect(() => {
+    if (!form.supplierId || !suppliers?.length) return;
+    if (appliedSupplierId.current === form.supplierId) return;
+    const s = suppliers.find((x) => x.id === form.supplierId);
+    if (!s) return;
+    appliedSupplierId.current = form.supplierId;
+    setForm((f) => ({ ...f, ...supplierFieldsFromOption(s) }));
+  }, [form.supplierId, suppliers]);
 
   const { data: invoices } = useQuery<
     { id: string; number: string; issueDate?: string | null; fileKey?: string | null; fileName?: string | null }[]
@@ -79,18 +81,15 @@ export default function NovoEquipamentoPage() {
   const set = (k: keyof NovoEquipamentoForm, v: string | boolean) => setForm((f) => ({ ...f, [k]: v }));
 
   const onSupplierSelect = (id: string) => {
-    const s = suppliers?.find((x) => x.id === id);
-    if (!s) {
+    if (!id) {
+      appliedSupplierId.current = null;
       setForm((f) => ({ ...f, supplierId: "" }));
       return;
     }
-    setForm((f) => ({
-      ...f,
-      supplierId: id,
-      supplierName: s.name,
-      ownerContact: f.ownerContact || s.phone || s.email || "",
-      ownerDocument: f.ownerDocument || s.cnpj || "",
-    }));
+    const s = suppliers?.find((x) => x.id === id);
+    if (!s) return;
+    appliedSupplierId.current = id;
+    setForm((f) => ({ ...f, ...supplierFieldsFromOption(s) }));
   };
 
   const mutation = useMutation({
@@ -274,15 +273,17 @@ export default function NovoEquipamentoPage() {
               {(suppliers ?? []).map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
+                  {s.cnpj ? ` · ${s.cnpj}` : ""}
                 </option>
               ))}
             </select>
             <p className="mt-1 text-xs text-slate-500">
-              Não está na lista?{" "}
+              Ao selecionar, razão social, CNPJ e contato são preenchidos automaticamente. Não está na
+              lista?{" "}
               <Link href="/fornecedores" className="text-emerald-600 hover:underline">
                 Cadastrar fornecedor
               </Link>{" "}
-              ou preencha o nome abaixo.
+              ou digite manualmente abaixo.
             </p>
           </div>
           <div>
