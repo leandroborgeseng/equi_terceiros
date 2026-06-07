@@ -9,6 +9,7 @@ import {
 } from "@/lib/validators/request";
 import { createAuditLog } from "@/lib/audit";
 import { isClinicalEngineering } from "@/lib/rbac";
+import { buildFileUrl } from "@/lib/file-storage";
 
 export async function GET(
   _req: Request,
@@ -29,7 +30,7 @@ export async function GET(
       releaseStatus: true,
       responsibilityTerm: true,
       accessInvite: { select: { key: true, requesterName: true } },
-      invoice: { select: { id: true, number: true, issueDate: true, fileName: true } },
+      invoice: { select: { id: true, number: true, issueDate: true, fileName: true, fileKey: true } },
       storageRecords: { orderBy: { storedAt: "desc" } },
       withdrawalRecords: { orderBy: { withdrawnAt: "desc" } },
       equipment: { include: { images: { include: { metadata: true } } } },
@@ -42,7 +43,14 @@ export async function GET(
     return NextResponse.json({ error: "Sem permissão" }, { status: 403 });
   }
 
-  return NextResponse.json(request);
+  const invoice = request.invoice
+    ? {
+        ...request.invoice,
+        previewUrl: request.invoice.fileKey ? buildFileUrl(request.invoice.fileKey) : null,
+      }
+    : null;
+
+  return NextResponse.json({ ...request, invoice });
 }
 
 export async function PATCH(

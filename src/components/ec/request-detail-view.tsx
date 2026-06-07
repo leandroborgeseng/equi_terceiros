@@ -33,6 +33,7 @@ import { formatDate, formatDateTime } from "@/lib/utils";
 import { ENTRY_TYPE_LABELS, EQUIPMENT_CLASS_LABELS, type RequestStatus, type EquipmentClass, type EntryType } from "@/lib/enums";
 import { DOC_CHECKLIST_ITEMS } from "@/lib/validators/request";
 import { FilePreviewGrid, type PreviewFile, isImageFile, fileUrlFromKey } from "@/components/ec/file-preview";
+import { InvoiceLinkButton } from "@/components/ec/invoice-link-button";
 
 type TabId = "resumo" | "documentos" | "termo" | "inspecao" | "ciclo" | "fotos";
 
@@ -110,6 +111,22 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
     enabled: !!requestId,
   });
 
+  const invoiceId = request?.invoiceId ?? request?.invoice?.id;
+
+  const { data: invoiceFile } = useQuery({
+    queryKey: ["invoice-file", invoiceId],
+    queryFn: async () => {
+      const res = await fetch(`/api/invoices/${invoiceId}/file`);
+      if (!res.ok) return null;
+      return res.json() as Promise<{
+        url: string;
+        fileName: string | null;
+        fileKey: string;
+      } | null>;
+    },
+    enabled: !!invoiceId,
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async () => {
       const res = await fetch(`/api/requests/${requestId}`, { method: "DELETE" });
@@ -175,8 +192,33 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
       );
     }
 
+    const inv = request.invoice as {
+      id: string;
+      number: string;
+      fileKey?: string | null;
+      fileName?: string | null;
+      previewUrl?: string | null;
+    } | null;
+    const invKey = inv?.fileKey ?? invoiceFile?.fileKey;
+    const invUrl = inv?.fileKey
+      ? fileUrlFromKey(inv.fileKey)
+      : inv?.previewUrl ?? invoiceFile?.url;
+    if (invKey && invUrl) {
+      const invName = inv?.fileName ?? invoiceFile?.fileName ?? invKey.split("/").pop() ?? "nota-fiscal";
+      add(
+        {
+          id: `invoice-${inv?.id ?? invoiceId}`,
+          label: `NF ${inv?.number ?? "vinculada"}`,
+          fileName: invName,
+          url: invUrl,
+          isImage: isImageFile(invName, invKey),
+        },
+        invKey
+      );
+    }
+
     return files;
-  }, [request, gallery]);
+  }, [request, gallery, invoiceFile, invoiceId]);
 
   const workflow = useMemo(() => {
     if (!request) return null;
@@ -283,6 +325,7 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
             <FileText className="h-3.5 w-3.5" />
             PDF termo
           </a>
+          <InvoiceLinkButton requestId={requestId} invoice={request.invoice} />
         </div>
       </div>
 
@@ -434,14 +477,16 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
                 <InfoRow label="Razão social" value={request.supplierName} />
                 <InfoRow label="CNPJ" value={request.ownerDocument} />
                 <InfoRow label="Contato" value={request.ownerContact} />
-                {request.invoice && (
-                  <InfoRow label="Nota fiscal">
-                    <Link href="/notas-fiscais" className="text-emerald-700 hover:underline">
+                <InfoRow label="Nota fiscal">
+                  {request.invoice ? (
+                    <span>
                       NF {request.invoice.number}
-                    </Link>
-                    {request.invoice.fileName ? ` · ${request.invoice.fileName}` : ""}
-                  </InfoRow>
-                )}
+                      {request.invoice.fileName ? ` · ${request.invoice.fileName}` : ""}
+                    </span>
+                  ) : (
+                    <span className="text-slate-400">Não vinculada</span>
+                  )}
+                </InfoRow>
               </CardContent>
             </Card>
 
