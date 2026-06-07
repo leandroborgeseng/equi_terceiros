@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { meets72hRule } from "@/lib/classification";
 
 const MS_DAY = 86400000;
 
@@ -74,6 +75,39 @@ export async function runAlertsJob() {
         });
         created++;
       }
+    }
+  }
+
+  // Regra das 72h: eletivos ainda não liberados com uso previsto em menos de 72h
+  const electives = await prisma.equipmentRequest.findMany({
+    where: {
+      flowType: "ELETIVO",
+      status: {
+        in: ["AGUARDANDO_CADASTRO", "AGUARDANDO_DOCUMENTOS", "PENDENTE_DOCUMENTOS", "AGUARDANDO_INSPECAO"],
+      },
+    },
+    select: { id: true, protocol: true, requestDate: true, plannedDate: true },
+  });
+
+  for (const r of electives) {
+    if (!r.plannedDate) continue;
+    if (r.plannedDate.getTime() < now.getTime()) continue; // já passou
+    if (meets72hRule(r.requestDate ?? now, r.plannedDate)) continue; // ok, tem antecedência
+    const exists = await prisma.alert.findFirst({
+      where: { requestId: r.id, type: "PRAZO_72H", resolved: false },
+    });
+    if (!exists) {
+      await prisma.alert.create({
+        data: {
+          type: "PRAZO_72H",
+          severity: "URGENT_7_DIAS",
+          title: `Prazo de 72h — ${r.protocol}`,
+          message: "Eletivo com uso previsto em menos de 72h e ainda não liberado.",
+          requestId: r.id,
+          dueDate: r.plannedDate,
+        },
+      });
+      created++;
     }
   }
 

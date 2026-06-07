@@ -18,11 +18,11 @@ const sections = [
     enabled: true,
   },
   {
-    href: "/configuracoes",
+    href: "/configuracoes/setores",
     title: "Setores",
-    desc: "Cadastro de setores assistenciais (em breve)",
+    desc: "Cadastro de setores assistenciais usados nos formulários",
     icon: Building2,
-    enabled: false,
+    enabled: true,
   },
   {
     href: "/configuracoes",

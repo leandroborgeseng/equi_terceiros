@@ -37,6 +37,15 @@ export default function CentroCirurgicoPage() {
         </p>
       </div>
 
+      <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
+        <p>
+          <strong>Regra de segurança:</strong> nenhum equipamento de terceiro pode entrar em sala
+          cirúrgica sem o status <strong>LIBERADO</strong> ou <strong>LIBERADO COM RESTRIÇÃO</strong>.
+          Na dúvida, escaneie o QR Code da etiqueta para conferir o status atual.
+        </p>
+      </div>
+
       {isLoading && <p className="text-sm text-slate-500">Carregando...</p>}
 
       <div className="grid gap-4 sm:grid-cols-2">

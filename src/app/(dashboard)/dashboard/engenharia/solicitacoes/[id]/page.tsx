@@ -11,6 +11,7 @@ import { InspectionPanel } from "@/components/ec/inspection-panel";
 import { LifecyclePanel } from "@/components/ec/lifecycle-panel";
 import { TermPanel } from "@/components/ec/term-panel";
 import { QrButton } from "@/components/ec/qr-button";
+import { PrintLabelButton } from "@/components/ec/print-label-button";
 import { ImageGallery } from "@/components/gallery/image-gallery";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate, formatDateTime } from "@/lib/utils";
@@ -176,13 +177,23 @@ export default function EngenhariaRequestDetailPage() {
         </Card>
       </div>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap items-center gap-4">
         <a href={`/api/terms/${id}`} target="_blank" rel="noreferrer" className="text-sm text-emerald-600 hover:underline">
           Baixar termo de responsabilidade (PDF)
         </a>
-        <a href={`/api/labels/${id}`} target="_blank" rel="noreferrer" className="text-sm text-emerald-600 hover:underline">
-          Baixar etiqueta (PDF)
-        </a>
+        <PrintLabelButton
+          requestId={id}
+          qrToken={request.qrToken}
+          status={request.releaseStatus?.labelStatus ?? "PENDENTE_ANALISE"}
+          equipmentName={request.equipmentName}
+          brand={request.brand}
+          model={request.model}
+          serialNumber={request.serialNumber}
+          internalOs={request.internalOs ?? request.protocol}
+          sector={request.usageSector}
+          validUntil={request.validUntil ? formatDate(request.validUntil) : undefined}
+          restriction={request.restrictionNotes ?? undefined}
+        />
         <QrButton qrToken={request.qrToken} />
       </div>
 

@@ -53,6 +53,11 @@ export default function NovoEquipamentoPage() {
     queryFn: () => fetch("/api/invoices").then((r) => r.json()),
   });
 
+  const { data: sectors } = useQuery<{ id: string; name: string }[]>({
+    queryKey: ["sectors"],
+    queryFn: () => fetch("/api/sectors").then((r) => r.json()),
+  });
+
   const set = (k: keyof typeof form, v: string | boolean) => setForm((f) => ({ ...f, [k]: v }));
 
   const onSupplierSelect = (id: string) => {
@@ -170,7 +175,16 @@ export default function NovoEquipamentoPage() {
           </div>
           <div className="sm:col-span-2">
             <Label>Setor de uso/destino *</Label>
-            <Input value={form.usageSector} onChange={(e) => set("usageSector", e.target.value)} />
+            <Input
+              value={form.usageSector}
+              onChange={(e) => set("usageSector", e.target.value)}
+              list="setores-list"
+            />
+            <datalist id="setores-list">
+              {(sectors ?? []).map((s) => (
+                <option key={s.id} value={s.name} />
+              ))}
+            </datalist>
           </div>
           <div>
             <Label>Local de armazenamento</Label>

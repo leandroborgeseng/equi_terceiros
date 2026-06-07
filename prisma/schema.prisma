@@ -154,6 +154,14 @@ model EquipmentRequest {
   withdrawalRecords     WithdrawalRecord[]
 }
 
+// Setor assistencial (configuração) — usado como sugestão nos formulários
+model Sector {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
 // Nota Fiscal — pode ser compartilhada por vários equipamentos (lote)
 model Invoice {
   id           String   @id @default(cuid())
