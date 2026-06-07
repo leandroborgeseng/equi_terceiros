@@ -1,6 +1,6 @@
-import { mkdir, readFile, writeFile } from "fs/promises";
+import { mkdir, readFile, unlink, writeFile } from "fs/promises";
 import path from "path";
-import { getObjectBuffer, isS3Configured } from "@/lib/s3";
+import { deleteObject, getObjectBuffer, isS3Configured } from "@/lib/s3";
 
 export function getUploadDir() {
   return process.env.UPLOAD_DIR ?? (process.env.NODE_ENV === "production" ? "/data/uploads" : "./uploads");
@@ -77,4 +77,21 @@ export async function readStoredFile(
   }
 
   return null;
+}
+
+export async function deleteLocalFile(storageKey: string) {
+  if (!isValidStorageKey(storageKey)) return;
+  try {
+    await unlink(resolveLocalPath(storageKey));
+  } catch {
+    // arquivo já removido ou inexistente
+  }
+}
+
+/** Remove do disco local e do S3 (quando configurado). */
+export async function deleteStoredFile(storageKey: string) {
+  await deleteLocalFile(storageKey);
+  if (isS3Configured()) {
+    await deleteObject(storageKey);
+  }
 }

@@ -10,6 +10,7 @@ import {
   ScanText,
   Loader2,
   ImageOff,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/utils";
@@ -43,19 +44,26 @@ function GalleryThumb({
   img,
   onOpen,
   onCompare,
+  onDelete,
+  deleting,
+  canDelete,
   meta,
 }: {
   img: GalleryImage;
   onOpen: () => void;
   onCompare: () => void;
+  onDelete?: () => void;
+  deleting?: boolean;
+  canDelete?: boolean;
   meta: GalleryImageMetadata | null;
 }) {
   const [failed, setFailed] = useState(false);
 
   return (
+    <div className="group relative aspect-square overflow-hidden rounded-xl bg-slate-100">
     <button
       type="button"
-      className="group relative aspect-square overflow-hidden rounded-xl bg-slate-100"
+      className="h-full w-full"
       onClick={onOpen}
       onContextMenu={(e) => {
         e.preventDefault();
@@ -86,19 +94,48 @@ function GalleryThumb({
           {meta.aiValidationStatus}
         </span>
       )}
-      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-left text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-left text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
         {img.photoType}
       </div>
     </button>
+      {canDelete && onDelete && (
+        <button
+          type="button"
+          title="Excluir foto"
+          disabled={deleting}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          className="absolute right-1.5 top-1.5 rounded-lg bg-red-600/90 p-1.5 text-white opacity-0 shadow transition-opacity hover:bg-red-600 group-hover:opacity-100 disabled:opacity-50"
+        >
+          {deleting ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Trash2 className="h-3.5 w-3.5" />
+          )}
+        </button>
+      )}
+    </div>
   );
 }
 
-export function ImageGallery({ images }: { images: GalleryImage[] }) {
+export function ImageGallery({
+  images,
+  canDelete = false,
+  onDeleted,
+}: {
+  images: GalleryImage[];
+  canDelete?: boolean;
+  onDeleted?: () => void;
+}) {
   const [index, setIndex] = useState<number | null>(null);
   const [compare, setCompare] = useState<number[]>([]);
   const [ocrLoading, setOcrLoading] = useState<string | null>(null);
   const [ocrResults, setOcrResults] = useState<Record<string, GalleryImageMetadata>>({});
   const [lightboxFailed, setLightboxFailed] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const current = index !== null ? images[index] : null;
 
@@ -124,6 +161,26 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
     setIndex(i);
   }
 
+  async function deleteImage(imageId: string) {
+    if (!confirm("Excluir esta foto? A ação não pode ser desfeita.")) return;
+    setDeleteError(null);
+    setDeletingId(imageId);
+    try {
+      const res = await fetch(`/api/images/${imageId}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? "Erro ao excluir foto");
+      if (index !== null && images[index]?.id === imageId) setIndex(null);
+      setCompare((prev) =>
+        prev.filter((i) => images[i]?.id !== imageId)
+      );
+      onDeleted?.();
+    } catch (e) {
+      setDeleteError(e instanceof Error ? e.message : "Erro ao excluir");
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   if (images.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-slate-200 py-10 text-center text-sm text-slate-500">
@@ -136,11 +193,14 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
     <div>
       <div className="mb-4 flex items-center justify-between">
         <h3 className="font-semibold text-slate-900">Galeria ({images.length})</h3>
-        {compare.length === 2 && (
-          <Button size="sm" variant="outline" onClick={() => openAt(compare[0])}>
-            Comparar selecionadas
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {compare.length === 2 && (
+            <Button size="sm" variant="outline" onClick={() => openAt(compare[0])}>
+              Comparar selecionadas
+            </Button>
+          )}
+          {deleteError && <span className="text-xs text-red-600">{deleteError}</span>}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -149,6 +209,9 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
             key={img.id}
             img={img}
             meta={metaFor(img)}
+            canDelete={canDelete}
+            deleting={deletingId === img.id}
+            onDelete={() => deleteImage(img.id)}
             onOpen={() => openAt(i)}
             onCompare={() =>
               setCompare((prev) =>
@@ -248,6 +311,21 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
                   >
                     <Download className="h-5 w-5" /> Abrir
                   </a>
+                  {canDelete && (
+                    <button
+                      type="button"
+                      disabled={deletingId === current.id}
+                      onClick={() => deleteImage(current.id)}
+                      className="flex items-center gap-1 rounded-lg bg-red-600/80 px-3 py-2 text-sm hover:bg-red-600 disabled:opacity-50"
+                    >
+                      {deletingId === current.id ? (
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-5 w-5" />
+                      )}
+                      Excluir
+                    </button>
+                  )}
                 </div>
               </div>
               {metaFor(current) && (
