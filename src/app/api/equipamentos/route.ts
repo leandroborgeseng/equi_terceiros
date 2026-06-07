@@ -34,7 +34,7 @@ export async function POST(req: Request) {
   const alreadyInPark = !!data.alreadyInPark;
 
   // Nota fiscal: vincula apenas NF já cadastrada com anexo
-  let invoiceId = data.invoiceId || undefined;
+  const invoiceId = data.invoiceId || undefined;
   if (invoiceId) {
     const invoice = await prisma.invoice.findUnique({ where: { id: invoiceId } });
     if (!invoice) {
