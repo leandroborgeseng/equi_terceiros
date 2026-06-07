@@ -22,7 +22,8 @@ import {
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/lib/enums";
-import { ROLE_LABELS } from "@/lib/rbac";
+import { ROLE_LABELS, isClinicalEngineering } from "@/lib/rbac";
+import { NotificationBell } from "./notification-bell";
 
 const navByRole: Record<UserRole, { href: string; label: string; icon: typeof LayoutDashboard }[]> = {
   ADMIN: [
@@ -89,6 +90,7 @@ export function AppShell({
               <p className="text-sm font-medium text-slate-900">{user.name}</p>
               <p className="text-xs text-slate-500">{ROLE_LABELS[user.role]}</p>
             </div>
+            {isClinicalEngineering(user.role) && <NotificationBell />}
             <button
               type="button"
               onClick={() => signOut({ callbackUrl: "/login" })}

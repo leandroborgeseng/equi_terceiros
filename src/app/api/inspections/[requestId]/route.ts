@@ -35,6 +35,17 @@ export async function PUT(
     return NextResponse.json({ error: "Motivo de bloqueio obrigatório" }, { status: 400 });
   }
 
+  // Regra de negócio: Termo de Responsabilidade (Anexo IV) é pré-requisito para liberar
+  if (data.status.startsWith("LIBERADO")) {
+    const term = await prisma.responsibilityTerm.findUnique({ where: { requestId } });
+    if (!term?.accepted) {
+      return NextResponse.json(
+        { error: "Termo de Responsabilidade (Anexo IV) deve ser aceito/assinado antes da liberação." },
+        { status: 400 }
+      );
+    }
+  }
+
   const inspection = await prisma.technicalInspection.upsert({
     where: { requestId },
     update: {

@@ -9,6 +9,8 @@ import { Trash2 } from "lucide-react";
 import { ChecklistPanel } from "@/components/ec/checklist-panel";
 import { InspectionPanel } from "@/components/ec/inspection-panel";
 import { LifecyclePanel } from "@/components/ec/lifecycle-panel";
+import { TermPanel } from "@/components/ec/term-panel";
+import { QrButton } from "@/components/ec/qr-button";
 import { ImageGallery } from "@/components/gallery/image-gallery";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate, formatDateTime } from "@/lib/utils";
@@ -128,6 +130,16 @@ export default function EngenhariaRequestDetailPage() {
 
         <Card className="lg:col-span-2">
           <CardContent className="pt-6">
+            <TermPanel
+              requestId={id}
+              term={request.responsibilityTerm}
+              ownerName={request.ownerName}
+            />
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-2">
+          <CardContent className="pt-6">
             <InspectionPanel requestId={id} />
           </CardContent>
         </Card>
@@ -171,6 +183,7 @@ export default function EngenhariaRequestDetailPage() {
         <a href={`/api/labels/${id}`} target="_blank" rel="noreferrer" className="text-sm text-emerald-600 hover:underline">
           Baixar etiqueta (PDF)
         </a>
+        <QrButton qrToken={request.qrToken} />
       </div>
 
       {DELETABLE_STATUSES.includes(request.status) && (

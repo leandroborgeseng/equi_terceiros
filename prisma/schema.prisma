@@ -333,6 +333,12 @@ model ResponsibilityTerm {
   signedByDoctor  Boolean  @default(false)
   signedBySupplier Boolean @default(false)
   signatureHash   String?
+  // Aceite eletrônico do responsável + visto da Engenharia Clínica
+  accepted        Boolean  @default(false)
+  signerName      String?
+  signatureData   String?
+  ecReviewed      Boolean  @default(false)
+  ecReviewerId    String?
   generatedById   String?
   generatedBy     User?    @relation(fields: [generatedById], references: [id])
   createdAt       DateTime @default(now())
