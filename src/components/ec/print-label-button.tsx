@@ -35,9 +35,11 @@ export function PrintLabelButton({
   sector,
   validUntil,
   restriction,
+  variant = "full",
 }: {
   requestId: string;
   qrToken?: string | null;
+  variant?: "full" | "pill";
   status: string;
   equipmentName: string;
   brand: string;
@@ -109,13 +111,28 @@ export function PrintLabelButton({
     }
   }
 
+  if (variant === "pill") {
+    return (
+      <button
+        type="button"
+        onClick={openPdf}
+        disabled={busy}
+        className="gesteq-pill gesteq-pill-brand-soft"
+        title="Baixar etiqueta PDF 90×50 mm"
+      >
+        {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Printer className="h-3.5 w-3.5" />}
+        Etiqueta
+      </button>
+    );
+  }
+
   return (
     <div className="flex flex-wrap items-center gap-3">
       <button
         type="button"
         onClick={printBluetooth}
         disabled={busy}
-        className="flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
+        className="gesteq-pill gesteq-pill-primary disabled:opacity-60"
       >
         {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bluetooth className="h-4 w-4" />}
         Imprimir etiqueta (Bluetooth)
@@ -123,11 +140,11 @@ export function PrintLabelButton({
       <button
         type="button"
         onClick={openPdf}
-        className="flex items-center gap-1 text-sm text-emerald-600 hover:underline"
+        className="flex items-center gap-1 text-sm text-[var(--brand-ink)] hover:underline"
       >
         <Printer className="h-4 w-4" /> Baixar etiqueta (PDF 90×50)
       </button>
-      {msg && <span className="text-xs text-slate-500">{msg}</span>}
+      {msg && <span className="text-xs text-[var(--muted)]">{msg}</span>}
     </div>
   );
 }

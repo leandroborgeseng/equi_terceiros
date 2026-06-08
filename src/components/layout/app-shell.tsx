@@ -63,8 +63,8 @@ export function AppShell({
   const nav = navByRole[user.role] ?? [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-emerald-50/30">
-      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl">
+    <div className="min-h-screen bg-[var(--bg)]">
+      <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[color-mix(in_oklch,var(--surface)_88%,transparent)] backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3">
             <button
@@ -76,25 +76,25 @@ export function AppShell({
               {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
             <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-sm font-bold text-white">
+              <div className="flex h-9 w-9 items-center justify-center rounded-[var(--r-lg)] bg-[var(--brand)] text-sm font-bold text-white">
                 GE
               </div>
               <div className="hidden sm:block">
-                <p className="text-sm font-semibold text-slate-900">GestEq</p>
-                <p className="text-xs text-slate-500">Equipamentos de Terceiros</p>
+                <p className="font-display text-sm font-semibold text-[var(--ink)]">GestEq</p>
+                <p className="text-xs text-[var(--muted)]">Equipamentos de Terceiros</p>
               </div>
             </Link>
           </div>
           <div className="flex items-center gap-3">
             <div className="hidden text-right sm:block">
-              <p className="text-sm font-medium text-slate-900">{user.name}</p>
-              <p className="text-xs text-slate-500">{ROLE_LABELS[user.role]}</p>
+              <p className="text-sm font-medium text-[var(--ink)]">{user.name}</p>
+              <p className="text-xs text-[var(--muted)]">{ROLE_LABELS[user.role]}</p>
             </div>
             {isClinicalEngineering(user.role) && <NotificationBell />}
             <button
               type="button"
               onClick={() => signOut({ callbackUrl: "/login" })}
-              className="rounded-xl border border-slate-200 p-2 text-slate-600 hover:bg-slate-50"
+              className="rounded-[var(--r-lg)] border border-[var(--line)] p-2 text-[var(--muted)] hover:bg-[var(--surface-2)]"
               aria-label="Sair"
             >
               <LogOut className="h-4 w-4" />
@@ -106,7 +106,7 @@ export function AppShell({
       <div className="mx-auto flex max-w-7xl gap-6 px-4 py-6 sm:px-6">
         <aside
           className={cn(
-            "fixed inset-y-0 left-0 z-30 w-64 transform border-r border-slate-200 bg-white p-4 pt-20 transition-transform lg:static lg:translate-x-0 lg:border-0 lg:bg-transparent lg:p-0 lg:pt-0",
+            "fixed inset-y-0 left-0 z-30 w-64 transform border-r border-[var(--line)] bg-[var(--surface)] p-4 pt-20 transition-transform lg:static lg:translate-x-0 lg:border-0 lg:bg-transparent lg:p-0 lg:pt-0",
             open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
           )}
         >
@@ -119,10 +119,10 @@ export function AppShell({
                   href={item.href}
                   onClick={() => setOpen(false)}
                   className={cn(
-                    "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors",
+                    "flex items-center gap-3 rounded-[var(--r-lg)] px-4 py-3 text-sm font-medium transition-colors",
                     active
-                      ? "bg-emerald-50 text-emerald-800"
-                      : "text-slate-600 hover:bg-slate-100"
+                      ? "bg-[var(--brand-soft)] text-[var(--brand-ink)]"
+                      : "text-[var(--muted)] hover:bg-[var(--surface-2)] hover:text-[var(--ink-2)]"
                   )}
                 >
                   <item.icon className="h-4 w-4" />
@@ -142,7 +142,7 @@ export function AppShell({
         </motion.main>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-slate-200 bg-white/95 backdrop-blur lg:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-[var(--line)] bg-[color-mix(in_oklch,var(--surface)_95%,transparent)] backdrop-blur lg:hidden">
         {[
           { href: nav[0]?.href ?? "/", label: "Início", icon: LayoutDashboard },
           { href: "/equipamentos", label: "Equipamentos", icon: PackageSearch },
@@ -156,7 +156,7 @@ export function AppShell({
               href={item.href}
               className={cn(
                 "flex flex-col items-center gap-1 py-2 text-[11px] font-medium",
-                active ? "text-emerald-700" : "text-slate-500"
+                active ? "text-[var(--brand-ink)]" : "text-[var(--muted)]"
               )}
             >
               <item.icon className="h-5 w-5" />

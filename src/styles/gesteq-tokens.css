@@ -1,0 +1,289 @@
+/* GestEq design tokens — Unimed clinical instrument UI */
+
+:root {
+  --ink: oklch(0.24 0.018 170);
+  --ink-2: oklch(0.36 0.018 168);
+  --muted: oklch(0.52 0.014 166);
+  --faint: oklch(0.63 0.013 164);
+  --line: oklch(0.905 0.008 165);
+  --line-2: oklch(0.94 0.006 165);
+  --surface: #ffffff;
+  --surface-2: oklch(0.984 0.006 165);
+  --bg: oklch(0.974 0.007 164);
+  --bg-rail: oklch(0.957 0.009 164);
+
+  --brand: #00995d;
+  --brand-dark: #00543d;
+  --brand-ink: oklch(0.45 0.1 163);
+  --brand-soft: oklch(0.96 0.034 162);
+  --brand-line: oklch(0.88 0.045 162);
+  --citrus: oklch(0.78 0.155 128);
+  --laranja: oklch(0.7 0.165 56);
+
+  --rascunho: oklch(0.6 0.012 255);
+  --rascunho-ink: oklch(0.42 0.012 255);
+  --rascunho-soft: oklch(0.955 0.004 255);
+
+  --aguard-cad: oklch(0.62 0.018 255);
+  --aguard-cad-ink: oklch(0.42 0.016 255);
+  --aguard-cad-soft: oklch(0.955 0.005 255);
+
+  --docs: oklch(0.8 0.135 84);
+  --docs-ink: oklch(0.5 0.1 76);
+  --docs-soft: oklch(0.965 0.038 86);
+
+  --pendente: oklch(0.71 0.16 53);
+  --pendente-ink: oklch(0.52 0.14 47);
+  --pendente-soft: oklch(0.966 0.044 58);
+
+  --inspecao: oklch(0.6 0.13 248);
+  --inspecao-ink: oklch(0.48 0.13 252);
+  --inspecao-soft: oklch(0.964 0.03 250);
+
+  --liberado: oklch(0.605 0.13 162);
+  --liberado-ink: oklch(0.45 0.1 163);
+  --liberado-soft: oklch(0.96 0.034 162);
+
+  --restricao: oklch(0.7 0.155 60);
+  --restricao-ink: oklch(0.52 0.13 54);
+  --restricao-soft: oklch(0.966 0.04 62);
+
+  --bloqueado: oklch(0.585 0.205 26);
+  --bloqueado-ink: oklch(0.505 0.19 27);
+  --bloqueado-soft: oklch(0.962 0.045 30);
+
+  --emuso: oklch(0.52 0.12 162);
+  --emuso-ink: oklch(0.42 0.105 162);
+  --emuso-soft: oklch(0.958 0.03 160);
+
+  --retirada: oklch(0.7 0.15 58);
+  --retirada-ink: oklch(0.52 0.13 52);
+  --retirada-soft: oklch(0.966 0.038 60);
+
+  --retirado: oklch(0.46 0.01 255);
+  --retirado-ink: oklch(0.4 0.01 255);
+  --retirado-soft: oklch(0.945 0.004 255);
+
+  --urgencia: oklch(0.55 0.19 305);
+  --urgencia-ink: oklch(0.47 0.18 305);
+  --urgencia-soft: oklch(0.962 0.042 305);
+
+  --r-sm: 6px;
+  --r: 9px;
+  --r-lg: 13px;
+  --r-xl: 18px;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --shadow-sm: 0 1px 2px oklch(0.4 0.02 255 / 0.06), 0 1px 1px oklch(0.4 0.02 255 / 0.04);
+  --shadow: 0 4px 16px oklch(0.4 0.02 255 / 0.07), 0 1px 3px oklch(0.4 0.02 255 / 0.05);
+  --shadow-lg: 0 18px 48px oklch(0.35 0.02 255 / 0.16), 0 4px 12px oklch(0.35 0.02 255 / 0.08);
+
+  --background: var(--bg);
+  --foreground: var(--ink);
+  --primary: var(--brand);
+  --primary-foreground: #ffffff;
+}
+
+.font-display {
+  font-family: var(--font-display), sans-serif;
+}
+
+.font-mono-data {
+  font-family: var(--font-mono-data), ui-monospace, monospace;
+}
+
+.gesteq-eyebrow {
+  font-family: var(--font-mono-data), ui-monospace, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--faint);
+  font-weight: 500;
+}
+
+.gesteq-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+}
+
+.gesteq-spine-rascunho { background: var(--rascunho); }
+.gesteq-spine-border-rascunho { border-left: 3px solid var(--rascunho); }
+.gesteq-spine-border-aguard-cad { border-left: 3px solid var(--aguard-cad); }
+.gesteq-spine-border-docs { border-left: 3px solid var(--docs); }
+.gesteq-spine-border-pendente { border-left: 3px solid var(--pendente); }
+.gesteq-spine-border-inspecao { border-left: 3px solid var(--inspecao); }
+.gesteq-spine-border-liberado { border-left: 3px solid var(--liberado); }
+.gesteq-spine-border-restricao { border-left: 3px solid var(--restricao); }
+.gesteq-spine-border-bloqueado { border-left: 3px solid var(--bloqueado); }
+.gesteq-spine-border-emuso { border-left: 3px solid var(--emuso); }
+.gesteq-spine-border-retirada { border-left: 3px solid var(--retirada); }
+.gesteq-spine-border-retirado { border-left: 3px solid var(--retirado); }
+.gesteq-spine-border-urgencia { border-left: 3px solid var(--urgencia); }
+.gesteq-spine-aguard-cad { background: var(--aguard-cad); }
+.gesteq-spine-docs { background: var(--docs); }
+.gesteq-spine-pendente { background: var(--pendente); }
+.gesteq-spine-inspecao { background: var(--inspecao); }
+.gesteq-spine-liberado { background: var(--liberado); }
+.gesteq-spine-restricao { background: var(--restricao); }
+.gesteq-spine-bloqueado { background: var(--bloqueado); }
+.gesteq-spine-emuso { background: var(--emuso); }
+.gesteq-spine-retirada { background: var(--retirada); }
+.gesteq-spine-retirado { background: var(--retirado); }
+.gesteq-spine-urgencia { background: var(--urgencia); }
+
+.gesteq-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px 3px 8px;
+  border-radius: 999px;
+  font-family: var(--font-mono-data), ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+  white-space: nowrap;
+  border: 1px solid;
+}
+
+.gesteq-badge .gesteq-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 99px;
+  flex: none;
+  box-shadow: 0 0 0 2px color-mix(in oklch, currentColor 16%, transparent);
+}
+
+.gesteq-badge.sm { padding: 2px 7px 2px 6px; font-size: 10px; }
+.gesteq-badge.lg { padding: 5px 12px 5px 10px; font-size: 12.5px; }
+
+.gesteq-st-rascunho { color: var(--rascunho-ink); background: var(--rascunho-soft); border-color: color-mix(in oklch, var(--rascunho) 26%, transparent); }
+.gesteq-st-rascunho .gesteq-dot { background: var(--rascunho); }
+.gesteq-st-aguard-cad { color: var(--aguard-cad-ink); background: var(--aguard-cad-soft); border-color: color-mix(in oklch, var(--aguard-cad) 28%, transparent); }
+.gesteq-st-aguard-cad .gesteq-dot { background: var(--aguard-cad); }
+.gesteq-st-docs { color: var(--docs-ink); background: var(--docs-soft); border-color: color-mix(in oklch, var(--docs) 40%, transparent); }
+.gesteq-st-docs .gesteq-dot { background: var(--docs); }
+.gesteq-st-pendente { color: var(--pendente-ink); background: var(--pendente-soft); border-color: color-mix(in oklch, var(--pendente) 38%, transparent); }
+.gesteq-st-pendente .gesteq-dot { background: var(--pendente); }
+.gesteq-st-inspecao { color: var(--inspecao-ink); background: var(--inspecao-soft); border-color: color-mix(in oklch, var(--inspecao) 34%, transparent); }
+.gesteq-st-inspecao .gesteq-dot { background: var(--inspecao); }
+.gesteq-st-liberado { color: var(--liberado-ink); background: var(--liberado-soft); border-color: color-mix(in oklch, var(--liberado) 38%, transparent); }
+.gesteq-st-liberado .gesteq-dot { background: var(--liberado); }
+.gesteq-st-restricao { color: var(--restricao-ink); background: var(--restricao-soft); border-color: color-mix(in oklch, var(--restricao) 40%, transparent); }
+.gesteq-st-restricao .gesteq-dot { background: var(--restricao); }
+.gesteq-st-bloqueado { color: var(--bloqueado-ink); background: var(--bloqueado-soft); border-color: color-mix(in oklch, var(--bloqueado) 40%, transparent); }
+.gesteq-st-bloqueado .gesteq-dot { background: var(--bloqueado); }
+.gesteq-st-emuso { color: var(--emuso-ink); background: var(--emuso-soft); border-color: color-mix(in oklch, var(--emuso) 34%, transparent); }
+.gesteq-st-emuso .gesteq-dot { background: var(--emuso); }
+.gesteq-st-retirada { color: var(--retirada-ink); background: var(--retirada-soft); border-color: color-mix(in oklch, var(--retirada) 40%, transparent); }
+.gesteq-st-retirada .gesteq-dot { background: var(--retirada); }
+.gesteq-st-retirado { color: var(--retirado-ink); background: var(--retirado-soft); border-color: color-mix(in oklch, var(--retirado) 24%, transparent); }
+.gesteq-st-retirado .gesteq-dot { background: var(--retirado); }
+.gesteq-st-urgencia { color: var(--urgencia-ink); background: var(--urgencia-soft); border-color: color-mix(in oklch, var(--urgencia) 38%, transparent); }
+.gesteq-st-urgencia .gesteq-dot { background: var(--urgencia); }
+
+.gesteq-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: all 0.14s var(--ease);
+  white-space: nowrap;
+}
+
+.gesteq-pill-primary {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: white;
+}
+
+.gesteq-pill-primary:hover {
+  background: var(--brand-dark);
+  border-color: var(--brand-dark);
+}
+
+.gesteq-pill-ghost {
+  background: var(--surface);
+  color: var(--ink-2);
+}
+
+.gesteq-pill-ghost:hover {
+  background: var(--surface-2);
+}
+
+.gesteq-pill-slate {
+  background: var(--surface-2);
+  border-color: var(--line);
+  color: var(--ink-2);
+}
+
+.gesteq-pill-blue {
+  background: oklch(0.966 0.016 245);
+  border-color: oklch(0.845 0.055 245);
+  color: oklch(0.46 0.105 245);
+}
+
+.gesteq-pill-amber {
+  background: oklch(0.966 0.042 83);
+  border-color: oklch(0.82 0.09 80);
+  color: oklch(0.51 0.1 74);
+}
+
+.gesteq-pill-brand-soft {
+  background: var(--brand-soft);
+  border-color: var(--brand-line);
+  color: var(--brand-ink);
+}
+
+.gesteq-seg {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+}
+
+.gesteq-seg button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 6px 13px;
+  border-radius: var(--r-sm);
+  transition: all 0.15s var(--ease);
+}
+
+.gesteq-seg button.on {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-sm);
+}
+
+.gesteq-filter-active {
+  background: var(--brand-soft);
+  border-color: var(--brand-line);
+  color: var(--brand-ink);
+}
+
+@keyframes gesteq-rise {
+  from { transform: translateY(6px); }
+  to { transform: translateY(0); }
+}
+
+.gesteq-rise {
+  animation: gesteq-rise 0.4s var(--ease) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gesteq-rise {
+    animation: none;
+  }
+}

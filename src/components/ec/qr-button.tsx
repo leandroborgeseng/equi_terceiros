@@ -4,7 +4,15 @@ import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { QrCode, X, Copy, ExternalLink } from "lucide-react";
 
-export function QrButton({ qrToken }: { qrToken?: string | null }) {
+import { cn } from "@/lib/utils";
+
+export function QrButton({
+  qrToken,
+  variant = "link",
+}: {
+  qrToken?: string | null;
+  variant?: "link" | "pill";
+}) {
   const [open, setOpen] = useState(false);
   const [dataUrl, setDataUrl] = useState<string | null>(null);
   const [url, setUrl] = useState("");
@@ -23,9 +31,14 @@ export function QrButton({ qrToken }: { qrToken?: string | null }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1 text-sm text-emerald-600 hover:underline"
+        className={cn(
+          variant === "pill"
+            ? "gesteq-pill gesteq-pill-ghost"
+            : "flex items-center gap-1 text-sm text-[var(--brand-ink)] hover:underline"
+        )}
       >
-        <QrCode className="h-4 w-4" /> Ver QR / consulta
+        <QrCode className="h-3.5 w-3.5" />
+        {variant === "pill" ? "QR" : "Ver QR / consulta"}
       </button>
 
       {open && (

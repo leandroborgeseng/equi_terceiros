@@ -14,9 +14,6 @@ import {
   Package,
   Camera,
   Info,
-  ChevronRight,
-  CheckCircle2,
-  Circle,
   AlertCircle,
 } from "lucide-react";
 import { RequestStatusBadge } from "@/components/requests/status-badge";
@@ -34,63 +31,40 @@ import { ENTRY_TYPE_LABELS, EQUIPMENT_CLASS_LABELS, type RequestStatus, type Equ
 import { DOC_CHECKLIST_ITEMS } from "@/lib/validators/request";
 import { FilePreviewGrid, type PreviewFile, isImageFile, fileUrlFromKey } from "@/components/ec/file-preview";
 import { InvoiceLinkButton } from "@/components/ec/invoice-link-button";
+import { ActionPill } from "@/components/gesteq/action-pill";
+import { FlowPills } from "@/components/gesteq/flow-pills";
+import { TabNav } from "@/components/gesteq/tab-nav";
+import { ClassTag } from "@/components/gesteq/class-tag";
+import { statusSpineBorderClass } from "@/lib/status-tokens";
+import { cn } from "@/lib/utils";
 
 type TabId = "resumo" | "documentos" | "termo" | "inspecao" | "ciclo" | "fotos";
 
-const TABS: { id: TabId; label: string; icon: typeof Info }[] = [
-  { id: "resumo", label: "Resumo", icon: Info },
-  { id: "documentos", label: "Documentos", icon: FileCheck },
-  { id: "termo", label: "Termo", icon: FileText },
-  { id: "inspecao", label: "Inspeção", icon: ClipboardCheck },
-  { id: "ciclo", label: "Ciclo de vida", icon: Package },
-  { id: "fotos", label: "Fotos", icon: Camera },
+const TABS = [
+  { id: "resumo" as const, label: "Resumo", icon: Info },
+  { id: "documentos" as const, label: "Documentos", icon: FileCheck },
+  { id: "termo" as const, label: "Termo", icon: FileText },
+  { id: "inspecao" as const, label: "Inspeção", icon: ClipboardCheck },
+  { id: "ciclo" as const, label: "Ciclo de vida", icon: Package },
+  { id: "fotos" as const, label: "Fotos", icon: Camera },
 ];
 
 function InfoRow({ label, value, children }: { label: string; value?: string; children?: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-0.5 border-b border-slate-100 py-2.5 last:border-0 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-      <span className="shrink-0 text-xs font-medium uppercase tracking-wide text-slate-400">{label}</span>
-      <span className="text-sm text-slate-800 sm:text-right">{children ?? value ?? "—"}</span>
+    <div className="flex flex-col gap-0.5 border-b border-[var(--line-2)] py-2.5 last:border-0 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+      <span className="gesteq-eyebrow shrink-0">{label}</span>
+      <span className="text-sm text-[var(--ink-2)] sm:text-right">{children ?? value ?? "—"}</span>
     </div>
-  );
-}
-
-function StepPill({
-  label,
-  done,
-  active,
-  onClick,
-}: {
-  label: string;
-  done: boolean;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-        active
-          ? "bg-emerald-600 text-white shadow-sm"
-          : done
-            ? "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200"
-            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-      }`}
-    >
-      {done ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Circle className="h-3.5 w-3.5 opacity-50" />}
-      {label}
-    </button>
   );
 }
 
 function LoadingSkeleton() {
   return (
-    <div className="animate-pulse space-y-4">
-      <div className="h-8 w-48 rounded-lg bg-slate-200" />
-      <div className="h-32 rounded-2xl bg-slate-200" />
-      <div className="h-12 rounded-xl bg-slate-200" />
-      <div className="h-64 rounded-2xl bg-slate-200" />
+    <div className="gesteq-rise animate-pulse space-y-4">
+      <div className="h-8 w-48 rounded-lg bg-[var(--line-2)]" />
+      <div className="h-32 rounded-[var(--r-xl)] bg-[var(--line-2)]" />
+      <div className="h-12 rounded-[var(--r-lg)] bg-[var(--line-2)]" />
+      <div className="h-64 rounded-[var(--r-xl)] bg-[var(--line-2)]" />
     </div>
   );
 }
@@ -240,54 +214,67 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
     return { docsOk, termOk, inspOk, released, inspStatus };
   }, [request]);
 
+  const flowSteps = useMemo(() => {
+    if (!workflow) return [];
+    return [
+      { id: "documentos", label: "Documentos", done: workflow.docsOk },
+      { id: "termo", label: "Termo", done: workflow.termOk },
+      { id: "inspecao", label: "Inspeção", done: !!workflow.inspOk },
+      { id: "ciclo", label: "Liberação", done: workflow.released },
+    ];
+  }, [workflow]);
+
   if (isLoading || !request) return <LoadingSkeleton />;
 
   const status = request.status as RequestStatus;
   const classe = request.equipmentClass as EquipmentClass | null;
   const canDelete = DELETABLE_STATUSES.includes(request.status);
 
+  const tabsWithBadge = TABS.map((t) => ({
+    ...t,
+    badge: t.id === "fotos" ? gallery.length : undefined,
+  }));
+
   return (
-    <div className="pb-8">
-      {/* Navegação */}
+    <div className="gesteq-rise pb-8">
       <Link
         href="/equipamentos"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-emerald-700"
+        className="mb-4 inline-flex items-center gap-1.5 text-sm text-[var(--muted)] transition-colors hover:text-[var(--brand-ink)]"
       >
         <ArrowLeft className="h-4 w-4" />
         Voltar para equipamentos
       </Link>
 
-      {/* Cabeçalho do equipamento */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
+      {/* Cabeçalho com status spine */}
+      <div className={cn("gesteq-card relative overflow-hidden", statusSpineBorderClass(status))}>
+        <div className="flex flex-wrap items-start justify-between gap-3 p-4 sm:p-5">
           <div className="min-w-0 flex-1">
-            <p className="font-mono text-xs text-slate-500">
+            <p className="font-mono-data text-xs text-[var(--muted)]">
               {request.internalOs ?? request.protocol}
             </p>
-            <h1 className="mt-0.5 text-xl font-bold leading-tight text-slate-900 sm:text-2xl">
+            <h1 className="font-display mt-0.5 text-xl font-semibold leading-tight text-[var(--ink)] sm:text-2xl">
               {request.equipmentName}
             </h1>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-[var(--muted)]">
               {request.brand} {request.model}
-              <span className="mx-2 text-slate-300">·</span>
-              S/N <span className="font-medium">{request.serialNumber || "—"}</span>
+              <span className="mx-2 text-[var(--line)]">·</span>
+              S/N <span className="font-mono-data font-medium text-[var(--ink-2)]">{request.serialNumber || "—"}</span>
             </p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {classe && (
-                <span className="rounded-lg bg-slate-800 px-2 py-0.5 text-xs font-medium text-white">
-                  Classe {classe}
-                </span>
-              )}
-              <span className="rounded-lg bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+            <div className="mt-2.5 flex flex-wrap items-center gap-2">
+              {classe && <ClassTag classe={classe} />}
+              <span className="inline-flex items-center rounded-md border border-[var(--line)] bg-[var(--surface-2)] px-2 py-0.5 text-xs text-[var(--ink-2)]">
                 {request.usageSector}
               </span>
               {request.isUrgent && (
-                <span className="rounded-lg bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                <span className="gesteq-badge gesteq-st-urgencia sm">
+                  <span className="gesteq-dot" />
                   Urgência
                 </span>
               )}
               {request.submittedViaPublic && (
-                <span className="rounded-lg bg-blue-50 px-2 py-0.5 text-xs text-blue-700">Solicitação pública</span>
+                <span className="inline-flex items-center rounded-md border border-[color-mix(in_oklch,var(--inspecao)_30%,transparent)] bg-[var(--inspecao-soft)] px-2 py-0.5 text-xs font-medium text-[var(--inspecao-ink)]">
+                  Solicitação pública
+                </span>
               )}
             </div>
           </div>
@@ -295,23 +282,16 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
         </div>
 
         {/* Ações rápidas */}
-        <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
-          <Link
-            href={`/equipamentos/${requestId}/cadastro`}
-            className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-200"
-          >
+        <div className="flex flex-wrap gap-2 border-t border-[var(--line-2)] px-4 py-3 sm:px-5">
+          <ActionPill href={`/equipamentos/${requestId}/cadastro`} variant="slate">
             Cadastro EC
-            <ChevronRight className="h-3.5 w-3.5" />
-          </Link>
-          <Link
-            href={`/equipamentos/novo?from=${requestId}`}
-            className="inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-medium text-blue-800 hover:bg-blue-100"
-          >
-            <Copy className="h-3.5 w-3.5" />
+          </ActionPill>
+          <ActionPill href={`/equipamentos/novo?from=${requestId}`} variant="blue" icon={<Copy className="h-3.5 w-3.5" />}>
             Duplicar
-          </Link>
-          <QrButton qrToken={request.qrToken} />
+          </ActionPill>
+          <QrButton qrToken={request.qrToken} variant="pill" />
           <PrintLabelButton
+            variant="pill"
             requestId={requestId}
             qrToken={request.qrToken}
             status={request.releaseStatus?.labelStatus ?? "PENDENTE_ANALISE"}
@@ -324,53 +304,28 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
             validUntil={request.validUntil ? formatDate(request.validUntil) : undefined}
             restriction={request.restrictionNotes ?? undefined}
           />
-          <a
+          <ActionPill
             href={`/api/terms/${requestId}`}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-emerald-700 hover:bg-emerald-50"
+            variant="brand"
+            icon={<FileText className="h-3.5 w-3.5" />}
           >
-            <FileText className="h-3.5 w-3.5" />
             PDF termo
-          </a>
+          </ActionPill>
           <InvoiceLinkButton requestId={requestId} invoice={request.invoice} />
         </div>
       </div>
 
-      {/* Fluxo de homologação — atalhos */}
+      {/* Fluxo de homologação */}
       {workflow && (
-        <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50/80 p-3">
-          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
-            Fluxo de homologação
-          </p>
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
-            <StepPill
-              label="1. Documentos"
-              done={workflow.docsOk}
-              active={tab === "documentos"}
-              onClick={() => setTab("documentos")}
-            />
-            <StepPill
-              label="2. Termo"
-              done={workflow.termOk}
-              active={tab === "termo"}
-              onClick={() => setTab("termo")}
-            />
-            <StepPill
-              label="3. Inspeção"
-              done={!!workflow.inspOk}
-              active={tab === "inspecao"}
-              onClick={() => setTab("inspecao")}
-            />
-            <StepPill
-              label="4. Liberação"
-              done={workflow.released}
-              active={tab === "ciclo"}
-              onClick={() => setTab("ciclo")}
-            />
-          </div>
+        <div className="gesteq-card mt-4 px-4 py-3 sm:px-5">
+          <div className="gesteq-eyebrow mb-1">Fluxo de homologação</div>
+          <FlowPills
+            steps={flowSteps}
+            activeId={tab === "resumo" || tab === "fotos" ? "documentos" : tab}
+            onSelect={(id) => setTab(id as TabId)}
+          />
           {!workflow.termOk && workflow.docsOk && (
-            <p className="mt-2 flex items-center gap-1 text-xs text-amber-700">
+            <p className="mt-2 flex items-center gap-1.5 text-xs text-[var(--pendente-ink)]">
               <AlertCircle className="h-3.5 w-3.5 shrink-0" />
               Documentos aprovados — registre o termo antes de liberar.
             </p>
@@ -379,37 +334,8 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
       )}
 
       {/* Abas */}
-      <div className="sticky top-16 z-20 -mx-4 mt-4 border-b border-slate-200 bg-white/95 px-4 backdrop-blur-md sm:mx-0 sm:rounded-t-xl sm:px-0">
-        <div className="flex gap-1 overflow-x-auto py-2 scrollbar-thin">
-          {TABS.map(({ id, label, icon: Icon }) => {
-            const count = id === "fotos" ? gallery.length : 0;
-            const active = tab === id;
-            return (
-              <button
-                key={id}
-                type="button"
-                onClick={() => setTab(id)}
-                className={`flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                  active
-                    ? "bg-emerald-600 text-white shadow-sm"
-                    : "text-slate-600 hover:bg-slate-100"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-                {count > 0 && (
-                  <span
-                    className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
-                      active ? "bg-white/20 text-white" : "bg-slate-200 text-slate-700"
-                    }`}
-                  >
-                    {count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
+      <div className="mt-4">
+        <TabNav tabs={tabsWithBadge} active={tab} onChange={setTab} />
       </div>
 
       {/* Conteúdo da aba */}
@@ -418,8 +344,8 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
           <div className="grid gap-4 lg:grid-cols-2">
             <Card className="lg:col-span-2">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Anexos e fotos ({previewFiles.length})</CardTitle>
-                <p className="text-sm text-slate-500">
+                <CardTitle>Anexos e fotos ({previewFiles.length})</CardTitle>
+                <p className="text-sm text-[var(--muted)]">
                   Clique na miniatura para pré-visualizar PDF ou imagem.
                 </p>
               </CardHeader>
@@ -430,15 +356,12 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Equipamento</CardTitle>
+                <CardTitle>Equipamento</CardTitle>
               </CardHeader>
               <CardContent>
                 <InfoRow label="Marca / modelo" value={`${request.brand} ${request.model}`} />
                 <InfoRow label="Nº de série" value={request.serialNumber} />
-                <InfoRow
-                  label="Classe"
-                  value={classe ? EQUIPMENT_CLASS_LABELS[classe] : "—"}
-                />
+                <InfoRow label="Classe" value={classe ? EQUIPMENT_CLASS_LABELS[classe] : "—"} />
                 <InfoRow
                   label="Tipo de ingresso"
                   value={ENTRY_TYPE_LABELS[request.entryType as EntryType] ?? request.entryType}
@@ -450,15 +373,10 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Solicitação</CardTitle>
+                <CardTitle>Solicitação</CardTitle>
               </CardHeader>
               <CardContent>
-                <InfoRow
-                  label="Solicitante"
-                  value={
-                    request.doctor?.name ?? request.requesterName ?? "—"
-                  }
-                />
+                <InfoRow label="Solicitante" value={request.doctor?.name ?? request.requesterName ?? "—"} />
                 {request.doctorCrm && <InfoRow label="CRM" value={request.doctorCrm} />}
                 {request.submittedViaPublic && (
                   <>
@@ -479,7 +397,7 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Empresa (PJ)</CardTitle>
+                <CardTitle>Empresa (PJ)</CardTitle>
               </CardHeader>
               <CardContent>
                 <InfoRow label="Razão social" value={request.supplierName} />
@@ -492,7 +410,7 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
                       {request.invoice.fileName ? ` · ${request.invoice.fileName}` : ""}
                     </span>
                   ) : (
-                    <span className="text-slate-400">Não vinculada</span>
+                    <span className="text-[var(--faint)]">Não vinculada</span>
                   )}
                 </InfoRow>
               </CardContent>
@@ -500,7 +418,7 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Origem</CardTitle>
+                <CardTitle>Origem</CardTitle>
               </CardHeader>
               <CardContent>
                 {request.originatedByEc && (
@@ -514,22 +432,20 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
             </Card>
 
             {canDelete && (
-              <Card className="border-red-100 bg-red-50/40 lg:col-span-2">
+              <Card className="border-[color-mix(in_oklch,var(--bloqueado)_25%,transparent)] bg-[var(--bloqueado-soft)] lg:col-span-2">
                 <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
-                  <p className="text-sm text-red-700">
+                  <p className="text-sm text-[var(--bloqueado-ink)]">
                     Cadastro ainda não validado — pode ser excluído.
                   </p>
                   <button
                     type="button"
                     onClick={() => {
-                      if (
-                        confirm("Excluir esta solicitação não validada? Esta ação não pode ser desfeita.")
-                      ) {
+                      if (confirm("Excluir esta solicitação não validada? Esta ação não pode ser desfeita.")) {
                         deleteMutation.mutate();
                       }
                     }}
                     disabled={deleteMutation.isPending}
-                    className="flex items-center gap-1 rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
+                    className="gesteq-pill gesteq-pill-ghost flex items-center gap-1 border-[color-mix(in_oklch,var(--bloqueado)_32%,transparent)] text-[var(--bloqueado-ink)] hover:bg-[var(--bloqueado-soft)] disabled:opacity-60"
                   >
                     <Trash2 className="h-4 w-4" />
                     {deleteMutation.isPending ? "Excluindo..." : "Excluir solicitação"}
@@ -545,7 +461,7 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
             {previewFiles.length > 0 && (
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-base">Pré-visualização dos anexos</CardTitle>
+                  <CardTitle>Pré-visualização dos anexos</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <FilePreviewGrid files={previewFiles} />
@@ -554,8 +470,8 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
             )}
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Checklist documental (Anexo II)</CardTitle>
-                <p className="text-sm text-slate-500">
+                <CardTitle>Checklist documental (Anexo II)</CardTitle>
+                <p className="text-sm text-[var(--muted)]">
                   Marque Sim/Não/N/A, use o ícone para observação e anexe o comprovante.
                 </p>
               </CardHeader>
@@ -569,17 +485,11 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
         {tab === "termo" && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Termo de responsabilidade (Anexo IV)</CardTitle>
-              <p className="text-sm text-slate-500">
-                Obrigatório para liberação do equipamento.
-              </p>
+              <CardTitle>Termo de responsabilidade (Anexo IV)</CardTitle>
+              <p className="text-sm text-[var(--muted)]">Obrigatório para liberação do equipamento.</p>
             </CardHeader>
             <CardContent>
-              <TermPanel
-                requestId={requestId}
-                term={request.responsibilityTerm}
-                ownerName={request.ownerName}
-              />
+              <TermPanel requestId={requestId} term={request.responsibilityTerm} ownerName={request.ownerName} />
             </CardContent>
           </Card>
         )}
@@ -587,8 +497,8 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
         {tab === "inspecao" && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Inspeção técnica (Anexo III)</CardTitle>
-              <p className="text-sm text-slate-500">
+              <CardTitle>Inspeção técnica (Anexo III)</CardTitle>
+              <p className="text-sm text-[var(--muted)]">
                 Registre a inspeção física e o parecer de liberação.
               </p>
             </CardHeader>
@@ -601,8 +511,8 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
         {tab === "ciclo" && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Ciclo de vida</CardTitle>
-              <p className="text-sm text-slate-500">
+              <CardTitle>Ciclo de vida</CardTitle>
+              <p className="text-sm text-[var(--muted)]">
                 Liberação, uso no setor, armazenamento e retirada.
               </p>
             </CardHeader>
@@ -620,8 +530,8 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
         {tab === "fotos" && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Galeria de fotos</CardTitle>
-              <p className="text-sm text-slate-500">
+              <CardTitle>Galeria de fotos</CardTitle>
+              <p className="text-sm text-[var(--muted)]">
                 Fotos do equipamento e anexos visuais. Passe o mouse para excluir fotos incorretas.
               </p>
             </CardHeader>

@@ -106,7 +106,7 @@ export function InvoiceLinkButton({
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="inline-flex items-center gap-1 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-900 hover:bg-amber-100"
+            className="gesteq-pill gesteq-pill-amber"
           >
             <Receipt className="h-3.5 w-3.5" />
             NF {invoice.number}
@@ -139,7 +139,7 @@ export function InvoiceLinkButton({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-1 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-900 hover:bg-amber-100"
+          className="gesteq-pill gesteq-pill-amber"
         >
           <Link2 className="h-3.5 w-3.5" />
           Vincular NF
@@ -152,22 +152,22 @@ export function InvoiceLinkButton({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[70] flex items-end justify-center bg-black/50 p-4 sm:items-center"
+            className="fixed inset-0 z-[70] flex items-end justify-center bg-black/45 p-0 sm:items-end sm:p-4"
             onClick={() => setOpen(false)}
           >
             <motion.div
               initial={{ y: 24, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 24, opacity: 0 }}
-              className="max-h-[85vh] w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-xl"
+              className="max-h-[88vh] w-full max-w-lg overflow-hidden rounded-t-[var(--r-xl)] bg-[var(--surface)] shadow-[var(--shadow-lg)] sm:rounded-[var(--r-xl)]"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+              <div className="flex items-center justify-between border-b border-[var(--line-2)] px-4 py-3.5">
                 <div>
-                  <h2 className="font-semibold text-slate-900">
+                  <h2 className="font-display font-semibold text-[var(--ink)]">
                     {invoice ? "Alterar nota fiscal" : "Vincular nota fiscal"}
                   </h2>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-[var(--muted)]">
                     Selecione uma NF cadastrada com anexo
                   </p>
                 </div>

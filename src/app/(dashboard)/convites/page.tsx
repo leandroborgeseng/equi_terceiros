@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/gesteq/page-header";
 import { Input, Label } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Copy, KeyRound, Ban, RotateCcw } from "lucide-react";
@@ -91,19 +92,17 @@ export default function ConvitesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Chaves de acesso</h1>
-        <p className="text-sm text-slate-500">
-          Gere uma chave e envie ao médico ou empresa para solicitar sem login. Validade de 30 dias,
-          reutilizável até expirar ou ser revogada.
-        </p>
-      </div>
+    <div className="gesteq-rise space-y-6">
+      <PageHeader
+        eyebrow="Configurações"
+        title="Chaves de acesso"
+        subtitle="Gere uma chave e envie ao médico ou empresa para solicitar sem login. Validade de 30 dias, reutilizável até expirar ou ser revogada."
+      />
 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <KeyRound className="h-5 w-5 text-emerald-600" /> Gerar nova chave
+            <KeyRound className="h-5 w-5 text-[var(--brand-ink)]" /> Gerar nova chave
           </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
@@ -168,7 +167,7 @@ export default function ConvitesPage() {
       </Card>
 
       <div className="space-y-3">
-        <h2 className="font-semibold text-slate-900">Chaves geradas</h2>
+        <h2 className="font-display font-semibold text-[var(--ink)]">Chaves geradas</h2>
         {(invites ?? []).length === 0 && (
           <p className="text-sm text-slate-500">Nenhuma chave gerada ainda.</p>
         )}
@@ -193,8 +192,8 @@ export default function ConvitesPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 rounded-lg bg-slate-100 p-2 text-xs">
-                <span className="truncate font-mono">{linkFor(i.key)}</span>
+              <div className="flex items-center gap-2 rounded-[var(--r)] border border-[var(--line)] bg-[var(--surface-2)] p-2 text-xs">
+                <span className="font-mono-data truncate">{linkFor(i.key)}</span>
                 <button
                   type="button"
                   onClick={() => copyLink(i.key)}

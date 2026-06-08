@@ -44,22 +44,25 @@ export function ChecklistItem({
   }, [hasObs]);
 
   return (
-    <div className="rounded-xl border border-slate-200 p-3">
-      <p className="text-sm leading-snug text-slate-700">
-        <span className="mr-1 font-semibold text-slate-400">{index}.</span>
+    <div className="rounded-[var(--r-lg)] border border-[var(--line)] bg-[var(--surface)] p-3 sm:p-3.5">
+      <p className="text-sm leading-snug text-[var(--ink-2)]">
+        <span className="font-mono-data mr-1.5 font-semibold text-[var(--faint)]">{index}.</span>
         {label}
       </p>
 
       <div className="mt-2.5 flex flex-wrap items-center gap-2">
-        <div className="flex flex-wrap gap-1">
+        <div className="gesteq-seg flex-wrap">
           {options.map((o) => (
             <button
               key={o.value}
               type="button"
               onClick={() => onChange(o.value)}
               className={cn(
-                "min-w-[3rem] rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
-                value === o.value ? o.activeClass : "bg-slate-50 text-slate-500 ring-1 ring-slate-200 hover:bg-slate-100"
+                "font-mono-data !text-xs",
+                value === o.value && "on",
+                value === o.value && o.activeClass.includes("emerald") && "!bg-[var(--brand-soft)] !text-[var(--brand-ink)]",
+                value === o.value && o.activeClass.includes("red") && "!bg-[var(--bloqueado-soft)] !text-[var(--bloqueado-ink)]",
+                value === o.value && o.activeClass.includes("amber") && "!bg-[var(--pendente-soft)] !text-[var(--pendente-ink)]"
               )}
             >
               {o.label}
@@ -74,10 +77,10 @@ export function ChecklistItem({
             aria-label={showObs ? "Ocultar observação" : "Adicionar observação"}
             onClick={() => setShowObs((s) => !s)}
             className={cn(
-              "rounded-lg p-2 transition-colors",
+              "rounded-[var(--r)] border p-2 transition-colors",
               showObs || hasObs
-                ? "bg-amber-100 text-amber-800 ring-1 ring-amber-200"
-                : "bg-slate-50 text-slate-500 ring-1 ring-slate-200 hover:bg-slate-100"
+                ? "border-[color-mix(in_oklch,var(--pendente)_35%,transparent)] bg-[var(--pendente-soft)] text-[var(--pendente-ink)]"
+                : "border-[var(--line)] bg-[var(--surface-2)] text-[var(--muted)] hover:bg-[var(--line-2)]"
             )}
           >
             <MessageSquarePlus className="h-4 w-4" />
@@ -87,7 +90,7 @@ export function ChecklistItem({
         {onFileUpload && (
           <label
             className={cn(
-              "inline-flex cursor-pointer items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50",
+              "inline-flex cursor-pointer items-center gap-1 rounded-[var(--r)] border border-[var(--line)] px-2.5 py-1.5 text-xs font-medium text-[var(--ink-2)] hover:bg-[var(--surface-2)]",
               uploading && "pointer-events-none opacity-60"
             )}
           >
@@ -125,14 +128,14 @@ export function ChecklistItem({
               href={fileUrl}
               target="_blank"
               rel="noreferrer"
-              className="max-w-[8rem] truncate text-xs text-emerald-700 hover:underline"
+              className="max-w-[8rem] truncate text-xs text-[var(--brand-ink)] hover:underline"
             >
               {fileName}
             </a>
           </>
         )}
         {fileName && !fileUrl && (
-          <span className="max-w-[10rem] truncate text-xs text-emerald-700">{fileName}</span>
+          <span className="max-w-[10rem] truncate text-xs text-[var(--brand-ink)]">{fileName}</span>
         )}
       </div>
 
@@ -142,7 +145,7 @@ export function ChecklistItem({
           value={obs ?? ""}
           onChange={(e) => onObsChange(e.target.value)}
           placeholder="Observação (opcional)"
-          className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+          className="mt-2 w-full rounded-[var(--r)] border border-[var(--line)] px-3 py-2 text-sm focus:border-[var(--brand)] focus:outline-none focus:ring-1 focus:ring-[var(--brand)]/30"
           autoFocus={showObs && !hasObs}
         />
       )}

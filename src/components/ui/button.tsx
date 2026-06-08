@@ -3,21 +3,21 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--r)] text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/40 disabled:pointer-events-none disabled:opacity-45 active:translate-y-px",
   {
     variants: {
       variant: {
-        default: "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-500",
-        secondary: "bg-slate-100 text-slate-900 hover:bg-slate-200",
-        outline: "border border-slate-200 bg-white hover:bg-slate-50",
-        ghost: "hover:bg-slate-100",
-        danger: "bg-red-600 text-white hover:bg-red-500",
-        warning: "bg-amber-500 text-white hover:bg-amber-400",
+        default: "border border-[var(--brand)] bg-[var(--brand)] text-white shadow-sm hover:bg-[var(--brand-dark)] hover:border-[var(--brand-dark)]",
+        secondary: "border border-[var(--line)] bg-[var(--surface-2)] text-[var(--ink-2)] hover:bg-[var(--line-2)]",
+        outline: "border border-[var(--line)] bg-[var(--surface)] text-[var(--ink-2)] hover:bg-[var(--surface-2)]",
+        ghost: "border border-transparent bg-transparent text-[var(--muted)] hover:bg-[var(--surface-2)] hover:text-[var(--ink)]",
+        danger: "border border-[color-mix(in_oklch,var(--bloqueado)_32%,transparent)] bg-transparent text-[var(--bloqueado-ink)] hover:bg-[var(--bloqueado-soft)]",
+        warning: "border border-[color-mix(in_oklch,var(--pendente)_38%,transparent)] bg-[var(--pendente-soft)] text-[var(--pendente-ink)]",
       },
       size: {
-        default: "h-11 px-5 py-2",
-        sm: "h-9 rounded-lg px-3",
-        lg: "h-12 rounded-xl px-8 text-base",
+        default: "h-10 px-4",
+        sm: "h-8 rounded-[var(--r-sm)] px-3 text-[13px]",
+        lg: "h-12 rounded-[var(--r-lg)] px-6 text-base",
         icon: "h-10 w-10",
       },
     },

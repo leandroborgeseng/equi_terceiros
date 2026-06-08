@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, Building2, Printer, Tags, KeyRound } from "lucide-react";
+import { PageHeader } from "@/components/gesteq/page-header";
 
 const sections = [
   {
@@ -42,23 +43,24 @@ const sections = [
 
 export default function ConfiguracoesPage() {
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Configurações</h1>
-        <p className="text-slate-500">Administração do sistema GestEq</p>
-      </div>
+    <div className="gesteq-rise space-y-6">
+      <PageHeader
+        eyebrow="Administração"
+        title="Configurações"
+        subtitle="Administração do sistema GestEq"
+      />
 
       <div className="grid gap-4 sm:grid-cols-2">
         {sections.map((s) => {
           const content = (
-            <Card className={s.enabled ? "transition-shadow hover:shadow-md" : "opacity-60"}>
+            <Card className={s.enabled ? "transition-shadow hover:shadow-[var(--shadow)]" : "opacity-60"}>
               <CardContent className="flex items-start gap-4 p-5">
-                <div className="rounded-xl bg-emerald-50 p-3">
-                  <s.icon className="h-6 w-6 text-emerald-600" />
+                <div className="rounded-[var(--r-lg)] bg-[var(--brand-soft)] p-3">
+                  <s.icon className="h-6 w-6 text-[var(--brand-ink)]" />
                 </div>
                 <div>
-                  <p className="font-semibold text-slate-900">{s.title}</p>
-                  <p className="text-sm text-slate-500">{s.desc}</p>
+                  <p className="font-display font-semibold text-[var(--ink)]">{s.title}</p>
+                  <p className="text-sm text-[var(--muted)]">{s.desc}</p>
                 </div>
               </CardContent>
             </Card>

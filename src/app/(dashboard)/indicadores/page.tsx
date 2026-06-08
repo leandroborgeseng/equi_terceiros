@@ -4,6 +4,9 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/gesteq/page-header";
+import { StatCard } from "@/components/gesteq/stat-card";
+import { FilterPills } from "@/components/gesteq/filter-pills";
 import { DonutChart } from "@/components/charts/donut-chart";
 import { CheckCircle, XCircle, AlertTriangle, Clock, Activity, FileDown } from "lucide-react";
 import { jsPDF } from "jspdf";
@@ -48,12 +51,12 @@ export default function IndicadoresPage() {
   });
 
   const kpis = [
-    { label: "Equipamentos ativos", value: data?.totalAtivos ?? 0, icon: Activity, color: "text-blue-600" },
-    { label: "Bloqueios no período", value: data?.bloqueios ?? 0, icon: XCircle, color: "text-red-600" },
-    { label: "Eventos adversos", value: data?.eventosAdversos ?? 0, icon: AlertTriangle, color: "text-orange-600" },
-    { label: "Pend. regularização", value: data?.pendentesRegularizacao ?? 0, icon: Clock, color: "text-amber-600" },
-    { label: "Cadastro prévio (eletivos)", value: `${data?.cadastroPrevioPct ?? 0}%`, icon: CheckCircle, color: "text-emerald-600" },
-    { label: "SLA homologação", value: `${data?.slaHoras ?? 0}h`, icon: Clock, color: "text-slate-600" },
+    { label: "Equipamentos ativos", value: data?.totalAtivos ?? 0, icon: Activity, accent: "inspecao" as const },
+    { label: "Bloqueios no período", value: data?.bloqueios ?? 0, icon: XCircle, accent: "bloqueado" as const },
+    { label: "Eventos adversos", value: data?.eventosAdversos ?? 0, icon: AlertTriangle, accent: "pendente" as const },
+    { label: "Pend. regularização", value: data?.pendentesRegularizacao ?? 0, icon: Clock, accent: "pendente" as const },
+    { label: "Cadastro prévio (eletivos)", value: `${data?.cadastroPrevioPct ?? 0}%`, icon: CheckCircle, accent: "brand" as const },
+    { label: "SLA homologação", value: `${data?.slaHoras ?? 0}h`, icon: Clock, accent: "muted" as const },
   ];
 
   function rows(): [string, string | number][] {
@@ -99,59 +102,50 @@ export default function IndicadoresPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Indicadores estratégicos</h1>
-          <p className="text-slate-500">Norma 445.000 — gestão de equipamentos de terceiros</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={exportCsv}>
-            <FileDown className="h-4 w-4" /> CSV
-          </Button>
-          <Button variant="outline" size="sm" onClick={exportPdf}>
-            <FileDown className="h-4 w-4" /> PDF
-          </Button>
-        </div>
-      </div>
+    <div className="gesteq-rise space-y-6">
+      <PageHeader
+        eyebrow="Gestão"
+        title="Indicadores estratégicos"
+        subtitle="Norma 445.000 — gestão de equipamentos de terceiros"
+        actions={
+          <>
+            <Button variant="outline" size="sm" onClick={exportCsv}>
+              <FileDown className="h-4 w-4" /> CSV
+            </Button>
+            <Button variant="outline" size="sm" onClick={exportPdf}>
+              <FileDown className="h-4 w-4" /> PDF
+            </Button>
+          </>
+        }
+      />
 
-      <div className="flex flex-wrap items-center gap-2">
-        {PERIODS.map((p) => (
-          <button
-            key={p.value}
-            onClick={() => setPeriod(p.value)}
-            className={`rounded-full px-3 py-1 text-xs font-medium ${
-              period === p.value ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-600"
-            }`}
+      <div className="flex flex-wrap items-end gap-4">
+        <FilterPills
+          label="Período"
+          options={PERIODS.map((p) => ({ value: p.value, label: p.label }))}
+          value={period}
+          onChange={setPeriod}
+        />
+        <div className="ml-auto min-w-[200px]">
+          <div className="gesteq-eyebrow mb-1.5">Setor</div>
+          <select
+            className="h-10 w-full rounded-[var(--r)] border border-[var(--line)] bg-[var(--surface)] px-3 text-sm"
+            value={sector}
+            onChange={(e) => setSector(e.target.value)}
           >
-            {p.label}
-          </button>
-        ))}
-        <select
-          className="ml-auto rounded-lg border border-slate-200 px-3 py-1.5 text-sm"
-          value={sector}
-          onChange={(e) => setSector(e.target.value)}
-        >
-          <option value="">Todos os setores</option>
-          {(data?.setores ?? []).map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
+            <option value="">Todos os setores</option>
+            {(data?.setores ?? []).map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {kpis.map((k) => (
-          <Card key={k.label}>
-            <CardContent className="flex items-center gap-4 p-5">
-              <k.icon className={`h-9 w-9 ${k.color}`} />
-              <div>
-                <p className="text-2xl font-bold">{k.value}</p>
-                <p className="text-xs text-slate-500">{k.label}</p>
-              </div>
-            </CardContent>
-          </Card>
+          <StatCard key={k.label} label={k.label} value={k.value} icon={k.icon} accent={k.accent} />
         ))}
       </div>
 
