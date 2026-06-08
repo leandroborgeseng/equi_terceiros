@@ -63,7 +63,7 @@ function PreviewModal({
               onError={() => setImgError(true)}
             />
           ) : file.isImage && imgError ? (
-            <div className="flex h-64 flex-col items-center justify-center gap-2 text-slate-500">
+            <div className="flex h-64 flex-col items-center justify-center gap-2 text-[var(--muted)]">
               <ImageOff className="h-10 w-10" />
               <p>Imagem indisponível</p>
             </div>
@@ -109,7 +109,7 @@ export function FileThumbnail({
         type="button"
         onClick={() => setOpen(true)}
         title={`Visualizar: ${file.fileName}`}
-        className={`${dim} shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-50 shadow-sm transition hover:ring-2 hover:ring-emerald-400`}
+        className={`${dim} shrink-0 overflow-hidden rounded-[var(--r)] border border-[var(--line)] bg-[var(--surface-2)] shadow-sm transition hover:ring-2 hover:ring-[var(--brand-soft)]`}
       >
         {file.isImage && !thumbError ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -120,7 +120,7 @@ export function FileThumbnail({
             onError={() => setThumbError(true)}
           />
         ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center gap-0.5 bg-red-50 text-red-700">
+          <div className="flex h-full w-full flex-col items-center justify-center gap-0.5 bg-[var(--bloqueado-soft)] text-[var(--bloqueado-ink)]">
             <FileText className={size === "sm" ? "h-5 w-5" : "h-7 w-7"} />
             <span className="text-[9px] font-bold uppercase">PDF</span>
           </div>
@@ -139,7 +139,7 @@ export function FilePreviewGrid({ files }: { files: PreviewFile[] }) {
 
   if (files.length === 0) {
     return (
-      <p className="text-sm text-slate-500">Nenhum anexo ou foto vinculado ainda.</p>
+      <p className="text-sm text-[var(--muted)]">Nenhum anexo ou foto vinculado ainda.</p>
     );
   }
 
@@ -151,9 +151,9 @@ export function FilePreviewGrid({ files }: { files: PreviewFile[] }) {
             key={file.id}
             type="button"
             onClick={() => setActive(file)}
-            className="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white text-left shadow-sm transition hover:border-emerald-300 hover:shadow-md"
+            className="group flex flex-col overflow-hidden rounded-[var(--r-lg)] border border-[var(--line)] bg-[var(--surface)] text-left shadow-sm transition hover:border-[var(--brand-line)] hover:shadow-[var(--shadow)]"
           >
-            <div className="relative aspect-square w-full bg-slate-100">
+            <div className="relative aspect-square w-full bg-[var(--surface-2)]">
               {file.isImage ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -166,15 +166,15 @@ export function FilePreviewGrid({ files }: { files: PreviewFile[] }) {
                   }}
                 />
               ) : (
-                <div className="flex h-full flex-col items-center justify-center gap-1 bg-gradient-to-br from-red-50 to-slate-50 text-red-700">
+                <div className="flex h-full flex-col items-center justify-center gap-1 bg-[var(--bloqueado-soft)] text-[var(--bloqueado-ink)]">
                   <FileText className="h-8 w-8" />
                   <span className="text-[10px] font-bold uppercase tracking-wide">PDF</span>
                 </div>
               )}
               <div className="absolute inset-0 bg-black/0 transition group-hover:bg-black/10" />
             </div>
-            <div className="border-t border-slate-100 p-2">
-              <p className="line-clamp-2 text-[10px] font-medium leading-tight text-slate-700">
+            <div className="border-t border-[var(--line-2)] p-2">
+              <p className="line-clamp-2 text-[10px] font-medium leading-tight text-[var(--ink-2)]">
                 {file.label}
               </p>
             </div>

@@ -1,8 +1,10 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3, CheckCircle, Clock, XCircle, AlertTriangle } from "lucide-react";
+import { CheckCircle, Clock, XCircle, AlertTriangle } from "lucide-react";
+import { PageHeader } from "@/components/gesteq/page-header";
+import { StatCard } from "@/components/gesteq/stat-card";
+import { Panel } from "@/components/gesteq/panel";
 
 type Stats = {
   liberados: number;
@@ -23,100 +25,65 @@ export default function ExecutivoDashboardPage() {
   });
 
   const kpis = [
-    { label: "Liberados", value: stats?.liberados ?? 0, icon: CheckCircle, color: "text-emerald-600" },
-    { label: "Pendentes", value: stats?.pendentes ?? 0, icon: Clock, color: "text-amber-600" },
-    { label: "Bloqueados", value: stats?.bloqueados ?? 0, icon: XCircle, color: "text-red-600" },
-    { label: "Vencidos", value: stats?.vencidos ?? 0, icon: AlertTriangle, color: "text-orange-600" },
+    { label: "Liberados", value: stats?.liberados ?? 0, icon: CheckCircle, accent: "brand" as const },
+    { label: "Pendentes", value: stats?.pendentes ?? 0, icon: Clock, accent: "pendente" as const },
+    { label: "Bloqueados", value: stats?.bloqueados ?? 0, icon: XCircle, accent: "bloqueado" as const },
+    { label: "Vencidos", value: stats?.vencidos ?? 0, icon: AlertTriangle, accent: "pendente" as const },
   ];
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Dashboard Executivo</h1>
-        <p className="text-slate-500">Indicadores de homologação e compliance</p>
-      </div>
+    <div className="gesteq-rise space-y-6">
+      <PageHeader
+        eyebrow="Diretoria"
+        title="Dashboard Executivo"
+        subtitle="Indicadores de homologação e compliance"
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {kpis.map((k) => (
-          <Card key={k.label}>
-            <CardContent className="flex items-center gap-4 p-6">
-              <k.icon className={`h-10 w-10 ${k.color}`} />
-              <div>
-                <p className="text-3xl font-bold">{k.value}</p>
-                <p className="text-sm text-slate-500">{k.label}</p>
-              </div>
-            </CardContent>
-          </Card>
+          <StatCard key={k.label} label={k.label} value={k.value} icon={k.icon} accent={k.accent} />
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" /> SLA Homologação
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-4xl font-bold text-emerald-600">{stats?.slaHomologacaoHoras ?? 0}h</p>
-            <p className="text-sm text-slate-500">Tempo médio até homologação</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Taxa de reprovação</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-4xl font-bold text-amber-600">{stats?.taxaReprovacao ?? 0}%</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Documentos vencidos</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-4xl font-bold text-red-600">{stats?.documentosVencidos ?? 0}</p>
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Panel title="SLA homologação" eyebrow="Média">
+          <p className="font-display text-3xl font-semibold text-[var(--ink)]">
+            {stats?.slaHomologacaoHoras ?? 0}h
+          </p>
+        </Panel>
+        <Panel title="Taxa reprovação docs" eyebrow="Período">
+          <p className="font-display text-3xl font-semibold text-[var(--ink)]">
+            {stats?.taxaReprovacao ?? 0}%
+          </p>
+        </Panel>
+        <Panel title="Docs vencidos" eyebrow="Alertas">
+          <p className="font-display text-3xl font-semibold text-[var(--ink)]">
+            {stats?.documentosVencidos ?? 0}
+          </p>
+        </Panel>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Pendências por fornecedor</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2 text-sm">
-              {(stats?.porFornecedor ?? []).slice(0, 10).map((row) => (
-                <li key={row.supplierName} className="flex justify-between border-b border-slate-100 py-2">
-                  <span>{row.supplierName || "—"}</span>
-                  <span className="font-semibold text-amber-700">{row._count}</span>
-                </li>
-              ))}
-              {!stats?.porFornecedor?.length && (
-                <p className="text-slate-500">Sem pendências por fornecedor.</p>
-              )}
-            </ul>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Solicitações abertas por médico</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2 text-sm">
-              {(stats?.porMedico ?? []).slice(0, 10).map((row) => (
-                <li key={row.doctorId} className="flex justify-between border-b border-slate-100 py-2">
-                  <span className="text-slate-600">ID {row.doctorId.slice(0, 8)}…</span>
-                  <span className="font-semibold">{row._count}</span>
-                </li>
-              ))}
-              {!stats?.porMedico?.length && (
-                <p className="text-slate-500">Sem dados agregados.</p>
-              )}
-            </ul>
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Panel title="Pendências por fornecedor" eyebrow="Top">
+          <ul className="space-y-2 text-sm text-[var(--ink-2)]">
+            {(stats?.porFornecedor ?? []).slice(0, 8).map((f) => (
+              <li key={f.supplierName} className="flex justify-between gap-2">
+                <span className="truncate">{f.supplierName}</span>
+                <span className="font-mono-data font-semibold">{f._count}</span>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+        <Panel title="Solicitações por médico" eyebrow="Ativos">
+          <ul className="space-y-2 text-sm text-[var(--ink-2)]">
+            {(stats?.porMedico ?? []).slice(0, 8).map((m) => (
+              <li key={m.doctorId ?? "—"} className="flex justify-between gap-2">
+                <span className="truncate">{m.doctorId ?? "Sem médico"}</span>
+                <span className="font-mono-data font-semibold">{m._count}</span>
+              </li>
+            ))}
+          </ul>
+        </Panel>
       </div>
     </div>
   );

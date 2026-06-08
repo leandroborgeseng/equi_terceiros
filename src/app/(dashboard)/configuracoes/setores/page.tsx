@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Building2 } from "lucide-react";
+import { PageHeader } from "@/components/gesteq/page-header";
+import { Panel } from "@/components/gesteq/panel";
 
 type Sector = { id: string; name: string; active: boolean };
 
@@ -53,21 +54,15 @@ export default function SetoresPage() {
   });
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Setores</h1>
-        <p className="text-sm text-slate-500">
-          Setores assistenciais usados como sugestão nos formulários de solicitação e cadastro.
-        </p>
-      </div>
+    <div className="gesteq-rise space-y-6">
+      <PageHeader
+        eyebrow="Administração"
+        title="Setores"
+        subtitle="Setores assistenciais usados como sugestão nos formulários de solicitação e cadastro"
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building2 className="h-5 w-5 text-emerald-600" /> Novo setor
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-wrap items-end gap-3">
+      <Panel title="Novo setor" right={<Building2 className="h-5 w-5 text-[var(--brand)]" />}>
+        <div className="flex flex-wrap items-end gap-3">
           <div className="flex-1 min-w-48">
             <Label>Nome do setor</Label>
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Centro Cirúrgico — Sala 03" />
@@ -75,29 +70,27 @@ export default function SetoresPage() {
           <Button onClick={() => create.mutate()} disabled={create.isPending || name.trim().length < 2}>
             {create.isPending ? "Salvando..." : "Adicionar"}
           </Button>
-        </CardContent>
-      </Card>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+        </div>
+      </Panel>
+      {error && <p className="text-sm text-[var(--bloqueado-ink)]">{error}</p>}
 
       <div className="grid gap-2 sm:grid-cols-2">
         {(sectors ?? []).map((s) => (
-          <Card key={s.id}>
-            <CardContent className="flex items-center justify-between py-3">
-              <span className="text-sm font-medium text-slate-800">{s.name}</span>
-              <div className="flex items-center gap-2">
-                <Badge variant={s.active ? "success" : "default"}>{s.active ? "Ativo" : "Inativo"}</Badge>
-                <button
-                  onClick={() => toggle.mutate({ id: s.id, active: !s.active })}
-                  className="text-xs text-slate-500 hover:underline"
-                >
-                  {s.active ? "Desativar" : "Ativar"}
-                </button>
-              </div>
-            </CardContent>
-          </Card>
+          <div key={s.id} className="gesteq-card flex items-center justify-between px-4 py-3">
+            <span className="text-sm font-medium text-[var(--ink)]">{s.name}</span>
+            <div className="flex items-center gap-2">
+              <Badge variant={s.active ? "success" : "default"}>{s.active ? "Ativo" : "Inativo"}</Badge>
+              <button
+                onClick={() => toggle.mutate({ id: s.id, active: !s.active })}
+                className="text-xs text-[var(--muted)] hover:underline"
+              >
+                {s.active ? "Desativar" : "Ativar"}
+              </button>
+            </div>
+          </div>
         ))}
         {(sectors ?? []).length === 0 && (
-          <p className="text-sm text-slate-500">Nenhum setor cadastrado.</p>
+          <p className="text-sm text-[var(--muted)]">Nenhum setor cadastrado.</p>
         )}
       </div>
     </div>

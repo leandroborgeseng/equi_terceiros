@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { MobileUpload, OfflineSyncBanner } from "@/components/upload/mobile-upload";
 import { PHOTO_LABELS, REQUIRED_PHOTOS, REQUIRED_DOCUMENT_TYPES } from "@/lib/validators/request";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/gesteq/page-header";
 import { useMutation } from "@tanstack/react-query";
 
 const DOC_TYPES = [
@@ -35,16 +36,17 @@ export default function DocumentosPage() {
   });
 
   return (
-    <div className="mx-auto max-w-lg space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-slate-900">Documentação e fotos</h1>
-        <p className="text-sm text-slate-500">Todas as fotos obrigatórias são necessárias para envio</p>
-      </div>
+    <div className="gesteq-rise mx-auto max-w-lg space-y-6">
+      <PageHeader
+        eyebrow="Médico"
+        title="Documentação e fotos"
+        subtitle="Todas as fotos obrigatórias são necessárias para envio"
+      />
 
       <OfflineSyncBanner />
 
       <section className="space-y-4">
-        <h2 className="font-semibold text-slate-800">Fotos obrigatórias</h2>
+        <h2 className="font-display font-semibold text-[var(--ink)]">Fotos obrigatórias</h2>
         {REQUIRED_PHOTOS.map((photoType) => (
           <MobileUpload
             key={photoType}
@@ -57,7 +59,7 @@ export default function DocumentosPage() {
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-semibold text-slate-800">Documentos</h2>
+        <h2 className="font-display font-semibold text-[var(--ink)]">Documentos</h2>
         {DOC_TYPES.map((doc) => (
           <div key={doc.type}>
             <MobileUpload requestId={id} type={doc.type} label={doc.label} />

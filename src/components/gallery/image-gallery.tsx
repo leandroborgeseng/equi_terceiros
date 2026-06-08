@@ -33,11 +33,11 @@ export type GalleryImage = {
 };
 
 const AI_BADGE: Record<string, string> = {
-  VALIDATED: "bg-emerald-100 text-emerald-800",
-  MANUAL_REVIEW: "bg-amber-100 text-amber-800",
-  PROCESSING: "bg-blue-100 text-blue-800",
-  FAILED: "bg-red-100 text-red-800",
-  PENDING: "bg-slate-100 text-slate-600",
+  VALIDATED: "bg-[var(--liberado-soft)] text-[var(--liberado-ink)]",
+  MANUAL_REVIEW: "bg-[var(--restricao-soft)] text-[var(--restricao-ink)]",
+  PROCESSING: "bg-[var(--inspecao-soft)] text-[var(--inspecao-ink)]",
+  FAILED: "bg-[var(--bloqueado-soft)] text-[var(--bloqueado-ink)]",
+  PENDING: "bg-[var(--surface-2)] text-[var(--muted)]",
 };
 
 function GalleryThumb({
@@ -60,7 +60,7 @@ function GalleryThumb({
   const [failed, setFailed] = useState(false);
 
   return (
-    <div className="group relative aspect-square overflow-hidden rounded-xl bg-slate-100">
+    <div className="group relative aspect-square overflow-hidden rounded-[var(--r-lg)] bg-[var(--surface-2)]">
     <button
       type="button"
       className="h-full w-full"
@@ -71,8 +71,8 @@ function GalleryThumb({
       }}
     >
       {failed ? (
-        <div className="flex h-full flex-col items-center justify-center gap-1 p-2 text-center text-xs text-slate-500">
-          <ImageOff className="h-6 w-6 text-slate-400" />
+        <div className="flex h-full flex-col items-center justify-center gap-1 p-2 text-center text-xs text-[var(--muted)]">
+          <ImageOff className="h-6 w-6 text-[var(--muted)]" />
           <span>Imagem indisponível</span>
         </div>
       ) : (
@@ -183,7 +183,7 @@ export function ImageGallery({
 
   if (images.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-200 py-10 text-center text-sm text-slate-500">
+      <div className="rounded-[var(--r-lg)] border border-dashed border-[var(--line)] py-10 text-center text-sm text-[var(--muted)]">
         Nenhuma foto enviada ainda. Use o checklist ou a seção de fotos obrigatórias.
       </div>
     );
@@ -192,7 +192,7 @@ export function ImageGallery({
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="font-semibold text-slate-900">Galeria ({images.length})</h3>
+        <h3 className="font-display font-semibold text-[var(--ink)]">Galeria ({images.length})</h3>
         <div className="flex items-center gap-2">
           {compare.length === 2 && (
             <Button size="sm" variant="outline" onClick={() => openAt(compare[0])}>

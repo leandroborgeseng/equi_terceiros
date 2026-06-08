@@ -15,6 +15,7 @@ import {
   type NovoEquipamentoForm,
 } from "@/lib/duplicate-equipment";
 import { supplierFieldsFromOption, type SupplierOption } from "@/lib/supplier-form";
+import { PageHeader } from "@/components/gesteq/page-header";
 
 export default function NovoEquipamentoPage() {
   const router = useRouter();
@@ -110,20 +111,19 @@ export default function NovoEquipamentoPage() {
   const isDuplicate = !!fromId;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">
-          {isDuplicate ? "Duplicar equipamento" : "Novo equipamento"}
-        </h1>
-        <p className="text-sm text-slate-500">
-          {isDuplicate
+    <div className="gesteq-rise space-y-6">
+      <PageHeader
+        eyebrow="Engenharia Clínica"
+        title={isDuplicate ? "Duplicar equipamento" : "Novo equipamento"}
+        subtitle={
+          isDuplicate
             ? "Dados copiados do cadastro anterior. Ajuste série, patrimônio e demais campos pertinentes."
-            : "Cadastro originado pela Engenharia Clínica. Entra direto em homologação (checklist + inspeção)."}
-        </p>
-      </div>
+            : "Cadastro originado pela Engenharia Clínica. Entra direto em homologação (checklist + inspeção)."
+        }
+      />
 
       {loadingSource && isDuplicate && (
-        <p className="text-sm text-slate-500">Carregando dados para duplicar...</p>
+        <p className="text-sm text-[var(--muted)]">Carregando dados para duplicar...</p>
       )}
 
       {sourceError && isDuplicate && (
@@ -136,28 +136,28 @@ export default function NovoEquipamentoPage() {
       )}
 
       {duplicateSource && (
-        <Card className="border-blue-200 bg-blue-50/50">
+        <Card className="border-[color-mix(in_oklch,var(--inspecao)_30%,transparent)] bg-[var(--inspecao-soft)]">
           <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
-            <div className="flex items-start gap-2 text-sm text-blue-900">
+            <div className="flex items-start gap-2 text-sm text-[var(--inspecao-ink)]">
               <Copy className="mt-0.5 h-4 w-4 shrink-0" />
               <div>
                 <p className="font-medium">Duplicando de {duplicateSource}</p>
-                <p className="text-xs text-blue-700">
+                <p className="text-xs opacity-80">
                   Número de série, patrimônio e autorização da diretoria foram limpos — preencha com os
                   dados do novo item.
                 </p>
               </div>
             </div>
-            <Link href="/equipamentos/novo" className="text-xs text-blue-700 hover:underline">
+            <Link href="/equipamentos/novo" className="text-xs hover:underline">
               Começar em branco
             </Link>
           </CardContent>
         </Card>
       )}
 
-      <Card className="border-amber-200 bg-amber-50/40">
+      <Card className="border-[color-mix(in_oklch,var(--pendente)_35%,transparent)] bg-[var(--pendente-soft)]">
         <CardContent className="py-4">
-          <label className="flex items-center gap-2 text-sm font-medium text-amber-900">
+          <label className="flex items-center gap-2 text-sm font-medium text-[var(--pendente-ink)]">
             <input
               type="checkbox"
               checked={form.alreadyInPark}
@@ -166,7 +166,7 @@ export default function NovoEquipamentoPage() {
             />
             Equipamento já está no parque tecnológico (apenas formalizar)
           </label>
-          <p className="mt-1 text-xs text-amber-700">
+          <p className="mt-1 text-xs text-[var(--restricao-ink)]">
             Marque para regularizar documentação de um equipamento que já está em uso. O fluxo de
             checklist e inspeção é mantido para garantir o compliance.
           </p>
@@ -206,7 +206,7 @@ export default function NovoEquipamentoPage() {
           <div>
             <Label>Classe *</Label>
             <select
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-[var(--r-md)] border border-[var(--line)] bg-[var(--card)] px-3 py-2 text-sm"
               value={form.equipmentClass}
               onChange={(e) => set("equipmentClass", e.target.value)}
             >
@@ -219,7 +219,7 @@ export default function NovoEquipamentoPage() {
           <div>
             <Label>Tipo de ingresso</Label>
             <select
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-[var(--r-md)] border border-[var(--line)] bg-[var(--card)] px-3 py-2 text-sm"
               value={form.entryType}
               onChange={(e) => set("entryType", e.target.value)}
             >
@@ -265,7 +265,7 @@ export default function NovoEquipamentoPage() {
           <div className="sm:col-span-2">
             <Label>Empresa cadastrada</Label>
             <select
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-[var(--r-md)] border border-[var(--line)] bg-[var(--card)] px-3 py-2 text-sm"
               value={form.supplierId}
               onChange={(e) => onSupplierSelect(e.target.value)}
             >
@@ -277,10 +277,10 @@ export default function NovoEquipamentoPage() {
                 </option>
               ))}
             </select>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-[var(--muted)]">
               Ao selecionar, razão social, CNPJ e contato são preenchidos automaticamente. Não está na
               lista?{" "}
-              <Link href="/fornecedores" className="text-emerald-600 hover:underline">
+              <Link href="/fornecedores" className="text-[var(--brand-ink)] hover:underline">
                 Cadastrar fornecedor
               </Link>{" "}
               ou digite manualmente abaixo.
@@ -313,7 +313,7 @@ export default function NovoEquipamentoPage() {
           <div className="sm:col-span-2">
             <Label>Vincular a uma NF cadastrada (opcional)</Label>
             <select
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-[var(--r-md)] border border-[var(--line)] bg-[var(--card)] px-3 py-2 text-sm"
               value={form.invoiceId}
               onChange={(e) => set("invoiceId", e.target.value)}
             >
@@ -325,15 +325,15 @@ export default function NovoEquipamentoPage() {
                 </option>
               ))}
             </select>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-[var(--muted)]">
               Uma NF com anexo pode ser compartilhada por vários equipamentos.{" "}
-              <Link href="/notas-fiscais" className="text-emerald-600 hover:underline">
+              <Link href="/notas-fiscais" className="text-[var(--brand-ink)] hover:underline">
                 Cadastre a nota fiscal
               </Link>{" "}
               (com anexo obrigatório) e vincule aqui ou depois na tela de Notas Fiscais.
             </p>
             {invoicesWithAttachment.length === 0 && (
-              <p className="mt-1 text-xs text-amber-700">
+              <p className="mt-1 text-xs text-[var(--restricao-ink)]">
                 Nenhuma NF com anexo disponível. Cadastre em Notas Fiscais antes de vincular.
               </p>
             )}
@@ -342,7 +342,7 @@ export default function NovoEquipamentoPage() {
       </Card>
 
       {error && (
-        <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+        <div className="rounded-[var(--r-lg)] bg-[var(--bloqueado-soft)] px-4 py-3 text-sm text-[var(--bloqueado-ink)]">{error}</div>
       )}
 
       <div className="flex items-center gap-3">
@@ -357,7 +357,7 @@ export default function NovoEquipamentoPage() {
               ? "Cadastrar e iniciar formalização"
               : "Cadastrar e enviar para homologação"}
         </Button>
-        <Link href="/equipamentos" className="text-sm text-slate-500 hover:underline">
+        <Link href="/equipamentos" className="text-sm text-[var(--muted)] hover:underline">
           Cancelar
         </Link>
       </div>

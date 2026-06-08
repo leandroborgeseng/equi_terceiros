@@ -138,7 +138,7 @@ export default function ConvitesPage() {
           <div>
             <Label>Tipo</Label>
             <select
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-[var(--r-md)] border border-[var(--line)] bg-[var(--card)] px-3 py-2 text-sm"
               value={form.entryType}
               onChange={(e) => setForm((f) => ({ ...f, entryType: e.target.value }))}
             >
@@ -169,18 +169,18 @@ export default function ConvitesPage() {
       <div className="space-y-3">
         <h2 className="font-display font-semibold text-[var(--ink)]">Chaves geradas</h2>
         {(invites ?? []).length === 0 && (
-          <p className="text-sm text-slate-500">Nenhuma chave gerada ainda.</p>
+          <p className="text-sm text-[var(--muted)]">Nenhuma chave gerada ainda.</p>
         )}
         {(invites ?? []).map((i) => (
           <Card key={i.id}>
             <CardContent className="space-y-3 py-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <p className="font-medium text-slate-900">
+                  <p className="font-medium text-[var(--ink)]">
                     {i.requesterName}{" "}
-                    <span className="text-xs font-normal text-slate-500">· {i.entryType}</span>
+                    <span className="text-xs font-normal text-[var(--muted)]">· {i.entryType}</span>
                   </p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-[var(--muted)]">
                     {i.requesterEmail}
                     {i.requesterPhone ? ` · ${i.requesterPhone}` : ""}
                     {i.doctorCrm ? ` · CRM ${i.doctorCrm}` : ""}
@@ -197,15 +197,15 @@ export default function ConvitesPage() {
                 <button
                   type="button"
                   onClick={() => copyLink(i.key)}
-                  className="shrink-0 rounded-md bg-white p-1.5 ring-1 ring-slate-200"
+                  className="shrink-0 rounded-md bg-[var(--card)] p-1.5 ring-1 ring-[var(--line)]"
                   aria-label="Copiar link"
                 >
                   <Copy className="h-4 w-4" />
                 </button>
-                {copied === i.key && <span className="text-emerald-600">copiado!</span>}
+                {copied === i.key && <span className="text-[var(--brand-ink)]">copiado!</span>}
               </div>
 
-              <div className="flex items-center justify-between text-xs text-slate-500">
+              <div className="flex items-center justify-between text-xs text-[var(--muted)]">
                 <span>
                   Criada em {formatDate(i.createdAt)}
                   {i.expiresAt ? ` · expira em ${formatDate(i.expiresAt)}` : ""}
@@ -213,7 +213,7 @@ export default function ConvitesPage() {
                 {i.revokedAt ? (
                   <button
                     onClick={() => revokeMutation.mutate({ id: i.id, revoke: false })}
-                    className="flex items-center gap-1 text-emerald-600 hover:underline"
+                    className="flex items-center gap-1 text-[var(--brand-ink)] hover:underline"
                   >
                     <RotateCcw className="h-3.5 w-3.5" /> Reativar
                   </button>

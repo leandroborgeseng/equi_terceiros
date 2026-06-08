@@ -3,7 +3,9 @@
 import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { PageHeader } from "@/components/gesteq/page-header";
+import { Panel } from "@/components/gesteq/panel";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -193,22 +195,19 @@ export default function NotasFiscaisPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Notas Fiscais</h1>
-        <p className="text-sm text-slate-500">
-          Cadastre a NF com anexo obrigatório e vincule a quantos equipamentos precisar — uma mesma
-          nota pode cobrir um lote inteiro.
-        </p>
-      </div>
+    <div className="gesteq-rise space-y-6">
+      <PageHeader
+        eyebrow="Documentação"
+        title="Notas Fiscais"
+        subtitle={`${(invoices ?? []).length} NFs · vários equipamentos podem compartilhar a mesma nota`}
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Receipt className="h-5 w-5 text-emerald-600" /> Nova nota fiscal
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
+      <Panel
+        title="Nova nota fiscal"
+        eyebrow="Cadastro"
+        right={<Receipt className="h-5 w-5 text-[var(--brand-ink)]" />}
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <Label>Número da NF *</Label>
             <Input value={form.number} onChange={(e) => setForm((f) => ({ ...f, number: e.target.value }))} />
@@ -235,17 +234,17 @@ export default function NotasFiscaisPage() {
               ref={createFileRef}
               type="file"
               accept="application/pdf,image/*"
-              className="mt-1 block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-emerald-700"
+              className="mt-1 block w-full text-sm text-[var(--ink-2)] file:mr-3 file:rounded-[var(--r-md)] file:border-0 file:bg-[var(--brand-soft)] file:px-3 file:py-2 file:text-sm file:font-medium file:text-[var(--brand-ink)]"
               onChange={(e) => setCreateFile(e.target.files?.[0] ?? null)}
             />
             {createFile && (
-              <p className="mt-1 text-xs text-emerald-700">
+              <p className="mt-1 text-xs text-[var(--brand-ink)]">
                 <FileText className="mr-1 inline h-3.5 w-3.5" />
                 {createFile.name}
               </p>
             )}
           </div>
-          {error && <p className="text-sm text-red-600 sm:col-span-2">{error}</p>}
+          {error && <p className="text-sm text-[var(--bloqueado-ink)] sm:col-span-2">{error}</p>}
           <div className="sm:col-span-2">
             <Button
               onClick={() => createMutation.mutate()}
@@ -254,13 +253,13 @@ export default function NotasFiscaisPage() {
               {createMutation.isPending ? "Salvando..." : "Cadastrar nota fiscal"}
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </Panel>
 
       <div className="space-y-3">
-        <h2 className="font-semibold text-slate-900">Notas cadastradas</h2>
+        <h2 className="font-display font-semibold text-[var(--ink)]">Notas cadastradas</h2>
         {(invoices ?? []).length === 0 && (
-          <p className="text-sm text-slate-500">Nenhuma nota fiscal cadastrada.</p>
+          <p className="text-sm text-[var(--muted)]">Nenhuma nota fiscal cadastrada.</p>
         )}
         {(invoices ?? []).map((inv) => {
           const pending = selectedToLink[inv.id] ?? [];
@@ -271,15 +270,15 @@ export default function NotasFiscaisPage() {
               <CardContent className="space-y-3 py-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <p className="font-medium text-slate-900">
+                    <p className="font-medium text-[var(--ink)]">
                       NF {inv.number}
                       {inv.issueDate ? (
-                        <span className="ml-2 text-xs font-normal text-slate-500">
+                        <span className="ml-2 text-xs font-normal text-[var(--muted)]">
                           emissão {formatDate(inv.issueDate)}
                         </span>
                       ) : null}
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-[var(--muted)]">
                       {inv.supplierName ?? "—"}
                       {inv.totalValue ? ` · R$ ${inv.totalValue.toFixed(2)}` : ""}
                     </p>
@@ -307,20 +306,20 @@ export default function NotasFiscaisPage() {
                     type="button"
                     onClick={() => fileInputs.current[inv.id]?.click()}
                     disabled={uploadingId === inv.id}
-                    className="flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-1 text-slate-600 hover:bg-slate-50"
+                    className="flex items-center gap-1 rounded-[var(--r-md)] border border-[var(--line)] px-2 py-1 text-[var(--ink-2)] hover:bg-[var(--surface-2)]"
                   >
                     <Paperclip className="h-3.5 w-3.5" />
                     {uploadingId === inv.id ? "Enviando..." : inv.fileKey ? "Trocar anexo" : "Anexar NF *"}
                   </button>
                   {inv.fileName && (
                     <>
-                      <span className="flex items-center gap-1 text-emerald-700">
+                      <span className="flex items-center gap-1 text-[var(--brand-ink)]">
                         <FileText className="h-3.5 w-3.5" /> {inv.fileName}
                       </span>
                       <button
                         type="button"
                         onClick={() => openAttachment(inv.id)}
-                        className="flex items-center gap-1 rounded-lg border border-emerald-200 px-2 py-1 text-emerald-700 hover:bg-emerald-50"
+                        className="flex items-center gap-1 rounded-[var(--r-md)] border border-[color-mix(in_oklch,var(--brand)_30%,transparent)] px-2 py-1 text-[var(--brand-ink)] hover:bg-[var(--brand-soft)]"
                       >
                         <ExternalLink className="h-3.5 w-3.5" /> Abrir
                       </button>
@@ -329,19 +328,19 @@ export default function NotasFiscaisPage() {
                 </div>
 
                 {inv.requests.length > 0 && (
-                  <div className="rounded-lg bg-slate-50 p-2">
-                    <p className="mb-1 text-xs font-medium text-slate-600">Equipamentos vinculados</p>
+                  <div className="rounded-[var(--r-md)] bg-[var(--surface-2)] p-2">
+                    <p className="mb-1 text-xs font-medium text-[var(--ink-2)]">Equipamentos vinculados</p>
                     <ul className="space-y-1">
                       {inv.requests.map((r) => (
                         <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 text-xs">
                           <span>
                             <Link
                               href={`/dashboard/engenharia/solicitacoes/${r.id}`}
-                              className="text-emerald-700 hover:underline"
+                              className="text-[var(--brand-ink)] hover:underline"
                             >
                               {r.equipmentName}
                             </Link>{" "}
-                            <span className="text-slate-400">
+                            <span className="text-[var(--muted)]">
                               · série {r.serialNumber || "—"}
                               {r.internalOs ? ` · ${r.internalOs}` : ""} · {r.status}
                             </span>
@@ -361,9 +360,9 @@ export default function NotasFiscaisPage() {
                 )}
 
                 {inv.fileKey && (
-                  <div className="rounded-lg border border-slate-200 p-3">
+                  <div className="rounded-[var(--r-md)] border border-[var(--line)] p-3">
                     <div className="mb-2 flex items-center justify-between gap-2">
-                      <p className="text-xs font-medium text-slate-700">
+                      <p className="text-xs font-medium text-[var(--ink)]">
                         <Link2 className="mr-1 inline h-3.5 w-3.5" />
                         Vincular mais equipamentos
                       </p>
@@ -379,11 +378,11 @@ export default function NotasFiscaisPage() {
                     {linkingId === inv.id && (
                       <div className="space-y-2">
                         {candidates.length === 0 ? (
-                          <p className="text-xs text-slate-500">
+                          <p className="text-xs text-[var(--muted)]">
                             Nenhum equipamento disponível (todos já estão em outra NF ou nesta).
                           </p>
                         ) : (
-                          <ul className="max-h-48 space-y-1 overflow-y-auto rounded-lg bg-slate-50 p-2">
+                          <ul className="max-h-48 space-y-1 overflow-y-auto rounded-[var(--r-md)] bg-[var(--surface-2)] p-2">
                             {candidates.map((r) => (
                               <li key={r.id}>
                                 <label className="flex cursor-pointer items-start gap-2 text-xs">
@@ -394,8 +393,8 @@ export default function NotasFiscaisPage() {
                                     className="mt-0.5"
                                   />
                                   <span>
-                                    <strong className="text-slate-800">{r.equipmentName}</strong>
-                                    <span className="text-slate-500">
+                                    <strong className="text-[var(--ink)]">{r.equipmentName}</strong>
+                                    <span className="text-[var(--muted)]">
                                       {" "}
                                       · {r.serialNumber || "s/n"} · {r.protocol}
                                       {r.invoiceId && r.invoiceId !== inv.id ? " · troca de NF" : ""}
@@ -423,7 +422,7 @@ export default function NotasFiscaisPage() {
                 )}
 
                 {!inv.fileKey && (
-                  <p className="text-xs text-amber-700">
+                  <p className="text-xs text-[var(--restricao-ink)]">
                     Anexe o arquivo da NF para poder vincular equipamentos.
                   </p>
                 )}

@@ -9,6 +9,7 @@ import { publicRequestSchema, type PublicRequestInput } from "@/lib/validators/r
 import { Button } from "@/components/ui/button";
 import { Input, Textarea, Label } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Panel } from "@/components/gesteq/panel";
 import { CheckCircle2, Copy } from "lucide-react";
 
 export type PublicPrefill = {
@@ -71,19 +72,19 @@ export function PublicRequestForm({
       <div className="flex min-h-[70vh] items-center justify-center p-4">
         <Card className="w-full max-w-lg">
           <CardHeader className="text-center">
-            <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-600" />
+            <CheckCircle2 className="mx-auto h-12 w-12 text-[var(--brand-ink)]" />
             <CardTitle>Solicitação enviada!</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-center">
             <div>
-              <p className="text-sm text-slate-500">Protocolo</p>
-              <p className="text-2xl font-bold text-slate-900">{result.protocol}</p>
+              <p className="gesteq-eyebrow">Protocolo</p>
+              <p className="font-display text-2xl font-semibold text-[var(--ink)]">{result.protocol}</p>
             </div>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-[var(--muted)]">
               Agora envie as <strong>fotos e documentos</strong> do equipamento pelo link abaixo. A
               Engenharia Clínica fará a avaliação e liberação.
             </p>
-            <div className="flex items-center gap-2 rounded-lg bg-slate-100 p-2 text-xs">
+            <div className="flex items-center gap-2 rounded-[var(--r)] border border-[var(--line)] bg-[var(--surface-2)] p-2 text-xs">
               <span className="truncate">
                 {typeof window !== "undefined" ? window.location.origin : ""}
                 {uploadUrl}
@@ -91,7 +92,7 @@ export function PublicRequestForm({
               <button
                 type="button"
                 onClick={() => navigator.clipboard?.writeText(`${window.location.origin}${uploadUrl}`)}
-                className="shrink-0 rounded-md bg-white p-1.5 ring-1 ring-slate-200"
+                className="shrink-0 rounded-md bg-[var(--card)] p-1.5 ring-1 ring-[var(--line)]"
                 aria-label="Copiar link"
               >
                 <Copy className="h-4 w-4" />
@@ -110,11 +111,8 @@ export function PublicRequestForm({
 
   return (
     <form onSubmit={form.handleSubmit((v) => mutation.mutate(v))} className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Identificação do solicitante</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
+      <Panel title="Identificação do solicitante" eyebrow="Solicitante">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <Label>Nome *</Label>
             <Input {...form.register("requesterName")} placeholder="Nome completo / responsável" />
@@ -134,7 +132,7 @@ export function PublicRequestForm({
           <div>
             <Label>Tipo de ingresso</Label>
             <select
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              className="mt-1 h-10 w-full rounded-[var(--r)] border border-[var(--line)] bg-[var(--surface)] px-3 text-sm"
               {...form.register("entryType")}
             >
               <option value="MEDICO">Médico</option>
@@ -145,14 +143,11 @@ export function PublicRequestForm({
               <option value="OUTRO">Outro</option>
             </select>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </Panel>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Procedimento e uso</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
+      <Panel title="Procedimento e uso" eyebrow="Assistencial">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <Label>Setor de uso *</Label>
             <Input {...form.register("usageSector")} placeholder="Centro Cirúrgico — Sala 03" />
@@ -185,14 +180,11 @@ export function PublicRequestForm({
             <input type="checkbox" {...form.register("isUrgent")} className="rounded" />
             Urgência / Emergência (fluxo Classe D)
           </label>
-        </CardContent>
-      </Card>
+        </div>
+      </Panel>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Equipamento</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
+      <Panel title="Equipamento" eyebrow="Dados técnicos">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <Label>Nome do equipamento *</Label>
             <Input {...form.register("equipmentName")} />
@@ -209,14 +201,11 @@ export function PublicRequestForm({
             <Label>Número de série (se disponível)</Label>
             <Input {...form.register("serialNumber")} />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </Panel>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Empresa (pessoa jurídica)</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
+      <Panel title="Empresa (pessoa jurídica)" eyebrow="Proprietário">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <Label>Razão social *</Label>
             <Input {...form.register("supplierName")} />
@@ -229,11 +218,11 @@ export function PublicRequestForm({
             <Label>Contato (telefone ou e-mail) *</Label>
             <Input {...form.register("ownerContact")} />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </Panel>
 
       {(Object.keys(errors).length > 0 || error) && (
-        <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-[var(--r-lg)] border border-[color-mix(in_oklch,var(--bloqueado)_30%,transparent)] bg-[var(--bloqueado-soft)] px-4 py-3 text-sm text-[var(--bloqueado-ink)]">
           {error && <p>{error}</p>}
           {Object.values(errors).map((e, i) => (
             <p key={i}>{(e as { message?: string })?.message}</p>
@@ -245,7 +234,7 @@ export function PublicRequestForm({
         <Button type="submit" size="lg" disabled={mutation.isPending}>
           {mutation.isPending ? "Enviando..." : "Enviar solicitação"}
         </Button>
-        <Link href="/login" className="text-sm text-slate-500 hover:underline">
+        <Link href="/login" className="text-sm text-[var(--muted)] hover:underline">
           Entrar na plataforma
         </Link>
       </div>

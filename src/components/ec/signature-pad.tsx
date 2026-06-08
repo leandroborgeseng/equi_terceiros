@@ -63,7 +63,7 @@ export function SignaturePad({ onChange }: { onChange: (dataUrl: string) => void
         ref={canvasRef}
         width={400}
         height={140}
-        className="w-full touch-none rounded-xl border border-slate-300 bg-white"
+        className="w-full touch-none rounded-[var(--r-lg)] border border-[var(--line)] bg-[var(--card)]"
         onPointerDown={start}
         onPointerMove={move}
         onPointerUp={end}
@@ -73,7 +73,7 @@ export function SignaturePad({ onChange }: { onChange: (dataUrl: string) => void
         <Button type="button" variant="outline" size="sm" onClick={clear}>
           Limpar
         </Button>
-        <span className="text-xs text-slate-500">
+        <span className="text-xs text-[var(--muted)]">
           {hasSignature ? "Assinatura capturada" : "Assine no quadro acima"}
         </span>
       </div>

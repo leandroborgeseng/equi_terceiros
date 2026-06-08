@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { ALL_ROLES, ROLE_LABELS } from "@/lib/rbac";
 import type { UserRole } from "@/lib/enums";
 import { UserPlus } from "lucide-react";
+import { PageHeader } from "@/components/gesteq/page-header";
+import { Panel } from "@/components/gesteq/panel";
 
 type User = {
   id: string;
@@ -67,19 +68,14 @@ export default function UsuariosPage() {
   });
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Usuários</h1>
-        <p className="text-slate-500">Gestão de acessos e perfis</p>
-      </div>
+    <div className="gesteq-rise space-y-6">
+      <PageHeader eyebrow="Administração" title="Usuários" subtitle="Gestão de acessos e perfis" />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5 text-emerald-600" /> Novo usuário
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <Panel
+        title="Novo usuário"
+        right={<UserPlus className="h-5 w-5 text-[var(--brand)]" />}
+      >
+        <div className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label>Nome</Label>
@@ -96,7 +92,7 @@ export default function UsuariosPage() {
             <div>
               <Label>Perfil</Label>
               <select
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-[var(--r-md)] border border-[var(--line)] bg-[var(--card)] px-3 py-2 text-sm"
                 value={form.role}
                 onChange={(e) => setForm({ ...form, role: e.target.value as UserRole })}
               >
@@ -130,30 +126,27 @@ export default function UsuariosPage() {
           >
             {createMutation.isPending ? "Criando..." : "Criar usuário"}
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </Panel>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Usuários cadastrados ({users.length})</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
+      <Panel title={`Usuários cadastrados (${users.length})`}>
+        <div className="space-y-2">
           {users.map((u) => (
             <div
               key={u.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 p-3"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--r-lg)] border border-[var(--line-2)] p-3"
             >
               <div>
-                <p className="font-medium text-slate-900">
-                  {u.name} {!u.active && <span className="text-xs text-red-500">(inativo)</span>}
+                <p className="font-medium text-[var(--ink)]">
+                  {u.name} {!u.active && <span className="text-xs text-[var(--bloqueado-ink)]">(inativo)</span>}
                 </p>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[var(--muted)]">
                   {u.email} {u.crm ? `· CRM ${u.crm}` : ""}
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 <select
-                  className="rounded-lg border border-slate-200 px-2 py-1 text-xs"
+                  className="rounded-[var(--r-md)] border border-[var(--line)] bg-[var(--card)] px-2 py-1 text-xs"
                   value={u.role}
                   onChange={(e) =>
                     patchMutation.mutate({ id: u.id, data: { role: e.target.value } })
@@ -175,8 +168,8 @@ export default function UsuariosPage() {
               </div>
             </div>
           ))}
-        </CardContent>
-      </Card>
+        </div>
+      </Panel>
     </div>
   );
 }

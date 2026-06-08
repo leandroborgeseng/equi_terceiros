@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RequestCard, type RequestCardData } from "@/components/requests/request-card";
+import { PageHeader } from "@/components/gesteq/page-header";
 
 export default function MedicoDashboardPage() {
   const { data: requests = [] } = useQuery({
@@ -13,16 +14,19 @@ export default function MedicoDashboardPage() {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Minhas solicitações</h1>
-          <p className="text-slate-500">Crie e acompanhe pedidos de equipamentos de terceiros</p>
-        </div>
-        <Link href="/dashboard/medico/nova">
-          <Button><Plus className="h-4 w-4" /> Nova solicitação</Button>
-        </Link>
-      </div>
+    <div className="gesteq-rise space-y-6">
+      <PageHeader
+        eyebrow="Médico solicitante"
+        title="Minhas solicitações"
+        subtitle="Crie e acompanhe pedidos de equipamentos de terceiros"
+        actions={
+          <Link href="/dashboard/medico/nova">
+            <Button>
+              <Plus className="h-4 w-4" /> Nova solicitação
+            </Button>
+          </Link>
+        }
+      />
 
       <div className="grid gap-4 sm:grid-cols-2">
         {(requests as RequestCardData[]).map((r) => (
@@ -33,7 +37,7 @@ export default function MedicoDashboardPage() {
           />
         ))}
         {requests.length === 0 && (
-          <p className="col-span-2 text-center text-slate-500 py-12">
+          <p className="col-span-2 py-12 text-center text-[var(--muted)]">
             Nenhuma solicitação ainda. Crie a primeira!
           </p>
         )}

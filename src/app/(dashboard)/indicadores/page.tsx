@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/gesteq/page-header";
 import { StatCard } from "@/components/gesteq/stat-card";
 import { FilterPills } from "@/components/gesteq/filter-pills";
+import { Panel } from "@/components/gesteq/panel";
+import { StatusBars } from "@/components/gesteq/status-bars";
 import { DonutChart } from "@/components/charts/donut-chart";
 import { CheckCircle, XCircle, AlertTriangle, Clock, Activity, FileDown } from "lucide-react";
 import { jsPDF } from "jspdf";
@@ -32,10 +33,10 @@ const PERIODS = [
 ];
 
 const CLASS_COLORS: Record<string, string> = {
-  A: "#7c3aed",
-  B: "#2563eb",
-  C: "#059669",
-  D: "#dc2626",
+  A: "var(--brand)",
+  B: "var(--inspecao)",
+  C: "var(--citrus)",
+  D: "var(--urgencia)",
 };
 
 export default function IndicadoresPage() {
@@ -49,6 +50,20 @@ export default function IndicadoresPage() {
         `/api/indicators?period=${period}${sector ? `&sector=${encodeURIComponent(sector)}` : ""}`
       ).then((r) => r.json()) as Promise<Indicators>,
   });
+
+  const { data: dashStats } = useQuery({
+    queryKey: ["dashboard-stats"],
+    queryFn: () => fetch("/api/dashboard/stats").then((r) => r.json()),
+  });
+
+  const statusBars = [
+    { label: "Aguard. docs", value: dashStats?.queue?.aguardandoDocumentos ?? 0, cls: "docs" },
+    { label: "Pendentes", value: dashStats?.queue?.pendenteDocumentos ?? 0, cls: "pendente" },
+    { label: "Inspeção", value: dashStats?.queue?.aguardandoInspecao ?? 0, cls: "inspecao" },
+    { label: "Liberados", value: dashStats?.queue?.liberado ?? 0, cls: "liberado" },
+    { label: "Bloqueados", value: dashStats?.queue?.bloqueado ?? 0, cls: "bloqueado" },
+    { label: "Urgência", value: dashStats?.queue?.urgencia ?? 0, cls: "urgencia" },
+  ];
 
   const kpis = [
     { label: "Equipamentos ativos", value: data?.totalAtivos ?? 0, icon: Activity, accent: "inspecao" as const },
@@ -149,20 +164,20 @@ export default function IndicadoresPage() {
         ))}
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Equipamentos por classe</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Panel title="Distribuição por classe" eyebrow="NP 445.000">
           <DonutChart
             data={(data?.porClasse ?? []).map((c) => ({
               label: `Classe ${c.classe}`,
               value: c.total,
-              color: CLASS_COLORS[c.classe] ?? "#94a3b8",
+              color: CLASS_COLORS[c.classe] ?? "var(--faint)",
             }))}
           />
-        </CardContent>
-      </Card>
+        </Panel>
+        <Panel title="Equipamentos por status" eyebrow="Pipeline atual">
+          <StatusBars items={statusBars} />
+        </Panel>
+      </div>
     </div>
   );
 }

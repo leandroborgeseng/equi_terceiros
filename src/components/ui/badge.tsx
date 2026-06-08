@@ -1,15 +1,15 @@
 import { cn } from "@/lib/utils";
 
 const variants: Record<string, string> = {
-  default: "bg-slate-100 text-slate-700",
-  success: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
-  warning: "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
-  danger: "bg-red-50 text-red-700 ring-1 ring-red-200",
-  orange: "bg-orange-50 text-orange-700 ring-1 ring-orange-200",
-  info: "bg-blue-50 text-blue-700 ring-1 ring-blue-200",
-  purple: "bg-purple-50 text-purple-700 ring-1 ring-purple-200",
-  successDark: "bg-emerald-600 text-white",
-  grayDark: "bg-slate-600 text-white",
+  default: "bg-[var(--surface-2)] text-[var(--ink-2)]",
+  success: "bg-[var(--liberado-soft)] text-[var(--liberado-ink)] ring-1 ring-[color-mix(in_oklch,var(--liberado)_30%,transparent)]",
+  warning: "bg-[var(--restricao-soft)] text-[var(--restricao-ink)] ring-1 ring-[color-mix(in_oklch,var(--restricao)_30%,transparent)]",
+  danger: "bg-[var(--bloqueado-soft)] text-[var(--bloqueado-ink)] ring-1 ring-[color-mix(in_oklch,var(--bloqueado)_30%,transparent)]",
+  orange: "bg-[var(--restricao-soft)] text-[var(--restricao-ink)] ring-1 ring-[color-mix(in_oklch,var(--restricao)_30%,transparent)]",
+  info: "bg-[var(--inspecao-soft)] text-[var(--inspecao-ink)] ring-1 ring-[color-mix(in_oklch,var(--inspecao)_30%,transparent)]",
+  purple: "bg-[var(--docs-soft)] text-[var(--docs-ink)] ring-1 ring-[color-mix(in_oklch,var(--docs)_30%,transparent)]",
+  successDark: "bg-[var(--brand)] text-white",
+  grayDark: "bg-[var(--muted)] text-white",
 };
 
 export function Badge({

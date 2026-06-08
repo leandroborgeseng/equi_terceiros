@@ -7,20 +7,13 @@ import { Textarea } from "@/components/ui/input";
 import { INSPECTION_ITEMS } from "@/lib/validators/request";
 import { ChecklistItem } from "./checklist-item";
 import { SignaturePad } from "./signature-pad";
+import { INSP_OPTIONS, TRI_OPTIONS } from "@/lib/checklist-options";
+import { StatusSeg } from "@/components/gesteq/status-seg";
 
 type ItemStatus = "CONFORME" | "NAO_CONFORME" | "NA";
 
-const OPTIONS = [
-  { value: "CONFORME", label: "Conforme", activeClass: "bg-emerald-100 text-emerald-800" },
-  { value: "NAO_CONFORME", label: "Não conf.", activeClass: "bg-red-100 text-red-800" },
-  { value: "NA", label: "N/A", activeClass: "bg-slate-200 text-slate-700" },
-];
-
-const SAFETY_OPTIONS = [
-  { value: "SIM", label: "Sim", activeClass: "bg-emerald-100 text-emerald-800" },
-  { value: "NAO", label: "Não", activeClass: "bg-red-100 text-red-800" },
-  { value: "NA", label: "N/A", activeClass: "bg-slate-200 text-slate-700" },
-];
+const OPTIONS = INSP_OPTIONS;
+const SAFETY_OPTIONS = TRI_OPTIONS;
 
 export function InspectionPanel({ requestId }: { requestId: string }) {
   const [status, setStatus] = useState<string>("PENDENTE");
@@ -65,7 +58,7 @@ export function InspectionPanel({ requestId }: { requestId: string }) {
 
   return (
     <div className="space-y-4">
-      <h3 className="font-semibold text-slate-900">Inspeção técnica (Anexo III)</h3>
+      <h3 className="font-display font-semibold text-[var(--ink)]">Inspeção técnica (Anexo III)</h3>
 
       {INSPECTION_ITEMS.map((item, idx) => (
         <ChecklistItem
@@ -78,18 +71,16 @@ export function InspectionPanel({ requestId }: { requestId: string }) {
         />
       ))}
 
-      <div className="rounded-xl border border-slate-200 p-3">
+      <div className="rounded-[var(--r-lg)] border border-[var(--line)] p-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="text-sm text-slate-700">Teste de segurança elétrica realizado?</span>
-          <div className="flex gap-1">
+          <span className="text-sm text-[var(--ink-2)]">Teste de segurança elétrica realizado?</span>
+          <div className="gesteq-seg">
             {SAFETY_OPTIONS.map((o) => (
               <button
                 key={o.value}
                 type="button"
                 onClick={() => setElectricalSafetyTest(o.value)}
-                className={`rounded-lg px-2.5 py-1 text-xs font-medium ${
-                  electricalSafetyTest === o.value ? o.activeClass : "bg-slate-50 text-slate-500"
-                }`}
+                className={electricalSafetyTest === o.value ? "on text-xs" : "text-xs"}
               >
                 {o.label}
               </button>
@@ -102,12 +93,12 @@ export function InspectionPanel({ requestId }: { requestId: string }) {
             value={electricalSafetyResult}
             onChange={(e) => setElectricalSafetyResult(e.target.value)}
             placeholder="Resultado / nº do laudo"
-            className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm"
+            className="mt-2 w-full rounded-[var(--r)] border border-[var(--line)] px-3 py-1.5 text-sm focus:border-[var(--brand)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-soft)]"
           />
         )}
       </div>
 
-      <label className="flex items-center gap-2 text-sm text-slate-700">
+      <label className="flex items-center gap-2 text-sm text-[var(--ink-2)]">
         <input type="checkbox" checked={cmeRequired} onChange={(e) => setCmeRequired(e.target.checked)} />
         Necessita encaminhamento ao CME
       </label>
@@ -118,30 +109,18 @@ export function InspectionPanel({ requestId }: { requestId: string }) {
         onChange={(e) => setGeneralNotes(e.target.value)}
       />
 
-      <div className="rounded-xl bg-slate-50 p-3">
-        <p className="mb-2 text-sm font-medium text-slate-700">Status final de liberação</p>
-        <div className="flex flex-wrap gap-2">
-          {["PENDENTE", "LIBERADO", "LIBERADO_COM_RESTRICAO", "BLOQUEADO"].map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => setStatus(s)}
-              className={`rounded-xl px-3 py-2 text-xs font-medium ${
-                status === s
-                  ? s === "LIBERADO"
-                    ? "bg-emerald-600 text-white"
-                    : s === "BLOQUEADO"
-                      ? "bg-red-600 text-white"
-                      : s === "LIBERADO_COM_RESTRICAO"
-                        ? "bg-orange-500 text-white"
-                        : "bg-amber-500 text-white"
-                  : "bg-white text-slate-600 ring-1 ring-slate-200"
-              }`}
-            >
-              {s.replace(/_/g, " ")}
-            </button>
-          ))}
-        </div>
+      <div className="rounded-[var(--r-lg)] border border-[var(--line-2)] bg-[var(--surface-2)] p-3">
+        <p className="gesteq-eyebrow mb-2">Status final de liberação</p>
+        <StatusSeg
+          value={status}
+          onChange={setStatus}
+          options={[
+            { value: "PENDENTE", label: "Pendente", tone: "pendente" },
+            { value: "LIBERADO", label: "Liberado", tone: "liberado" },
+            { value: "LIBERADO_COM_RESTRICAO", label: "C/ restrição", tone: "restricao" },
+            { value: "BLOQUEADO", label: "Bloqueado", tone: "danger" },
+          ]}
+        />
       </div>
 
       {status === "LIBERADO_COM_RESTRICAO" && (
@@ -160,11 +139,11 @@ export function InspectionPanel({ requestId }: { requestId: string }) {
       )}
 
       <div>
-        <p className="mb-1 text-sm font-medium text-slate-700">Assinatura do responsável técnico</p>
+        <p className="gesteq-eyebrow mb-1">Assinatura do responsável técnico</p>
         <SignaturePad onChange={(data) => (signatureRef.current = data)} />
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-[var(--bloqueado-ink)]">{error}</p>}
 
       <div className="flex flex-wrap gap-2">
         <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>

@@ -132,8 +132,8 @@ export function MobileUpload({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-dashed bg-slate-50/50 p-4 transition-colors",
-        dragOver ? "border-emerald-500 bg-emerald-50/50" : "border-slate-200"
+        "rounded-[var(--r-xl)] border border-dashed bg-[var(--surface-2)]/50 p-4 transition-colors",
+        dragOver ? "border-[var(--brand)] bg-[var(--brand-soft)]/50" : "border-[var(--line)]"
       )}
       onDragOver={(e) => {
         e.preventDefault();
@@ -148,8 +148,8 @@ export function MobileUpload({
       }}
     >
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-sm font-medium text-slate-800">{label}</p>
-        {quality && <span className="text-xs text-slate-500">Qualidade: {quality}</span>}
+        <p className="text-sm font-medium text-[var(--ink)]">{label}</p>
+        {quality && <span className="text-xs text-[var(--muted)]">Qualidade: {quality}</span>}
       </div>
 
       {preview && (
@@ -172,7 +172,7 @@ export function MobileUpload({
       />
 
       {dragOver && (
-        <p className="mb-2 flex items-center gap-1 text-xs text-emerald-700">
+        <p className="mb-2 flex items-center gap-1 text-xs text-[var(--brand-ink)]">
           <ImagePlus className="h-3 w-3" /> Solte os arquivos aqui
         </p>
       )}
@@ -209,14 +209,14 @@ export function MobileUpload({
       <div className="mt-2 flex items-center gap-2 text-xs">
         {status === "uploading" && (
           <>
-            <Loader2 className="h-3 w-3 animate-spin text-emerald-600" />
-            <span className="text-slate-500">Enviando...</span>
+            <Loader2 className="h-3 w-3 animate-spin text-[var(--brand)]" />
+            <span className="text-[var(--muted)]">Enviando...</span>
           </>
         )}
         {status === "done" && (
           <>
-            <CheckCircle2 className="h-3 w-3 text-emerald-600" />
-            <span className="text-emerald-700">Enviado</span>
+            <CheckCircle2 className="h-3 w-3 text-[var(--brand)]" />
+            <span className="text-[var(--brand-ink)]">Enviado</span>
           </>
         )}
         {status === "offline" && (

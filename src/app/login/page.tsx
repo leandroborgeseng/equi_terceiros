@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Link from "next/link";
+import { GestEqLogo } from "@/components/gesteq/logo";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -48,11 +49,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-emerald-50 p-4">
-      <Card className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center bg-[var(--bg)] p-4">
+      <Card className="w-full max-w-md shadow-[var(--shadow)]">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-600 text-xl font-bold text-white">
-            GE
+          <div className="mx-auto mb-4 flex justify-center">
+            <GestEqLogo size={52} />
           </div>
           <CardTitle>Entrar na plataforma</CardTitle>
           <CardDescription>GestEq — Gestão de Equipamentos de Terceiros</CardDescription>
@@ -67,21 +68,23 @@ export default function LoginPage() {
               <Label>Senha</Label>
               <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && <p className="text-sm text-[var(--bloqueado-ink)]">{error}</p>}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Entrando..." : "Entrar"}
             </Button>
           </form>
-          <p className="mt-6 text-center text-xs text-slate-500">
+          <p className="mt-6 text-center text-xs text-[var(--muted)]">
             Demo: medico@hospital.local / Hospital@2026
           </p>
           <p className="mt-4 text-center text-sm">
-            <Link href="/solicitar" className="font-medium text-emerald-600 hover:underline">
+            <Link href="/solicitar" className="font-medium text-[var(--brand-ink)] hover:underline">
               Solicitar equipamento sem login
             </Link>
           </p>
           <p className="mt-2 text-center text-sm">
-            <Link href="/" className="text-slate-500 hover:underline">Voltar</Link>
+            <Link href="/" className="text-[var(--muted)] hover:underline">
+              Voltar
+            </Link>
           </p>
         </CardContent>
       </Card>

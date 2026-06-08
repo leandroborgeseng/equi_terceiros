@@ -191,13 +191,13 @@ export function MedicalRequestWizard() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Nova solicitação médica</CardTitle>
-          <div className="text-right text-sm text-slate-500">
+          <div className="text-right text-sm text-[var(--muted)]">
             <p>Etapa {step + 1} de {steps.length}</p>
-            {autoSaved && <p className="text-emerald-600">Rascunho salvo</p>}
+            {autoSaved && <p className="text-[var(--brand-ink)]">Rascunho salvo</p>}
           </div>
         </div>
         {session?.user?.name && (
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-sm text-[var(--ink-2)]">
             Médico solicitante: <strong>{session.user.name}</strong>
           </p>
         )}
@@ -205,7 +205,7 @@ export function MedicalRequestWizard() {
           {steps.map((_, i) => (
             <div
               key={i}
-              className={`h-1.5 flex-1 rounded-full ${i <= step ? "bg-emerald-500" : "bg-slate-200"}`}
+              className={`h-1.5 flex-1 rounded-full ${i <= step ? "bg-[var(--brand)]" : "bg-[var(--line)]"}`}
             />
           ))}
         </div>
@@ -220,7 +220,7 @@ export function MedicalRequestWizard() {
               exit={{ opacity: 0, x: -12 }}
               className="space-y-4"
             >
-              <h3 className="font-medium text-slate-800">{steps[step].title}</h3>
+              <h3 className="font-medium text-[var(--ink)]">{steps[step].title}</h3>
 
               {step === 0 && (
                 <>
@@ -327,7 +327,7 @@ export function MedicalRequestWizard() {
                   <div>
                     <Label>Tipo de ingresso</Label>
                     <select
-                      className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                      className="mt-1 w-full rounded-[var(--r-md)] border border-[var(--line)] bg-[var(--card)] px-3 py-2 text-sm"
                       {...form.register("entryType")}
                     >
                       <option value="MEDICO">Médico</option>
@@ -338,9 +338,9 @@ export function MedicalRequestWizard() {
                       <option value="OUTRO">Outro</option>
                     </select>
                   </div>
-                  <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">
+                  <p className="rounded-[var(--r-md)] bg-[var(--surface-2)] px-3 py-2 text-xs text-[var(--muted)]">
                     Classe sugerida:{" "}
-                    <strong className="text-slate-700">
+                    <strong className="text-[var(--ink)]">
                       {form.watch("isUrgent")
                         ? "D — Urgência/Emergência"
                         : "B — Temporário programado (ajustável pela Engenharia Clínica)"}
@@ -350,7 +350,7 @@ export function MedicalRequestWizard() {
               )}
               {step === 4 && (
                 <>
-                  <p className="text-sm text-slate-500">Empresa proprietária do equipamento (pessoa jurídica).</p>
+                  <p className="text-sm text-[var(--muted)]">Empresa proprietária do equipamento (pessoa jurídica).</p>
                   <div>
                     <Label>Razão social *</Label>
                     <Input {...form.register("supplierName")} />

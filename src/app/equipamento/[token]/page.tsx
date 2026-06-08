@@ -8,6 +8,7 @@ import type { RequestStatus } from "@/lib/enums";
 import { EQUIPMENT_CLASS_LABELS } from "@/lib/enums";
 import { formatDate } from "@/lib/utils";
 import { CheckCircle2, AlertTriangle, XCircle, ShieldCheck } from "lucide-react";
+import { GestEqLogo } from "@/components/gesteq/logo";
 
 type EquipmentInfo = {
   protocol: string;
@@ -50,25 +51,28 @@ export default function EquipamentoPublicPage() {
   const restrito = data?.status === "LIBERADO_COM_RESTRICAO";
   const bloqueado = data?.status === "BLOQUEADO";
 
+  const statusBg = liberado
+    ? "var(--liberado)"
+    : restrito
+      ? "var(--restricao)"
+      : bloqueado
+        ? "var(--bloqueado)"
+        : "var(--muted)";
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      <header className="border-b bg-white px-4 py-4">
-        <div className="mx-auto flex max-w-lg items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-sm font-bold text-white">
-            GE
-          </div>
-          <div>
-            <p className="font-semibold text-slate-900">GestEq — Consulta do equipamento</p>
-            <p className="text-xs text-slate-500">Status e rastreabilidade · Norma 445.000</p>
-          </div>
+    <div className="min-h-screen bg-[var(--surface)]">
+      <header className="border-b border-[var(--line)] bg-[var(--card)] px-4 py-4">
+        <div className="mx-auto flex max-w-lg items-center justify-between gap-3">
+          <GestEqLogo size={36} />
+          <p className="gesteq-eyebrow text-right">Consulta pública · Norma 445.000</p>
         </div>
       </header>
 
-      <main className="mx-auto max-w-lg space-y-4 p-4 pb-24">
-        {isLoading && <p className="p-8 text-center text-slate-500">Carregando...</p>}
+      <main className="gesteq-rise mx-auto max-w-lg space-y-4 p-4 pb-24">
+        {isLoading && <p className="p-8 text-center text-[var(--muted)]">Carregando...</p>}
 
         {isError && (
-          <div className="rounded-xl bg-red-50 px-4 py-6 text-center text-red-700">
+          <div className="rounded-[var(--r-lg)] bg-[var(--bloqueado-soft)] px-4 py-6 text-center text-[var(--bloqueado-ink)]">
             QR Code inválido ou equipamento não encontrado.
           </div>
         )}
@@ -77,15 +81,8 @@ export default function EquipamentoPublicPage() {
           <>
             {/* Faixa de status grande para leitura rápida no setor */}
             <div
-              className={`flex items-center gap-3 rounded-2xl p-4 text-white ${
-                liberado
-                  ? "bg-emerald-600"
-                  : restrito
-                    ? "bg-orange-500"
-                    : bloqueado
-                      ? "bg-red-600"
-                      : "bg-slate-500"
-              }`}
+              className="flex items-center gap-3 rounded-[var(--r-xl)] p-4 text-white"
+              style={{ background: statusBg }}
             >
               {liberado && <CheckCircle2 className="h-8 w-8 shrink-0" />}
               {restrito && <AlertTriangle className="h-8 w-8 shrink-0" />}
@@ -106,7 +103,7 @@ export default function EquipamentoPublicPage() {
             </div>
 
             {(data.restrictionNotes || data.blockReason) && (
-              <div className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              <div className="rounded-[var(--r-lg)] bg-[var(--restricao-soft)] px-4 py-3 text-sm text-[var(--restricao-ink)]">
                 <strong>{bloqueado ? "Motivo do bloqueio:" : "Restrição:"}</strong>{" "}
                 {data.blockReason || data.restrictionNotes}
               </div>
@@ -119,7 +116,7 @@ export default function EquipamentoPublicPage() {
                   <RequestStatusBadge status={data.status} />
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2 text-sm text-slate-600">
+              <CardContent className="space-y-2 text-sm text-[var(--ink-2)]">
                 <Row label="Equipamento" value={`${data.equipmentName}`} />
                 <Row label="Marca / Modelo" value={`${data.brand} ${data.model}`} />
                 <Row label="Nº de série" value={data.serialNumber || "—"} />
@@ -144,7 +141,7 @@ export default function EquipamentoPublicPage() {
               </CardContent>
             </Card>
 
-            <p className="text-center text-xs text-slate-400">
+            <p className="text-center text-xs text-[var(--muted)]">
               Consulta pública de status. Para edição, acesse a plataforma.
             </p>
           </>
@@ -156,9 +153,9 @@ export default function EquipamentoPublicPage() {
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between gap-3 border-b border-slate-100 py-1.5 last:border-0">
-      <span className="text-slate-400">{label}</span>
-      <span className="text-right font-medium text-slate-700">{value}</span>
+    <div className="flex justify-between gap-3 border-b border-[var(--line-2)] py-1.5 last:border-0">
+      <span className="text-[var(--muted)]">{label}</span>
+      <span className="text-right font-medium text-[var(--ink)]">{value}</span>
     </div>
   );
 }

@@ -58,21 +58,21 @@ export function TermPanel({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="flex items-center gap-2 font-semibold text-slate-900">
-          <FileText className="h-5 w-5 text-emerald-600" /> Termo de Responsabilidade (Anexo IV)
+        <h3 className="font-display flex items-center gap-2 font-semibold text-[var(--ink)]">
+          <FileText className="h-5 w-5 text-[var(--brand-ink)]" /> Termo de Responsabilidade (Anexo IV)
         </h3>
         <a
           href={`/api/terms/${requestId}`}
           target="_blank"
           rel="noreferrer"
-          className="text-sm text-emerald-600 hover:underline"
+          className="text-sm text-[var(--brand-ink)] hover:underline"
         >
           Baixar PDF
         </a>
       </div>
 
       {accepted ? (
-        <div className="flex items-start gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+        <div className="flex items-start gap-2 rounded-[var(--r-lg)] border border-[var(--brand-line)] bg-[var(--brand-soft)] px-4 py-3 text-sm text-[var(--brand-ink)]">
           <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
           <div>
             <p className="font-medium">Termo aceito/assinado.</p>
@@ -84,7 +84,7 @@ export function TermPanel({
           </div>
         </div>
       ) : (
-        <div className="flex items-start gap-2 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        <div className="flex items-start gap-2 rounded-[var(--r-lg)] border border-[color-mix(in_oklch,var(--pendente)_35%,transparent)] bg-[var(--pendente-soft)] px-4 py-3 text-sm text-[var(--pendente-ink)]">
           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
           <p>
             Pré-requisito para liberação. Registre o aceite eletrônico do responsável (empresa PJ,
@@ -93,7 +93,7 @@ export function TermPanel({
         </div>
       )}
 
-      <div className="space-y-3 rounded-xl border border-slate-200 p-3">
+      <div className="space-y-3 rounded-[var(--r-lg)] border border-[var(--line)] p-3">
         <div>
           <Label>Responsável que aceita (nome) *</Label>
           <Input value={signerName} onChange={(e) => setSignerName(e.target.value)} />
@@ -102,7 +102,7 @@ export function TermPanel({
           <Label>Assinatura (opcional)</Label>
           <SignaturePad onChange={setSignature} />
         </div>
-        <label className="flex items-center gap-2 text-sm text-slate-700">
+        <label className="flex items-center gap-2 text-sm text-[var(--ink-2)]">
           <input
             type="checkbox"
             checked={ecReviewed}
@@ -112,7 +112,7 @@ export function TermPanel({
           Visto da Engenharia Clínica
         </label>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-[var(--bloqueado-ink)]">{error}</p>}
 
         <Button
           onClick={() => {

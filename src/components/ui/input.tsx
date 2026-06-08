@@ -6,7 +6,7 @@ export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttribute
     <input
       type={type}
       className={cn(
-        "flex h-11 w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm shadow-sm transition-colors placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 disabled:cursor-not-allowed disabled:opacity-50",
+        "flex h-10 w-full rounded-[var(--r)] border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--ink)] shadow-sm transition-colors placeholder:text-[var(--faint)] focus-visible:border-[var(--brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-soft)] disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       ref={ref}
@@ -22,7 +22,7 @@ export const Textarea = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <textarea
     className={cn(
-      "flex min-h-[100px] w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm transition-colors placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30",
+      "flex min-h-[100px] w-full rounded-[var(--r)] border border-[var(--line)] bg-[var(--surface)] px-3 py-3 text-sm text-[var(--ink)] shadow-sm transition-colors placeholder:text-[var(--faint)] focus-visible:border-[var(--brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-soft)]",
       className
     )}
     ref={ref}
@@ -32,5 +32,8 @@ export const Textarea = React.forwardRef<
 Textarea.displayName = "Textarea";
 
 export const Label = ({ className, ...props }: React.LabelHTMLAttributes<HTMLLabelElement>) => (
-  <label className={cn("text-sm font-medium text-slate-700", className)} {...props} />
+  <label
+    className={cn("mb-1.5 block text-[12.5px] font-semibold text-[var(--ink-2)]", className)}
+    {...props}
+  />
 );

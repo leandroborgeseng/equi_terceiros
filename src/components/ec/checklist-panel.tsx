@@ -9,6 +9,8 @@ import { ChecklistItem } from "./checklist-item";
 import { MobileUpload } from "@/components/upload/mobile-upload";
 import { uploadAttachment } from "@/lib/upload-client";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { TRI_OPTIONS } from "@/lib/checklist-options";
+import { StatusSeg } from "@/components/gesteq/status-seg";
 
 function fileViewUrl(storageKey: string) {
   return `/api/files?key=${encodeURIComponent(storageKey)}`;
@@ -17,11 +19,7 @@ function fileViewUrl(storageKey: string) {
 type DocItem = "SIM" | "NAO" | "NA";
 type DocStatus = "APROVADO" | "PENDENTE" | "REPROVADO";
 
-const OPTIONS = [
-  { value: "SIM", label: "Sim", activeClass: "bg-emerald-100 text-emerald-800" },
-  { value: "NAO", label: "Não", activeClass: "bg-red-100 text-red-800" },
-  { value: "NA", label: "N/A", activeClass: "bg-slate-200 text-slate-700" },
-];
+const OPTIONS = TRI_OPTIONS;
 
 export function ChecklistPanel({
   requestId,
@@ -120,17 +118,17 @@ export function ChecklistPanel({
         />
       ))}
 
-      <div className="rounded-xl border border-slate-200">
+      <div className="rounded-[var(--r-lg)] border border-[var(--line)]">
         <button
           type="button"
           onClick={() => setShowPhotos((s) => !s)}
-          className="flex w-full items-center justify-between px-3 py-2.5 text-left text-sm font-medium text-slate-700"
+          className="flex w-full items-center justify-between px-3 py-2.5 text-left text-sm font-medium text-[var(--ink-2)]"
         >
           <span>Fotos do equipamento ({REQUIRED_PHOTOS.length})</span>
           {showPhotos ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </button>
         {showPhotos && (
-          <div className="grid gap-3 border-t border-slate-100 p-3 sm:grid-cols-2">
+          <div className="grid gap-3 border-t border-[var(--line-2)] p-3 sm:grid-cols-2">
             {REQUIRED_PHOTOS.map((photoType) => (
               <MobileUpload
                 key={photoType}
@@ -144,33 +142,22 @@ export function ChecklistPanel({
         )}
       </div>
 
-      <div className="rounded-xl bg-slate-50 p-3">
-        <p className="mb-2 text-sm font-medium text-slate-700">Parecer final</p>
-        <div className="flex gap-2">
-          {(["APROVADO", "PENDENTE", "REPROVADO"] as DocStatus[]).map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => setDocStatus(s)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-medium ${
-                docStatus === s
-                  ? s === "APROVADO"
-                    ? "bg-emerald-600 text-white"
-                    : s === "REPROVADO"
-                      ? "bg-red-600 text-white"
-                      : "bg-amber-500 text-white"
-                  : "bg-white text-slate-600 ring-1 ring-slate-200"
-              }`}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
+      <div className="rounded-[var(--r-lg)] border border-[var(--line-2)] bg-[var(--surface-2)] p-3">
+        <p className="gesteq-eyebrow mb-2">Parecer final</p>
+        <StatusSeg
+          value={docStatus}
+          onChange={setDocStatus}
+          options={[
+            { value: "APROVADO", label: "Aprovado", tone: "liberado" },
+            { value: "PENDENTE", label: "Pendente", tone: "pendente" },
+            { value: "REPROVADO", label: "Reprovado", tone: "danger" },
+          ]}
+        />
       </div>
 
       {(docStatus === "REPROVADO" || docStatus === "PENDENTE") && (
         <div>
-          <label className="text-sm font-medium text-slate-700">
+          <label className="text-sm font-medium text-[var(--ink-2)]">
             Motivo / pendência {docStatus === "REPROVADO" && "(obrigatório)"}
           </label>
           <Textarea
@@ -181,7 +168,7 @@ export function ChecklistPanel({
         </div>
       )}
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-[var(--bloqueado-ink)]">{error}</p>}
 
       <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
         {mutation.isPending ? "Salvando..." : "Finalizar checklist"}

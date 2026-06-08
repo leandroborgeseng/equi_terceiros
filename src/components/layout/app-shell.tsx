@@ -24,14 +24,15 @@ import { cn } from "@/lib/utils";
 import type { UserRole } from "@/lib/enums";
 import { ROLE_LABELS, isClinicalEngineering } from "@/lib/rbac";
 import { NotificationBell } from "./notification-bell";
+import { GestEqLogo } from "@/components/gesteq/logo";
 
-const navByRole: Record<UserRole, { href: string; label: string; icon: typeof LayoutDashboard }[]> = {
+const navByRole: Record<UserRole, { href: string; label: string; icon: typeof LayoutDashboard; badge?: boolean }[]> = {
   ADMIN: [
     { href: "/dashboard/engenharia", label: "Fila de Homologação", icon: Shield },
     { href: "/equipamentos", label: "Equipamentos", icon: PackageSearch },
     { href: "/fornecedores", label: "Fornecedores", icon: Building2 },
     { href: "/notas-fiscais", label: "Notas Fiscais", icon: Receipt },
-    { href: "/pendencias", label: "Pendências", icon: AlertTriangle },
+    { href: "/pendencias", label: "Pendências", icon: AlertTriangle, badge: true },
     { href: "/indicadores", label: "Indicadores", icon: BarChart3 },
     { href: "/convites", label: "Chaves de acesso", icon: KeyRound },
     { href: "/configuracoes", label: "Configurações", icon: Settings },
@@ -41,7 +42,7 @@ const navByRole: Record<UserRole, { href: string; label: string; icon: typeof La
     { href: "/equipamentos", label: "Equipamentos", icon: PackageSearch },
     { href: "/fornecedores", label: "Fornecedores", icon: Building2 },
     { href: "/notas-fiscais", label: "Notas Fiscais", icon: Receipt },
-    { href: "/pendencias", label: "Pendências", icon: AlertTriangle },
+    { href: "/pendencias", label: "Pendências", icon: AlertTriangle, badge: true },
     { href: "/indicadores", label: "Indicadores", icon: BarChart3 },
     { href: "/convites", label: "Chaves de acesso", icon: KeyRound },
   ],
@@ -64,37 +65,25 @@ export function AppShell({
 
   return (
     <div className="min-h-screen bg-[var(--bg)]">
-      <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[color-mix(in_oklch,var(--surface)_88%,transparent)] backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-          <div className="flex items-center gap-3">
+      <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[color-mix(in_oklch,var(--surface)_88%,transparent)] backdrop-blur-xl lg:hidden">
+        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
+          <div className="flex items-center gap-2">
             <button
               type="button"
-              className="rounded-lg p-2 lg:hidden"
+              className="rounded-lg p-2"
               onClick={() => setOpen(!open)}
               aria-label="Menu"
             >
               {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
-            <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-[var(--r-lg)] bg-[var(--brand)] text-sm font-bold text-white">
-                GE
-              </div>
-              <div className="hidden sm:block">
-                <p className="font-display text-sm font-semibold text-[var(--ink)]">GestEq</p>
-                <p className="text-xs text-[var(--muted)]">Equipamentos de Terceiros</p>
-              </div>
-            </Link>
+            <GestEqLogo size={32} href="/" />
           </div>
-          <div className="flex items-center gap-3">
-            <div className="hidden text-right sm:block">
-              <p className="text-sm font-medium text-[var(--ink)]">{user.name}</p>
-              <p className="text-xs text-[var(--muted)]">{ROLE_LABELS[user.role]}</p>
-            </div>
+          <div className="flex items-center gap-2">
             {isClinicalEngineering(user.role) && <NotificationBell />}
             <button
               type="button"
               onClick={() => signOut({ callbackUrl: "/login" })}
-              className="rounded-[var(--r-lg)] border border-[var(--line)] p-2 text-[var(--muted)] hover:bg-[var(--surface-2)]"
+              className="rounded-[var(--r-lg)] border border-[var(--line)] p-2 text-[var(--muted)]"
               aria-label="Sair"
             >
               <LogOut className="h-4 w-4" />
@@ -103,40 +92,81 @@ export function AppShell({
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-7xl gap-6 px-4 py-6 sm:px-6">
+      <div className="mx-auto flex max-w-[1440px] gap-0 lg:gap-6 lg:px-6 lg:py-0">
         <aside
           className={cn(
-            "fixed inset-y-0 left-0 z-30 w-64 transform border-r border-[var(--line)] bg-[var(--surface)] p-4 pt-20 transition-transform lg:static lg:translate-x-0 lg:border-0 lg:bg-transparent lg:p-0 lg:pt-0",
+            "fixed inset-y-0 left-0 z-30 flex w-[248px] flex-col border-r border-[var(--line)] bg-[var(--surface)] transition-transform lg:static lg:translate-x-0",
             open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
           )}
         >
-          <nav className="space-y-1">
+          <div className="hidden border-b border-[var(--line)] px-[18px] py-5 lg:block">
+            <GestEqLogo href="/" />
+          </div>
+
+          <nav className="flex-1 overflow-y-auto px-3 py-4 lg:py-3">
+            <div className="gesteq-eyebrow px-2.5 py-2">Núcleo EC</div>
             {nav.map((item) => {
-              const active = pathname.startsWith(item.href);
+              const active = pathname === item.href || pathname.startsWith(item.href + "/");
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={() => setOpen(false)}
                   className={cn(
-                    "flex items-center gap-3 rounded-[var(--r-lg)] px-4 py-3 text-sm font-medium transition-colors",
+                    "mb-0.5 flex items-center gap-2.5 rounded-[var(--r)] px-2.5 py-2 text-[13.5px] font-medium transition-colors",
                     active
-                      ? "bg-[var(--brand-soft)] text-[var(--brand-ink)]"
-                      : "text-[var(--muted)] hover:bg-[var(--surface-2)] hover:text-[var(--ink-2)]"
+                      ? "bg-[var(--brand)] font-semibold text-white"
+                      : "text-[var(--ink-2)] hover:bg-[var(--surface-2)]"
                   )}
                 >
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
+                  <item.icon className={cn("h-[18px] w-[18px]", !active && "opacity-70")} />
+                  <span className="flex-1">{item.label}</span>
+                  {item.badge && item.href === "/pendencias" && (
+                    <span
+                      className={cn(
+                        "font-mono-data grid h-[18px] min-w-[18px] place-items-center rounded-[5px] px-1 text-[10.5px] font-semibold",
+                        active
+                          ? "bg-white/16 text-white"
+                          : "bg-[var(--pendente-soft)] text-[var(--pendente-ink)]"
+                      )}
+                    >
+                      ·
+                    </span>
+                  )}
                 </Link>
               );
             })}
           </nav>
+
+          <div className="hidden border-t border-[var(--line)] p-3 lg:block">
+            <div className="rounded-[var(--r)] bg-[var(--surface-2)] px-3 py-2.5">
+              <p className="truncate text-sm font-medium text-[var(--ink)]">{user.name}</p>
+              <p className="text-xs text-[var(--muted)]">{ROLE_LABELS[user.role]}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              className="mt-2 flex w-full items-center gap-2 rounded-[var(--r)] px-2.5 py-2 text-sm text-[var(--muted)] hover:bg-[var(--surface-2)]"
+            >
+              <LogOut className="h-4 w-4" />
+              Sair
+            </button>
+          </div>
         </aside>
+
+        {open && (
+          <button
+            type="button"
+            className="fixed inset-0 z-20 bg-black/30 lg:hidden"
+            onClick={() => setOpen(false)}
+            aria-label="Fechar menu"
+          />
+        )}
 
         <motion.main
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="min-w-0 flex-1 pb-24 lg:pb-6"
+          className="min-w-0 flex-1 px-4 py-5 pb-24 lg:px-0 lg:py-6 lg:pb-6"
         >
           {children}
         </motion.main>
@@ -144,7 +174,7 @@ export function AppShell({
 
       <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-[var(--line)] bg-[color-mix(in_oklch,var(--surface)_95%,transparent)] backdrop-blur lg:hidden">
         {[
-          { href: nav[0]?.href ?? "/", label: "Início", icon: LayoutDashboard },
+          { href: nav[0]?.href ?? "/", label: "Fila", icon: Shield },
           { href: "/equipamentos", label: "Equipamentos", icon: PackageSearch },
           { href: "/pendencias", label: "Pendências", icon: AlertTriangle },
           { href: "/indicadores", label: "Indicadores", icon: BarChart3 },

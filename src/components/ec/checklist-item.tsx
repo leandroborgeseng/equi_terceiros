@@ -8,8 +8,16 @@ import { FileThumbnail, isImageFile, type PreviewFile } from "@/components/ec/fi
 export interface ChecklistOption {
   value: string;
   label: string;
-  activeClass: string;
+  tone?: "brand" | "danger" | "muted";
+  /** @deprecated use tone */
+  activeClass?: string;
 }
+
+const TONE_ACTIVE: Record<string, string> = {
+  brand: "!bg-[var(--brand-soft)] !text-[var(--brand-ink)]",
+  danger: "!bg-[var(--bloqueado-soft)] !text-[var(--bloqueado-ink)]",
+  muted: "!bg-[var(--surface-2)] !text-[var(--ink-2)]",
+};
 
 export function ChecklistItem({
   index,
@@ -60,9 +68,7 @@ export function ChecklistItem({
               className={cn(
                 "font-mono-data !text-xs",
                 value === o.value && "on",
-                value === o.value && o.activeClass.includes("emerald") && "!bg-[var(--brand-soft)] !text-[var(--brand-ink)]",
-                value === o.value && o.activeClass.includes("red") && "!bg-[var(--bloqueado-soft)] !text-[var(--bloqueado-ink)]",
-                value === o.value && o.activeClass.includes("amber") && "!bg-[var(--pendente-soft)] !text-[var(--pendente-ink)]"
+                value === o.value && o.tone && TONE_ACTIVE[o.tone]
               )}
             >
               {o.label}

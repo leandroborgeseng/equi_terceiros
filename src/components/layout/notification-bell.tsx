@@ -54,7 +54,7 @@ export function NotificationBell() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="relative rounded-xl border border-slate-200 p-2 text-slate-600 hover:bg-slate-50"
+        className="relative rounded-[var(--r-lg)] border border-[var(--line)] p-2 text-[var(--ink-2)] hover:bg-[var(--surface-2)]"
         aria-label="Notificações"
       >
         <Bell className="h-4 w-4" />
@@ -68,35 +68,35 @@ export function NotificationBell() {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 z-50 mt-2 w-80 max-w-[90vw] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
-            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-              <p className="text-sm font-semibold text-slate-900">Notificações</p>
+          <div className="absolute right-0 z-50 mt-2 w-80 max-w-[90vw] overflow-hidden rounded-[var(--r-xl)] border border-[var(--line)] bg-[var(--card)] shadow-lg">
+            <div className="flex items-center justify-between border-b border-[var(--line-2)] px-4 py-3">
+              <p className="font-display text-sm font-semibold text-[var(--ink)]">Notificações</p>
               <button onClick={() => setOpen(false)} aria-label="Fechar">
-                <X className="h-4 w-4 text-slate-400" />
+                <X className="h-4 w-4 text-[var(--muted)]" />
               </button>
             </div>
             <div className="max-h-96 overflow-y-auto">
               {count === 0 && (
-                <p className="px-4 py-8 text-center text-sm text-slate-500">
+                <p className="px-4 py-8 text-center text-sm text-[var(--muted)]">
                   Nenhum alerta pendente.
                 </p>
               )}
               {alerts.map((a) => (
-                <div key={a.id} className="flex gap-2 border-b border-slate-50 px-4 py-3 last:border-0">
+                <div key={a.id} className="flex gap-2 border-b border-[var(--line-2)] px-4 py-3 last:border-0">
                   <span
                     className={cn(
                       "mt-1.5 h-2 w-2 shrink-0 rounded-full",
-                      severityColor[a.severity] ?? "bg-slate-400"
+                      severityColor[a.severity] ?? "bg-[var(--muted)]"
                     )}
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-slate-800">{a.title}</p>
-                    <p className="text-xs text-slate-500">{a.message}</p>
+                    <p className="text-sm font-medium text-[var(--ink)]">{a.title}</p>
+                    <p className="text-xs text-[var(--muted)]">{a.message}</p>
                     {a.requestId && (
                       <Link
                         href={`/dashboard/engenharia/solicitacoes/${a.requestId}`}
                         onClick={() => setOpen(false)}
-                        className="text-xs text-emerald-600 hover:underline"
+                        className="text-xs text-[var(--brand-ink)] hover:underline"
                       >
                         {a.request?.equipmentName ?? "Ver solicitação"}
                       </Link>
@@ -105,7 +105,7 @@ export function NotificationBell() {
                   <button
                     onClick={() => resolve.mutate(a.id)}
                     disabled={resolve.isPending}
-                    className="shrink-0 self-start rounded-md p-1 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600"
+                    className="shrink-0 self-start rounded-md p-1 text-[var(--muted)] hover:bg-[var(--brand-soft)] hover:text-[var(--brand-ink)]"
                     aria-label="Resolver"
                     title="Marcar como resolvido"
                   >

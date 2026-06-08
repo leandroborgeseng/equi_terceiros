@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea, Label } from "@/components/ui/input";
 import { AlertTriangle, ShieldAlert } from "lucide-react";
+import { PageHeader } from "@/components/gesteq/page-header";
+import { Panel } from "@/components/gesteq/panel";
 
 type AdverseEvent = {
   id: string;
@@ -55,26 +57,23 @@ export default function CmePage() {
   });
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">CME / CCIH / NSP</h1>
-        <p className="text-slate-500">
-          Registro de eventos adversos e acompanhamento de higienização de equipamentos de terceiros.
-        </p>
-      </div>
+    <div className="gesteq-rise space-y-6">
+      <PageHeader
+        eyebrow="Higienização"
+        title="CME / CCIH / NSP"
+        subtitle="Registro de eventos adversos e acompanhamento de higienização de equipamentos de terceiros"
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ShieldAlert className="h-5 w-5 text-red-600" />
-            Registrar evento adverso
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <Panel
+        title="Registrar evento adverso"
+        eyebrow="Segurança"
+        right={<ShieldAlert className="h-5 w-5 text-[var(--bloqueado-ink)]" />}
+      >
+        <div className="space-y-4">
           <div>
             <Label>Solicitação / equipamento</Label>
             <select
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-[var(--r-md)] border border-[var(--line)] bg-[var(--card)] px-3 py-2 text-sm"
               value={form.requestId}
               onChange={(e) => setForm({ ...form, requestId: e.target.value })}
             >
@@ -89,7 +88,7 @@ export default function CmePage() {
           <div>
             <Label>Severidade</Label>
             <select
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-[var(--r-md)] border border-[var(--line)] bg-[var(--card)] px-3 py-2 text-sm"
               value={form.severity}
               onChange={(e) => setForm({ ...form, severity: e.target.value })}
             >
@@ -124,12 +123,12 @@ export default function CmePage() {
           {createMutation.error && (
             <p className="text-sm text-red-600">{(createMutation.error as Error).message}</p>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </Panel>
 
       <section>
-        <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-          <AlertTriangle className="h-5 w-5 text-amber-600" />
+        <h2 className="font-display mb-4 flex items-center gap-2 text-lg font-semibold text-[var(--ink)]">
+          <AlertTriangle className="h-5 w-5 text-[var(--pendente-ink)]" />
           Eventos registrados
         </h2>
         <div className="space-y-3">
@@ -138,20 +137,21 @@ export default function CmePage() {
               <CardContent className="p-4 text-sm">
                 <div className="flex flex-wrap justify-between gap-2">
                   <span className="font-medium">{ev.request.equipmentName}</span>
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs">
+                  <span className="gesteq-badge gesteq-st-pendente sm">
+                    <span className="gesteq-dot" />
                     {ev.severity}
                   </span>
                 </div>
-                <p className="text-slate-500">{ev.request.protocol}</p>
+                <p className="text-[var(--muted)]">{ev.request.protocol}</p>
                 <p className="mt-2">{ev.description}</p>
-                <p className="mt-2 text-xs text-slate-400">
+                <p className="mt-2 text-xs text-[var(--faint)]">
                   {new Date(ev.occurredAt).toLocaleString("pt-BR")} — {ev.reportedBy.name}
                 </p>
               </CardContent>
             </Card>
           ))}
           {events.length === 0 && (
-            <p className="text-sm text-slate-500">Nenhum evento adverso registrado.</p>
+            <p className="text-sm text-[var(--muted)]">Nenhum evento adverso registrado.</p>
           )}
         </div>
       </section>

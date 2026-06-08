@@ -1,70 +1,165 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { Clock, Building2, Stethoscope, AlertTriangle } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { User, MapPin } from "lucide-react";
 import { RequestStatusBadge } from "./status-badge";
-import { formatDate, formatDateTime } from "@/lib/utils";
-import type { RequestStatus } from "@/lib/enums";
+import { ClassTag } from "@/components/gesteq/class-tag";
+import { ProgressMeter } from "@/components/gesteq/progress-meter";
+import { countDocsOk, countInspOk } from "@/lib/queue-stages";
+import { statusSpineBorderClass } from "@/lib/status-tokens";
+import { DOC_CHECKLIST_ITEMS } from "@/lib/validators/request";
+import { INSPECTION_ITEMS } from "@/lib/validators/request";
+import type { RequestStatus, EquipmentClass } from "@/lib/enums";
+import { cn } from "@/lib/utils";
 
 export type RequestCardData = {
   id: string;
   protocol: string;
+  internalOs?: string | null;
   status: RequestStatus;
   equipmentName: string;
   brand: string;
   model: string;
+  serialNumber?: string | null;
+  equipmentClass?: EquipmentClass | string | null;
   usageSector: string;
-  supplierName: string;
-  doctor: { name: string };
-  plannedDate: string;
-  plannedTime: string;
-  isUrgent: boolean;
+  supplierName?: string;
+  doctor?: { name: string } | null;
+  requesterName?: string | null;
+  plannedDate?: string;
+  plannedTime?: string;
+  isUrgent?: boolean;
   validUntil?: string | null;
+  createdAt?: string;
+  documentChecklist?: Record<string, unknown> | null;
+  technicalInspection?: Record<string, unknown> | null;
 };
 
-export function RequestCard({ request, href }: { request: RequestCardData; href: string }) {
+function relTime(dateStr?: string) {
+  if (!dateStr) return "";
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const h = Math.floor(diff / 3600000);
+  if (h < 24) return `${h}h`;
+  const d = Math.floor(h / 24);
+  return `${d}d`;
+}
+
+export function RequestCard({
+  request,
+  href,
+  compact = false,
+}: {
+  request: RequestCardData;
+  href: string;
+  compact?: boolean;
+}) {
+  const docsOk = countDocsOk(request.documentChecklist);
+  const inspOk = countInspOk(request.technicalInspection);
+  const docsTotal = DOC_CHECKLIST_ITEMS.length;
+  const inspTotal = INSPECTION_ITEMS.length;
+  const requester = request.doctor?.name ?? request.requesterName ?? "—";
+  const overdue =
+    request.validUntil && new Date(request.validUntil) < new Date() && !["RETIRADO"].includes(request.status);
+
   return (
-    <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.15 }}>
-      <Link href={href}>
-        <Card className="cursor-pointer transition-shadow hover:shadow-md">
-          <CardContent className="space-y-3 p-4">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <p className="font-mono text-xs text-slate-500">{request.protocol}</p>
-                <h3 className="font-semibold text-slate-900">
-                  {request.equipmentName} — {request.brand} {request.model}
-                </h3>
-              </div>
-              <RequestStatusBadge status={request.status} />
+    <Link href={href} className="block">
+      <div
+        className={cn(
+          "gesteq-card gesteq-rise relative cursor-pointer overflow-hidden transition-shadow hover:shadow-[var(--shadow)]",
+          statusSpineBorderClass(request.status)
+        )}
+      >
+        <div className={cn("px-4 py-3", compact ? "pb-2.5" : "pb-3")} style={{ paddingLeft: 16 }}>
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <span className="font-mono-data text-[11px] text-[var(--faint)]">
+              {request.protocol}
+              {request.internalOs ? ` · ${request.internalOs}` : ""}
+            </span>
+            <div className="flex items-center gap-1.5">
+              {request.isUrgent && (
+                <span className="gesteq-badge gesteq-st-urgencia sm">
+                  <span className="gesteq-dot" />
+                  Urgente
+                </span>
+              )}
+              {overdue && (
+                <span className="gesteq-badge gesteq-st-bloqueado sm">
+                  <span className="gesteq-dot" />
+                  Vencido
+                </span>
+              )}
+              {request.equipmentClass && <ClassTag classe={request.equipmentClass} />}
             </div>
-            <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
-              <span className="flex items-center gap-1">
-                <Stethoscope className="h-3 w-3" /> {request.doctor.name}
+          </div>
+
+          <h3 className="font-display text-base font-semibold leading-snug text-[var(--ink)]">
+            {request.equipmentName}
+          </h3>
+          <p className="mt-0.5 text-[12.5px] text-[var(--muted)]">
+            {request.brand} · {request.model} ·{" "}
+            <span className="font-mono-data text-[11.5px]">{request.serialNumber || "—"}</span>
+          </p>
+
+          {!compact && (
+            <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1 text-[12.5px] text-[var(--ink-2)]">
+              <span className="inline-flex items-center gap-1">
+                <User className="h-3 w-3 text-[var(--faint)]" />
+                {requester}
               </span>
-              <span className="flex items-center gap-1">
-                <Building2 className="h-3 w-3" /> {request.usageSector}
+              <span className="inline-flex items-center gap-1">
+                <MapPin className="h-3 w-3 text-[var(--faint)]" />
+                {request.usageSector}
               </span>
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {formatDate(request.plannedDate)} {request.plannedTime}
-              </span>
-              <span>{request.supplierName}</span>
             </div>
-            {request.isUrgent && (
-              <div className="flex items-center gap-1 text-xs font-medium text-red-600">
-                <AlertTriangle className="h-3 w-3" /> Urgência / Emergência
+          )}
+
+          <div className={cn("flex gap-3.5", compact ? "mt-2.5" : "mt-3")}>
+            <div className="flex-1">
+              <div className="gesteq-eyebrow mb-0.5 flex justify-between">
+                <span>Docs</span>
+                <span
+                  className={cn(
+                    "font-mono-data",
+                    docsOk === docsTotal ? "text-[var(--liberado-ink)]" : "text-[var(--muted)]"
+                  )}
+                >
+                  {docsOk}/{docsTotal}
+                </span>
               </div>
-            )}
-            {request.validUntil && (
-              <p className="text-xs text-amber-700">
-                Validade: {formatDateTime(request.validUntil)}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      </Link>
-    </motion.div>
+              <ProgressMeter
+                value={docsOk}
+                total={docsTotal}
+                tone={docsOk === docsTotal ? "var(--liberado)" : "var(--docs)"}
+              />
+            </div>
+            <div className="flex-1">
+              <div className="gesteq-eyebrow mb-0.5 flex justify-between">
+                <span>Inspeção</span>
+                <span
+                  className={cn(
+                    "font-mono-data",
+                    inspOk === inspTotal ? "text-[var(--liberado-ink)]" : "text-[var(--muted)]"
+                  )}
+                >
+                  {inspOk}/{inspTotal}
+                </span>
+              </div>
+              <ProgressMeter
+                value={inspOk}
+                total={inspTotal}
+                tone={inspOk === inspTotal ? "var(--liberado)" : "var(--inspecao)"}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between border-t border-[var(--line-2)] bg-[var(--surface-2)] px-4 py-2">
+          <RequestStatusBadge status={request.status} size="sm" />
+          {request.createdAt && (
+            <span className="font-mono-data text-[10.5px] text-[var(--faint)]">{relTime(request.createdAt)}</span>
+          )}
+        </div>
+      </div>
+    </Link>
   );
 }

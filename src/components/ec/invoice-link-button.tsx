@@ -115,7 +115,7 @@ export function InvoiceLinkButton({
             <button
               type="button"
               onClick={openAttachment}
-              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-2 text-xs text-emerald-700 hover:bg-emerald-50"
+              className="inline-flex items-center gap-1 rounded-[var(--r-md)] border border-[var(--line)] px-2 py-2 text-xs text-[var(--brand-ink)] hover:bg-[var(--brand-soft)]"
               title="Abrir anexo da NF"
             >
               <ExternalLink className="h-3.5 w-3.5" />
@@ -129,7 +129,7 @@ export function InvoiceLinkButton({
               }
             }}
             disabled={unlinkMutation.isPending}
-            className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-2 text-xs text-slate-500 hover:bg-slate-50 hover:text-red-600 disabled:opacity-60"
+            className="inline-flex items-center gap-1 rounded-[var(--r-md)] border border-[var(--line)] px-2 py-2 text-xs text-[var(--muted)] hover:bg-[var(--surface-2)] hover:text-[var(--bloqueado-ink)] disabled:opacity-60"
             title="Desvincular NF"
           >
             <Unlink className="h-3.5 w-3.5" />
@@ -174,7 +174,7 @@ export function InvoiceLinkButton({
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                  className="rounded-[var(--r-md)] p-1.5 text-[var(--muted)] hover:bg-[var(--surface-2)] hover:text-[var(--ink)]"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -183,17 +183,17 @@ export function InvoiceLinkButton({
               <div className="overflow-y-auto p-4" style={{ maxHeight: "calc(85vh - 8rem)" }}>
                 {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
 
-                {isLoading && <p className="text-sm text-slate-500">Carregando notas fiscais...</p>}
+                {isLoading && <p className="text-sm text-[var(--muted)]">Carregando notas fiscais...</p>}
 
                 {!isLoading && linkable.length === 0 && (
-                  <div className="space-y-3 text-sm text-slate-600">
+                  <div className="space-y-3 text-sm text-[var(--ink-2)]">
                     <p>
                       Nenhuma nota fiscal com anexo disponível.
                       {invoice ? " Você pode desvincular a NF atual ou cadastrar uma nova." : ""}
                     </p>
                     <Link
                       href="/notas-fiscais"
-                      className="inline-flex items-center gap-1 text-emerald-700 hover:underline"
+                      className="inline-flex items-center gap-1 text-[var(--brand-ink)] hover:underline"
                       onClick={() => setOpen(false)}
                     >
                       <Receipt className="h-4 w-4" />
@@ -209,15 +209,15 @@ export function InvoiceLinkButton({
                         type="button"
                         onClick={() => linkMutation.mutate(inv.id)}
                         disabled={linkMutation.isPending}
-                        className="w-full rounded-xl border border-slate-200 p-3 text-left transition-colors hover:border-emerald-300 hover:bg-emerald-50/50 disabled:opacity-60"
+                        className="w-full rounded-[var(--r-lg)] border border-[var(--line)] p-3 text-left transition-colors hover:border-[color-mix(in_oklch,var(--brand)_40%,transparent)] hover:bg-[var(--brand-soft)]/50 disabled:opacity-60"
                       >
-                        <p className="font-medium text-slate-900">NF {inv.number}</p>
-                        <p className="mt-0.5 text-xs text-slate-500">
+                        <p className="font-medium text-[var(--ink)]">NF {inv.number}</p>
+                        <p className="mt-0.5 text-xs text-[var(--muted)]">
                           {inv.supplierName ?? "—"}
                           {inv.issueDate ? ` · ${formatDate(inv.issueDate)}` : ""}
                           {inv.fileName ? ` · ${inv.fileName}` : ""}
                         </p>
-                        <p className="mt-1 text-xs text-slate-400">
+                        <p className="mt-1 text-xs text-[var(--muted)]">
                           {inv.requests.length} equipamento(s) já vinculado(s)
                         </p>
                       </button>
@@ -226,10 +226,10 @@ export function InvoiceLinkButton({
                 </ul>
               </div>
 
-              <div className="flex items-center justify-between gap-2 border-t border-slate-100 px-4 py-3">
+              <div className="flex items-center justify-between gap-2 border-t border-[var(--line-2)] px-4 py-3">
                 <Link
                   href="/notas-fiscais"
-                  className="text-xs text-emerald-700 hover:underline"
+                  className="text-xs text-[var(--brand-ink)] hover:underline"
                   onClick={() => setOpen(false)}
                 >
                   Cadastrar nova NF

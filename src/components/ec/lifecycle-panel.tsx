@@ -79,7 +79,7 @@ export function LifecyclePanel({
   // Só faz sentido depois da liberação
   if (!LIFECYCLE_STATUSES.includes(status)) {
     return (
-      <div className="text-sm text-slate-500">
+      <div className="text-sm text-[var(--muted)]">
         As ações de ciclo de vida (em uso, armazenamento e retirada) ficam disponíveis após a
         liberação do equipamento.
       </div>
@@ -92,8 +92,9 @@ export function LifecyclePanel({
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-slate-900">Ciclo de vida</h3>
-        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+        <h3 className="font-display font-semibold text-[var(--ink)]">Ciclo de vida</h3>
+        <span className="gesteq-badge gesteq-st-emuso sm">
+          <span className="gesteq-dot" />
           {status.replace(/_/g, " ")}
         </span>
       </div>
@@ -123,8 +124,8 @@ export function LifecyclePanel({
 
       {/* Registrar retirada definitiva */}
       {!isRetirado && (
-        <div className="rounded-xl border border-slate-200 p-3">
-          <p className="mb-2 flex items-center gap-1.5 text-sm font-medium text-slate-700">
+        <div className="rounded-[var(--r-lg)] border border-[var(--line)] p-3">
+          <p className="mb-2 flex items-center gap-1.5 text-sm font-medium text-[var(--ink-2)]">
             <LogOut className="h-4 w-4" /> Registrar retirada (encerra o ciclo)
           </p>
           <div className="grid gap-2 sm:grid-cols-2">
@@ -155,8 +156,8 @@ export function LifecyclePanel({
 
       {/* Armazenamento */}
       {!isRetirado && (
-        <div className="rounded-xl border border-slate-200 p-3">
-          <p className="mb-2 flex items-center gap-1.5 text-sm font-medium text-slate-700">
+        <div className="rounded-[var(--r-lg)] border border-[var(--line)] p-3">
+          <p className="mb-2 flex items-center gap-1.5 text-sm font-medium text-[var(--ink-2)]">
             <Warehouse className="h-4 w-4" /> Registrar armazenamento
           </p>
           <div className="grid gap-2 sm:grid-cols-2">
@@ -175,11 +176,11 @@ export function LifecyclePanel({
         </div>
       )}
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-[var(--bloqueado-ink)]">{error}</p>}
 
       {/* Histórico */}
       {(storageRecords.length > 0 || withdrawalRecords.length > 0) && (
-        <div className="space-y-2 text-xs text-slate-500">
+        <div className="space-y-2 text-xs text-[var(--muted)]">
           {withdrawalRecords.map((w) => (
             <p key={w.id}>
               {w.completed ? "Retirado" : "Aguardando retirada"} por <strong>{w.withdrawnBy}</strong>{" "}

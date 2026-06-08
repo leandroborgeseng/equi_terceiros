@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea, Label } from "@/components/ui/input";
 import { EQUIPMENT_CLASS_LABELS, type EquipmentClass } from "@/lib/enums";
+import { PageHeader } from "@/components/gesteq/page-header";
 
 export default function CadastroEcPage() {
   const { id } = useParams<{ id: string }>();
@@ -60,13 +61,12 @@ export default function CadastroEcPage() {
   });
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Cadastro do equipamento</h1>
-        <p className="text-slate-500">
-          Recebimento pela Engenharia Clínica {request?.protocol ? `· ${request.protocol}` : ""}
-        </p>
-      </div>
+    <div className="gesteq-rise mx-auto max-w-2xl space-y-6">
+      <PageHeader
+        eyebrow="Engenharia Clínica"
+        title="Cadastro do equipamento"
+        subtitle={`Recebimento e registro${request?.protocol ? ` · ${request.protocol}` : ""}`}
+      />
 
       <Card>
         <CardHeader>
@@ -93,7 +93,7 @@ export default function CadastroEcPage() {
           <div>
             <Label>Classe do equipamento *</Label>
             <select
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-[var(--r-md)] border border-[var(--line)] bg-[var(--card)] px-3 py-2 text-sm"
               value={form.equipmentClass}
               onChange={(e) =>
                 setForm({ ...form, equipmentClass: e.target.value as EquipmentClass })
