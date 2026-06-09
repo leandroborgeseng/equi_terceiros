@@ -24,7 +24,7 @@ export function canAccessRoute(role: UserRole, path: string): boolean {
   if (path.startsWith("/fornecedor/")) return true;
 
   const rolePrefixes: Record<UserRole, string[]> = {
-    ADMIN: ["/dashboard", "/api"],
+    ADMIN: ["/dashboard", "/api", "/configuracoes"],
     ENGENHARIA_CLINICA: ["/dashboard/engenharia", "/dashboard/executivo", "/equipamentos", "/fornecedores", "/notas-fiscais", "/pendencias", "/indicadores", "/convites", "/api/requests", "/api/equipamentos", "/api/suppliers", "/api/invoices", "/api/sectors", "/api/uploads", "/api/files", "/api/inspections", "/api/checklist", "/api/labels", "/api/gallery", "/api/alerts", "/api/dashboard", "/api/indicators", "/api/images", "/api/invites", "/api/terms"],
     MEDICO: ["/dashboard/medico", "/api/requests", "/api/uploads", "/api/gallery", "/api/files", "/api/images"],
     FORNECEDOR: ["/dashboard/fornecedor", "/fornecedor", "/api/requests", "/api/uploads", "/api/gallery", "/api/files", "/api/images"],
@@ -48,6 +48,11 @@ export function canCreateRequest(role: UserRole) {
 }
 
 export function canManageUsers(role: UserRole) {
+  return role === "ADMIN";
+}
+
+/** Personificação de perfis demo — apenas administrador real. */
+export function canImpersonate(role: UserRole) {
   return role === "ADMIN";
 }
 

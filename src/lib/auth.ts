@@ -5,21 +5,6 @@ import { prisma } from "@/lib/prisma";
 import { authConfig } from "@/lib/auth.config";
 import type { UserRole } from "@/lib/enums";
 
-declare module "next-auth" {
-  interface User {
-    role: UserRole;
-    id: string;
-  }
-  interface Session {
-    user: {
-      id: string;
-      email: string;
-      name: string;
-      role: UserRole;
-    };
-  }
-}
-
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   providers: [
