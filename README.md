@@ -1,6 +1,8 @@
-# GestEq — Gestão de Equipamentos de Terceiros
+# AION Engenharia — Gestão de Equipamentos de Terceiros
 
 Sistema web/PWA, mobile-first, para gestão, homologação, inspeção e rastreabilidade de equipamentos médico-hospitalares de terceiros pela Engenharia Clínica, baseado na **Norma de Procedimento 445.000**.
+
+> Marca visual: **AION Engenharia** · logotipo em `public/logo.png` · ícones PWA em `public/icons/`
 
 **Repositório:** https://github.com/leandroborgeseng/equi_terceiros
 

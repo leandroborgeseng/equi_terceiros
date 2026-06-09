@@ -3,6 +3,7 @@ import { IBM_Plex_Mono, Public_Sans, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/providers/query-provider";
 import { RegisterServiceWorker } from "@/components/pwa/register-sw";
+import { APP_DESCRIPTION, APP_NAME, APP_SHORT_NAME } from "@/lib/brand";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-display",
@@ -23,13 +24,20 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GestEq — Gestão de Equipamentos de Terceiros",
-  description: "Gestão, homologação e rastreabilidade de equipamentos de terceiros (Norma 445.000)",
+  title: APP_NAME,
+  description: APP_DESCRIPTION,
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "GestEq",
+    title: APP_SHORT_NAME,
   },
 };
 

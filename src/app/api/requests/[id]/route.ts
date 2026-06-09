@@ -8,7 +8,10 @@ import {
   DELETABLE_STATUSES,
 } from "@/lib/validators/request";
 import { createAuditLog } from "@/lib/audit";
-import { isClinicalEngineering } from "@/lib/rbac";
+import { canHomologate, isClinicalEngineering } from "@/lib/rbac";
+import { resolveStageDrop } from "@/lib/kanban-stages";
+import type { StageKey } from "@/lib/queue-stages";
+import type { RequestStatus } from "@/lib/enums";
 import { buildFileUrl } from "@/lib/file-storage";
 
 export async function GET(
@@ -124,6 +127,41 @@ export async function PATCH(
       action: "REQUEST_SUBMITTED",
       entity: "EquipmentRequest",
       entityId: id,
+    });
+
+    return NextResponse.json(request);
+  }
+
+  if (body.action === "moveStage") {
+    if (!canHomologate(session.user.role)) {
+      return NextResponse.json({ error: "Sem permissão" }, { status: 403 });
+    }
+
+    const stage = body.stage as StageKey;
+    if (!stage || typeof stage !== "string") {
+      return NextResponse.json({ error: "Coluna inválida" }, { status: 400 });
+    }
+
+    const resolved = resolveStageDrop(stage, existing.status as RequestStatus);
+    if ("error" in resolved) {
+      return NextResponse.json({ error: resolved.error }, { status: 400 });
+    }
+
+    if (resolved.status === existing.status) {
+      return NextResponse.json(existing);
+    }
+
+    const request = await prisma.equipmentRequest.update({
+      where: { id },
+      data: { status: resolved.status },
+    });
+
+    await createAuditLog({
+      userId: session.user.id,
+      action: "REQUEST_STAGE_MOVED",
+      entity: "EquipmentRequest",
+      entityId: id,
+      metadata: { from: existing.status, to: resolved.status, stage },
     });
 
     return NextResponse.json(request);

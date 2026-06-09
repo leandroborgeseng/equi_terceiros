@@ -185,7 +185,7 @@ function App() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
-      {!isMobile && <Sidebar route={openReq ? 'fila' : route} go={go} pendCount={pendCount} />}
+      {!isMobile && <Sidebar route={route} go={go} pendCount={pendCount} />}
 
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', height: '100vh' }}>
         {/* Topbar */}
@@ -197,12 +197,12 @@ function App() {
         }}>
           {isMobile ? <Logo size={30} /> : (
             <div className="eyebrow" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span>GestEq</span><Icon name="chevR" size={12} /><span style={{ color: 'var(--ink-2)' }}>{openReq ? 'Detalhe da solicitação' : NAV.find(n => n.id === route)?.label}</span>
+              <span>GestEq</span><Icon name="chevR" size={12} /><span style={{ color: 'var(--ink-2)' }}>{openReq ? 'Detalhe do equipamento' : NAV.find(n => n.id === route)?.label}</span>
             </div>
           )}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span className="badge st-liberado sm" title="Fila offline sincronizada"><Icon name="signal" size={11} />Sincronizado</span>
-            {!isMobile && <button className="btn btn-primary sm"><Icon name="plus" size={15} />Novo equipamento</button>}
+            {!isMobile && ['fila','equipamentos'].includes(route) && <button className="btn btn-primary sm" onClick={() => pushToast && pushToast({ msg: 'Novo equipamento', icon: 'plus' })}><Icon name="plus" size={15} />Novo equipamento</button>}
             {isMobile && <button className="btn btn-ghost sm" style={{ padding: 7 }}><Icon name="bell" size={17} /></button>}
           </div>
         </header>

@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { LayoutGrid, List, Search, X, Zap } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { LayoutGrid, List, Search, X, Zap, AlertCircle } from "lucide-react";
 import { RequestCard, type RequestCardData } from "@/components/requests/request-card";
 import { FilterChip } from "@/components/gesteq/filter-chip";
 import { SegToggle } from "@/components/gesteq/seg-toggle";
@@ -10,16 +10,22 @@ import {
   HOMOLOGATION_STAGES,
   QUEUE_COUNTERS,
   stageForStatus,
+  type StageKey,
 } from "@/lib/queue-stages";
+import { cn } from "@/lib/utils";
 
 type QueueStats = {
   queue?: Record<string, number>;
 };
 
 export default function EngenhariaDashboardPage() {
+  const qc = useQueryClient();
   const [view, setView] = useState<"board" | "list">("board");
   const [filter, setFilter] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [dropStage, setDropStage] = useState<StageKey | null>(null);
+  const [moveError, setMoveError] = useState<string | null>(null);
 
   const { data: stats } = useQuery<QueueStats>({
     queryKey: ["dashboard-stats"],
@@ -32,6 +38,25 @@ export default function EngenhariaDashboardPage() {
   });
 
   const rows = requests as RequestCardData[];
+
+  const moveMutation = useMutation({
+    mutationFn: async ({ requestId, stage }: { requestId: string; stage: StageKey }) => {
+      const res = await fetch(`/api/requests/${requestId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "moveStage", stage }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Não foi possível mover o card");
+      return data;
+    },
+    onSuccess: () => {
+      setMoveError(null);
+      qc.invalidateQueries({ queryKey: ["requests", "engenharia"] });
+      qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
+    },
+    onError: (e: Error) => setMoveError(e.message),
+  });
 
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
@@ -85,6 +110,12 @@ export default function EngenhariaDashboardPage() {
       (r.validUntil && new Date(r.validUntil) < new Date() && r.status !== "RETIRADO")
   );
 
+  function handleDrop(stage: StageKey, requestId: string) {
+    setDropStage(null);
+    setDraggingId(null);
+    moveMutation.mutate({ requestId, stage });
+  }
+
   return (
     <div className="gesteq-rise flex min-h-[60vh] flex-col">
       {/* Toolbar */}
@@ -100,6 +131,9 @@ export default function EngenhariaDashboardPage() {
               <span className="font-mono-data text-[var(--urgencia-ink)]">
                 {priority.length} prioritários
               </span>
+              {view === "board" && (
+                <span className="text-[var(--faint)]"> · arraste cards entre colunas</span>
+              )}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2.5">
@@ -122,6 +156,16 @@ export default function EngenhariaDashboardPage() {
             />
           </div>
         </div>
+
+        {moveError && (
+          <div className="mb-4 flex items-start gap-2 rounded-[var(--r-lg)] border border-[color-mix(in_oklch,var(--bloqueado)_30%,transparent)] bg-[var(--bloqueado-soft)] px-3 py-2.5 text-sm text-[var(--bloqueado-ink)]">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{moveError}</span>
+            <button type="button" className="ml-auto text-xs underline" onClick={() => setMoveError(null)}>
+              Fechar
+            </button>
+          </div>
+        )}
 
         {/* Priority rail */}
         {priority.length > 0 && (
@@ -181,8 +225,27 @@ export default function EngenhariaDashboardPage() {
           <div className="grid h-full min-h-[460px] grid-cols-1 gap-3.5 md:grid-cols-2 xl:grid-cols-4">
             {HOMOLOGATION_STAGES.map((stage) => {
               const items = filtered.filter((r) => stageForStatus(r.status) === stage.key);
+              const isDropTarget = dropStage === stage.key && draggingId !== null;
+
               return (
-                <div key={stage.key} className="flex min-h-0 flex-col rounded-[var(--r-lg)]">
+                <div
+                  key={stage.key}
+                  className={cn(
+                    "flex min-h-0 flex-col rounded-[var(--r-lg)] transition-colors",
+                    isDropTarget && "bg-[var(--brand-soft)] ring-2 ring-[var(--brand)]"
+                  )}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = "move";
+                    setDropStage(stage.key);
+                  }}
+                  onDragLeave={() => setDropStage((s) => (s === stage.key ? null : s))}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const requestId = e.dataTransfer.getData("text/request-id");
+                    if (requestId) handleDrop(stage.key, requestId);
+                  }}
+                >
                   <div className="sticky top-16 z-10 mb-3 flex items-center gap-2 bg-[var(--bg)] px-1 py-1">
                     <span className="font-display flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--surface-2)] text-sm font-semibold text-[var(--ink-2)]">
                       {stage.n}
@@ -201,11 +264,26 @@ export default function EngenhariaDashboardPage() {
                         key={r.id}
                         request={r}
                         href={`/dashboard/engenharia/solicitacoes/${r.id}`}
+                        kanban
+                        isDragging={draggingId === r.id}
+                        onDragStart={() => {
+                          setDraggingId(r.id);
+                          setMoveError(null);
+                        }}
+                        onDragEnd={() => {
+                          setDraggingId(null);
+                          setDropStage(null);
+                        }}
                       />
                     ))}
                     {items.length === 0 && (
-                      <div className="rounded-[var(--r-lg)] border border-dashed border-[var(--line)] px-4 py-8 text-center text-xs text-[var(--faint)]">
-                        Nenhum item
+                      <div
+                        className={cn(
+                          "rounded-[var(--r-lg)] border border-dashed px-4 py-8 text-center text-xs text-[var(--faint)]",
+                          isDropTarget ? "border-[var(--brand)] text-[var(--brand-ink)]" : "border-[var(--line)]"
+                        )}
+                      >
+                        {isDropTarget ? "Solte aqui" : "Nenhum item"}
                       </div>
                     )}
                   </div>

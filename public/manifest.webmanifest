@@ -1,11 +1,11 @@
 {
-  "name": "GestEq — Gestão de Equipamentos de Terceiros",
-  "short_name": "GestEq",
+  "name": "AION Engenharia — Gestão de Equipamentos de Terceiros",
+  "short_name": "AION",
   "description": "Gestão, homologação e rastreabilidade de equipamentos de terceiros (Norma 445.000)",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f8fafc",
-  "theme_color": "#059669",
+  "theme_color": "#00995D",
   "orientation": "portrait-primary",
   "icons": [
     {
