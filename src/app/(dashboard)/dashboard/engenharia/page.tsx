@@ -117,7 +117,7 @@ export default function EngenhariaDashboardPage() {
   }
 
   return (
-    <div className="gesteq-rise flex min-h-[60vh] flex-col">
+    <div className="flex min-h-[60vh] flex-col">
       {/* Toolbar */}
       <div className="mb-4">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
@@ -222,7 +222,7 @@ export default function EngenhariaDashboardPage() {
       {/* Board */}
       {view === "board" ? (
         <div className="min-h-[460px] flex-1 overflow-x-auto pb-2">
-          <div className="grid min-h-[460px] w-max min-w-full grid-cols-1 gap-3.5 md:grid-cols-2 xl:grid-cols-[repeat(4,minmax(280px,1fr))]">
+          <div className="flex min-h-[460px] flex-col gap-3.5 md:flex-row md:items-start">
             {HOMOLOGATION_STAGES.map((stage) => {
               const items = filtered.filter((r) => stageForStatus(r.status) === stage.key);
               const isDropTarget = dropStage === stage.key && draggingId !== null;
@@ -231,8 +231,8 @@ export default function EngenhariaDashboardPage() {
                 <div
                   key={stage.key}
                   className={cn(
-                    "flex min-h-[460px] flex-col rounded-[var(--r-lg)] transition-colors",
-                    isDropTarget && "bg-[var(--brand-soft)] ring-2 ring-[var(--brand)]"
+                    "flex w-full shrink-0 flex-col md:w-[280px]",
+                    isDropTarget && "rounded-[var(--r-lg)] bg-[var(--brand-soft)] ring-2 ring-[var(--brand)]"
                   )}
                   onDragOver={(e) => {
                     e.preventDefault();
@@ -246,7 +246,7 @@ export default function EngenhariaDashboardPage() {
                     if (requestId) handleDrop(stage.key, requestId);
                   }}
                 >
-                  <div className="sticky top-16 z-10 mb-3 flex items-center gap-2 bg-[var(--bg)] px-1 py-1">
+                  <div className="mb-3 flex shrink-0 items-center gap-2 px-1 py-1">
                     <span className="font-display flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--surface-2)] text-sm font-semibold text-[var(--ink-2)]">
                       {stage.n}
                     </span>
@@ -258,7 +258,7 @@ export default function EngenhariaDashboardPage() {
                       {items.length}
                     </span>
                   </div>
-                  <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-1 pb-3">
+                  <div className="flex flex-col gap-2.5 px-1 pb-3">
                     {items.map((r) => (
                       <RequestCard
                         key={r.id}

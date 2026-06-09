@@ -79,7 +79,7 @@ export function RequestCard({
         "gesteq-card relative overflow-hidden transition-shadow",
         !kanban && "gesteq-rise",
         statusSpineBorderClass(request.status),
-        kanban ? "cursor-grab active:cursor-grabbing" : "cursor-pointer hover:shadow-[var(--shadow)]",
+        kanban ? "w-full shrink-0 cursor-grab active:cursor-grabbing" : "cursor-pointer hover:shadow-[var(--shadow)]",
         isDragging && "opacity-50 ring-2 ring-[var(--brand)]"
       )}
       draggable={kanban}
@@ -206,7 +206,7 @@ export function RequestCard({
   );
 
   if (kanban) {
-    return <div className="block shrink-0">{card}</div>;
+    return card;
   }
 
   return (
