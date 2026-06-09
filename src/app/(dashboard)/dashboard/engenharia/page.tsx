@@ -222,7 +222,7 @@ export default function EngenhariaDashboardPage() {
       {/* Board */}
       {view === "board" ? (
         <div className="min-h-[460px] flex-1 overflow-x-auto pb-2">
-          <div className="grid h-full min-h-[460px] grid-cols-1 gap-3.5 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid min-h-[460px] w-max min-w-full grid-cols-1 gap-3.5 md:grid-cols-2 xl:grid-cols-[repeat(4,minmax(280px,1fr))]">
             {HOMOLOGATION_STAGES.map((stage) => {
               const items = filtered.filter((r) => stageForStatus(r.status) === stage.key);
               const isDropTarget = dropStage === stage.key && draggingId !== null;
@@ -231,7 +231,7 @@ export default function EngenhariaDashboardPage() {
                 <div
                   key={stage.key}
                   className={cn(
-                    "flex min-h-0 flex-col rounded-[var(--r-lg)] transition-colors",
+                    "flex min-h-[460px] flex-col rounded-[var(--r-lg)] transition-colors",
                     isDropTarget && "bg-[var(--brand-soft)] ring-2 ring-[var(--brand)]"
                   )}
                   onDragOver={(e) => {
@@ -258,7 +258,7 @@ export default function EngenhariaDashboardPage() {
                       {items.length}
                     </span>
                   </div>
-                  <div className="flex flex-1 flex-col gap-2.5">
+                  <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-1 pb-3">
                     {items.map((r) => (
                       <RequestCard
                         key={r.id}
