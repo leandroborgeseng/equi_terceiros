@@ -267,6 +267,23 @@
   box-shadow: var(--shadow-sm);
 }
 
+.gesteq-seg button.on[data-tone="liberado"] {
+  background: var(--liberado);
+  color: white;
+}
+.gesteq-seg button.on[data-tone="pendente"] {
+  background: var(--pendente);
+  color: white;
+}
+.gesteq-seg button.on[data-tone="restricao"] {
+  background: var(--restricao);
+  color: white;
+}
+.gesteq-seg button.on[data-tone="danger"] {
+  background: var(--bloqueado);
+  color: white;
+}
+
 .gesteq-filter-active {
   background: var(--brand-soft);
   border-color: var(--brand-line);

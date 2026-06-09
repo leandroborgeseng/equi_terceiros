@@ -31,8 +31,15 @@ export async function PUT(
 
   const data = parsed.data;
 
-  if (data.status === "BLOQUEADO" && !data.blockReason) {
+  if (data.status === "BLOQUEADO" && !data.blockReason?.trim()) {
     return NextResponse.json({ error: "Motivo de bloqueio obrigatório" }, { status: 400 });
+  }
+
+  if (data.status === "LIBERADO_COM_RESTRICAO" && !data.restrictionNotes?.trim()) {
+    return NextResponse.json(
+      { error: "Descrição da restrição é obrigatória para liberação com restrição." },
+      { status: 400 }
+    );
   }
 
   // Regra de negócio: Termo de Responsabilidade (Anexo IV) é pré-requisito para liberar

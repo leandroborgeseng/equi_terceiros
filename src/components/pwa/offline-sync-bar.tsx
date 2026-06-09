@@ -53,7 +53,7 @@ export function OfflineSyncBar() {
   if (count === 0 && !lastResult) return null;
 
   return (
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-[var(--r-lg)] border border-[color-mix(in_oklch,var(--restricao)_30%,transparent)] bg-[var(--restricao-soft)] px-4 py-3 text-sm text-[var(--restricao-ink)]">
       <span>
         {count > 0
           ? `${count} arquivo(s) na fila offline`

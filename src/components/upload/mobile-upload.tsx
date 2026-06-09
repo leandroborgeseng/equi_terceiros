@@ -221,8 +221,8 @@ export function MobileUpload({
         )}
         {status === "offline" && (
           <>
-            <AlertCircle className="h-3 w-3 text-amber-600" />
-            <span className="text-amber-700">Salvo offline — sincronizará depois</span>
+            <AlertCircle className="h-3 w-3 text-[var(--restricao)]" />
+            <span className="text-[var(--restricao-ink)]">Salvo offline — sincronizará depois</span>
           </>
         )}
         {status === "error" && <span className="text-red-600">{error}</span>}

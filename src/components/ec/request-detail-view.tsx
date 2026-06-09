@@ -512,7 +512,11 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
               </p>
             </CardHeader>
             <CardContent>
-              <InspectionPanel requestId={requestId} />
+              <InspectionPanel
+                requestId={requestId}
+                inspection={request.technicalInspection}
+                termAccepted={!!request.responsibilityTerm?.accepted}
+              />
             </CardContent>
           </Card>
         )}
