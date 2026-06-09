@@ -76,7 +76,7 @@ export function AppShell({
             >
               {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
-            <GestEqLogo size={32} href="/" />
+            <GestEqLogo size={32} href="/" showText={false} />
           </div>
           <div className="flex items-center gap-2">
             {isClinicalEngineering(user.role) && <NotificationBell />}
@@ -100,7 +100,7 @@ export function AppShell({
           )}
         >
           <div className="hidden border-b border-[var(--line)] px-[18px] py-5 lg:block">
-            <GestEqLogo href="/" />
+            <GestEqLogo size={36} href="/" showText={false} />
           </div>
 
           <nav className="flex-1 overflow-y-auto px-3 py-4 lg:py-3">

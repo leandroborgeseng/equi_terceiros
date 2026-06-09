@@ -8,6 +8,7 @@ import { Input, Label } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Link from "next/link";
 import { GestEqLogo } from "@/components/gesteq/logo";
+import { APP_NAME } from "@/lib/brand";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -56,7 +57,7 @@ export default function LoginPage() {
             <GestEqLogo size={52} />
           </div>
           <CardTitle>Entrar na plataforma</CardTitle>
-          <CardDescription>GestEq — Gestão de Equipamentos de Terceiros</CardDescription>
+          <CardDescription>{APP_NAME}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
