@@ -73,7 +73,11 @@ const VALID_TABS: TabId[] = ["resumo", "documentos", "termo", "inspecao", "ciclo
 
 function initialTabFromUrl(param: string | null): TabId {
   if (param && VALID_TABS.includes(param as TabId)) return param as TabId;
-  return "documentos";
+  return "resumo";
+}
+
+function setTabInUrl(router: ReturnType<typeof useRouter>, requestId: string, next: TabId) {
+  router.replace(`/dashboard/engenharia/solicitacoes/${requestId}?tab=${next}`, { scroll: false });
 }
 
 export function RequestDetailView({ requestId }: { requestId: string }) {
@@ -81,6 +85,11 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<TabId>(() => initialTabFromUrl(searchParams.get("tab")));
+
+  function changeTab(next: TabId) {
+    setTab(next);
+    setTabInUrl(router, requestId, next);
+  }
 
   const { data: request, isLoading } = useQuery({
     queryKey: ["request", requestId],
@@ -322,7 +331,7 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
           <FlowPills
             steps={flowSteps}
             activeId={tab === "resumo" || tab === "fotos" ? "documentos" : tab}
-            onSelect={(id) => setTab(id as TabId)}
+            onSelect={(id) => changeTab(id as TabId)}
           />
           {!workflow.termOk && workflow.docsOk && (
             <p className="mt-2 flex items-center gap-1.5 text-xs text-[var(--pendente-ink)]">
@@ -335,7 +344,7 @@ export function RequestDetailView({ requestId }: { requestId: string }) {
 
       {/* Abas */}
       <div className="mt-4">
-        <TabNav tabs={tabsWithBadge} active={tab} onChange={setTab} />
+        <TabNav tabs={tabsWithBadge} active={tab} onChange={changeTab} />
       </div>
 
       {/* Conteúdo da aba */}
