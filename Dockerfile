@@ -36,6 +36,8 @@ COPY --from=builder /app/node_modules/bcryptjs ./node_modules/bcryptjs
 
 COPY scripts/docker-entrypoint.sh /app/docker-entrypoint.sh
 COPY scripts/seed-production.mjs /app/scripts/seed-production.mjs
+COPY scripts/seed-unimed-franca-parque.mjs /app/scripts/seed-unimed-franca-parque.mjs
+COPY scripts/data/unimed-franca-parque.json /app/scripts/data/unimed-franca-parque.json
 RUN chmod +x /app/docker-entrypoint.sh
 
 # Entrypoint roda como root (migrate + permissões em /data), app como nextjs

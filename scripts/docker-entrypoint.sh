@@ -60,6 +60,13 @@ else
   echo "AVISO: seed falhou"
 fi
 
+echo "==> Seed parque legado Unimed Franca..."
+if node /app/scripts/seed-unimed-franca-parque.mjs; then
+  echo "==> Parque Unimed Franca OK (idempotente)"
+else
+  echo "AVISO: seed Unimed Franca falhou"
+fi
+
 echo "==> Iniciando Next.js na porta $PORT"
 cd /app
 exec su-exec nextjs:nodejs node server.js
