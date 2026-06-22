@@ -1,0 +1,296 @@
+{
+  "sistema": "Gestão de Equipamentos de Terceiros",
+  "cooperativa": "Unimed Franca",
+  "gerado_em": "2026-06-22",
+  "observacoes": [
+    "CPF não incluído — obter diretamente de cada médico ou via cadastro interno da Unimed Franca.",
+    "E-mails não encontrados em fontes públicas — preencher para habilitar o fluxo de confirmação por e-mail.",
+    "Dr. Nelson Uzun Júnior e Dra. Dulce Helena são profissionais de odontologia (registro CRO, não CRM).",
+    "Endereço de Dr. Caio Franchini em Franca não localizado — atende em Franca mas sede principal é Ribeirão Preto.",
+    "Dr. Roberto Kairala não incluído — dados a confirmar."
+  ],
+  "medicos": [
+    {
+      "id": 1,
+      "nome": "Caio Freitas Franchini Neves",
+      "cpf": null,
+      "crm": "175754",
+      "crm_uf": "SP",
+      "especialidade": "Cirurgia Plástica",
+      "endereco": {
+        "logradouro": null,
+        "bairro": null,
+        "cidade": "Franca",
+        "uf": "SP",
+        "cep": null,
+        "telefone": null
+      },
+      "email": null,
+      "confirmacao_enviada": false,
+      "equipamentos": [
+        {
+          "descricao_informal": "lipo aspirador",
+          "nome_formal": "Lipossugador Cirúrgico (Aspirador para Lipoaspiração)",
+          "numero_serie": null,
+          "patrimonio": null
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "nome": "Diogo Faria Moreira",
+      "cpf": null,
+      "crm": "131064",
+      "crm_uf": "SP",
+      "especialidade": "Cirurgia Plástica",
+      "endereco": {
+        "logradouro": "Rua Rio Solimões, 1259",
+        "bairro": "Residencial Amazonas",
+        "cidade": "Franca",
+        "uf": "SP",
+        "cep": "14406-012",
+        "telefone": "(16) 3724-2521"
+      },
+      "email": null,
+      "confirmacao_enviada": false,
+      "equipamentos": [
+        {
+          "descricao_informal": "lipo aspirador",
+          "nome_formal": "Lipossugador Cirúrgico (Aspirador para Lipoaspiração)",
+          "numero_serie": null,
+          "patrimonio": null
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "nome": "Gustavo Nero Mitsuushi",
+      "cpf": null,
+      "crm": "125893",
+      "crm_uf": "SP",
+      "especialidade": "Cirurgia Plástica",
+      "endereco": {
+        "logradouro": "Avenida Doutor Ismael Alonso Y Alonso, 2510",
+        "bairro": "São José",
+        "cidade": "Franca",
+        "uf": "SP",
+        "cep": null,
+        "telefone": "(16) 3721-2399"
+      },
+      "email": null,
+      "confirmacao_enviada": false,
+      "equipamentos": [
+        {
+          "descricao_informal": "lipo aspirador",
+          "nome_formal": "Lipossugador Cirúrgico (Aspirador para Lipoaspiração)",
+          "numero_serie": null,
+          "patrimonio": null
+        },
+        {
+          "descricao_informal": "lipo portátil",
+          "nome_formal": "Lipossugador Portátil para Lipoaspiração",
+          "numero_serie": null,
+          "patrimonio": null
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "nome": "Marco Aurélio Dainezi",
+      "cpf": null,
+      "crm": "63713",
+      "crm_uf": "SP",
+      "especialidade": "Gastroenterologia / Coloproctologia",
+      "endereco": {
+        "logradouro": "Avenida Elias Abraão, 191",
+        "bairro": "São Joaquim",
+        "cidade": "Franca",
+        "uf": "SP",
+        "cep": "14406-363",
+        "telefone": "(16) 3703-8785"
+      },
+      "email": null,
+      "confirmacao_enviada": false,
+      "equipamentos": [
+        {
+          "descricao_informal": "retossigmoidoscopio",
+          "nome_formal": "Retossigmoidoscópio Rígido",
+          "numero_serie": null,
+          "patrimonio": null
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "nome": "Adriano Braga",
+      "cpf": null,
+      "crm": "116293",
+      "crm_uf": "SP",
+      "especialidade": "Otorrinolaringologia",
+      "endereco": {
+        "logradouro": "Rua Rio Solimões, 1067",
+        "bairro": "Residencial Amazonas",
+        "cidade": "Franca",
+        "uf": "SP",
+        "cep": "14406-012",
+        "telefone": "(16) 3409-5070"
+      },
+      "email": null,
+      "confirmacao_enviada": false,
+      "equipamentos": [
+        {
+          "descricao_informal": "fonte de luz",
+          "nome_formal": "Fonte de Luz para Endoscopia / Endoscópio",
+          "numero_serie": null,
+          "patrimonio": null
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "nome": "Carlos Eduardo Martins Barcelos",
+      "cpf": null,
+      "crm": "104987",
+      "crm_uf": "SP",
+      "especialidade": "Otorrinolaringologia",
+      "endereco": {
+        "logradouro": "Rua Rio Solimões, 1259",
+        "bairro": "Residencial Amazonas",
+        "cidade": "Franca",
+        "uf": "SP",
+        "cep": "14406-012",
+        "telefone": "(16) 3722-7877"
+      },
+      "email": null,
+      "confirmacao_enviada": false,
+      "equipamentos": [
+        {
+          "descricao_informal": "motor otorrino",
+          "nome_formal": "Sistema de Motor para Cirurgia Otorrinolaringológica (Shaver / Motor de Alta Rotação ORL)",
+          "numero_serie": null,
+          "patrimonio": null
+        },
+        {
+          "descricao_informal": "fonte de luz",
+          "nome_formal": "Fonte de Luz para Endoscopia / Endoscópio",
+          "numero_serie": null,
+          "patrimonio": null
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "nome": "Francisco Leite dos Santos",
+      "cpf": null,
+      "crm": "134161",
+      "crm_uf": "SP",
+      "especialidade": "Otorrinolaringologia",
+      "endereco": {
+        "logradouro": "Avenida Joaquim Spereta, 331",
+        "bairro": "São Joaquim",
+        "cidade": "Franca",
+        "uf": "SP",
+        "cep": null,
+        "telefone": "(16) 3432-3349"
+      },
+      "email": null,
+      "confirmacao_enviada": false,
+      "equipamentos": [
+        {
+          "descricao_informal": "fonte de luz",
+          "nome_formal": "Fonte de Luz para Endoscopia / Endoscópio",
+          "numero_serie": null,
+          "patrimonio": null
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "nome": "Nelson Uzun Júnior",
+      "cpf": null,
+      "crm": null,
+      "cro": "A confirmar",
+      "crm_uf": null,
+      "especialidade": "Cirurgia e Traumatologia Bucomaxilofacial",
+      "obs_registro": "Profissional de odontologia — registro no CRO, não CRM",
+      "endereco": {
+        "logradouro": "Avenida Sete de Setembro, 500",
+        "bairro": null,
+        "cidade": "Franca",
+        "uf": "SP",
+        "cep": null,
+        "telefone": null
+      },
+      "email": null,
+      "confirmacao_enviada": false,
+      "equipamentos": [
+        {
+          "descricao_informal": "bota pneumática",
+          "nome_formal": "Bota de Compressão Pneumática Intermitente (Dispositivo para Profilaxia de Trombose Venosa Profunda)",
+          "numero_serie": null,
+          "patrimonio": null
+        },
+        {
+          "descricao_informal": "motor piezo",
+          "nome_formal": "Sistema Piezoelétrico para Cirurgia Óssea (Piezocirurgia / Ultrassom Cirúrgico Ósseo)",
+          "numero_serie": null,
+          "patrimonio": null
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "nome": "Henrique Lopes Haber",
+      "cpf": null,
+      "crm": "190619",
+      "crm_uf": "SP",
+      "especialidade": "Ortopedia e Traumatologia",
+      "endereco": {
+        "logradouro": "Rua Joaquim Spereta, 290",
+        "bairro": "São Joaquim",
+        "cidade": "Franca",
+        "uf": "SP",
+        "cep": "14406-349",
+        "telefone": "(16) 3722-4148"
+      },
+      "email": null,
+      "confirmacao_enviada": false,
+      "equipamentos": [
+        {
+          "descricao_informal": "posicionador de ortopedia",
+          "nome_formal": "Posicionador Cirúrgico para Ortopedia (Sistema de Posicionamento e Tração para Procedimentos Ortopédicos)",
+          "numero_serie": null,
+          "patrimonio": null
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "nome": "Dulce Helena Pena de Andrade",
+      "cpf": null,
+      "crm": null,
+      "cro": "A confirmar",
+      "crm_uf": null,
+      "especialidade": "Odontologia",
+      "obs_registro": "Cirurgiã-dentista — registro no CRO, não CRM",
+      "endereco": {
+        "logradouro": "Avenida Doutor Armando Sales Oliveira, 201",
+        "bairro": "Parque Universitário",
+        "cidade": "Franca",
+        "uf": "SP",
+        "cep": null,
+        "telefone": null
+      },
+      "email": null,
+      "confirmacao_enviada": false,
+      "equipamentos": [
+        {
+          "descricao_informal": "motor odontológico",
+          "nome_formal": "Micromotor Odontológico (Motor para Micromotor de Alta / Baixa Rotação)",
+          "numero_serie": null,
+          "patrimonio": null
+        }
+      ]
+    }
+  ]
+}
